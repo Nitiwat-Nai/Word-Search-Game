@@ -296,7 +296,7 @@
         </header>
 
         <div id="start-screen" class="screen active-screen">
-            <h2 style="color: var(--color-primary); margin-bottom: 0;">ยินดีต้อนรับสู่เกม Word Search! 🎉</h2>
+            <h2 style="color: var(--color-primary); margin-bottom: 0;">ยินดีต้อนรับสู่เกม Word Search! 🔍</h2>
             <p style="font-size: 1.1rem; margin-top: 0.5rem; margin-bottom: 1.5rem;">โปรดเลือกหมวดหมู่และระดับความยากเพื่อเริ่มเกม</p>
             
             <h3>เลือกหมวดหมู่</h3>
@@ -312,7 +312,7 @@
             <h2 id="difficulty-category-title">หมวดหมู่: สัตว์ป่า</h2>
             <h3>เลือกระดับความยาก</h3>
             <button class="main-btn difficulty-btn" data-difficulty="easy">
-                ง่าย (6x6, 8 คำ, สุ่มจาก 20 คำ)
+                ง่าย (6x6, 6 คำ, สุ่มจาก 20 คำ)
             </button>
             <button class="main-btn difficulty-btn" data-difficulty="hard">
                 ยาก (10x10, 10 คำ, สุ่มจาก 20 คำ)
@@ -460,7 +460,9 @@
                 ],
                 easy: {
                     size: 6, 
-                    targetWordCount: 8, 
+                    // *** START OF MODIFICATION 1: Change targetWordCount from 8 to 6 ***
+                    targetWordCount: 6, 
+                    // *** END OF MODIFICATION 1 ***
                     poolKey: 'easyWordsPool'
                 },
                 hard: {
@@ -517,7 +519,9 @@
                 ],
                 easy: {
                     size: 6, 
-                    targetWordCount: 8, 
+                    // *** START OF MODIFICATION 1: Change targetWordCount from 8 to 6 ***
+                    targetWordCount: 6, 
+                    // *** END OF MODIFICATION 1 ***
                     poolKey: 'easyWordsPool'
                 },
                 hard: {
