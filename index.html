@@ -8,17 +8,30 @@
     <style>
         /* --- THEME & GLOBAL STYLES --- */
         :root {
-            --color-primary-found: #38C172; /* Bright Green - For Found Word */
-            --color-secondary-select: #42A5F5; /* Blue - For Selection */
+            --color-primary: #29B6F6; /* Brighter Blue */
+            --color-secondary-select: #42A5F5; /* Blue - For single selection */
             --color-wrong: #EF5350; /* Red - For Incorrect Flash */
             --color-bg: #80DEEA; /* Light Cyan/Aqua Background */
             --color-card: #FFFFFF; /* White Card/Container */
             --color-text-dark: #2C3E50; /* Dark Text */
             --color-text-light: #FFFFFF;
-            --color-header: #29B6F6; /* Brighter Blue Header */
+            --color-header: var(--color-primary); 
             --color-grid-line: #BBDEFB; /* Light Blue Grid Separator */
+            --color-category-btn: #FFD54F; /* Amber for category buttons */
+            --color-difficulty-btn: #66BB6A; /* Light Green for difficulty */
+        }
 
-            --found-color: var(--color-primary-found); 
+        /* Screen Management */
+        .screen {
+            padding: 0 1rem 1rem;
+            display: none;
+            flex-direction: column;
+            gap: 1rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .active-screen {
+            display: flex;
         }
 
         /* Responsive Container */
@@ -61,28 +74,29 @@
             margin: 0;
         }
 
-        /* Status Bar */
+        /* Status Bar & Timer */
         #status-bar {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             font-weight: bold;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
             padding: 0 1rem;
             color: var(--color-text-dark);
         }
-
-        /* --- GAME SPECIFIC STYLES --- */
-        #game-area {
-            display: flex;
-            flex-direction: column; 
-            padding: 0 1rem 1rem;
-            gap: 1rem;
+        #timer-display {
+            background-color: #E0E0E0;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 1.1rem;
         }
 
+        /* --- GAME SPECIFIC STYLES --- */
+        
         /* --- Grid (The Search Area) --- */
         #word-search-grid {
             display: grid;
-            grid-template-columns: repeat(10, 1fr); 
+            /* grid-template-columns will be set by JS dynamically */
             width: 100%;
             max-width: 480px; 
             margin: 0 auto;
@@ -106,7 +120,8 @@
             color: var(--color-text-dark);
             border: 1px solid var(--color-grid-line);
             box-sizing: border-box;
-            transition: background-color 0.1s, color 0.1s, transform 0.1s;
+            transition: transform 0.1s;
+            background-color: transparent; /* Default state */
         }
 
         /* Selection States */
@@ -117,18 +132,16 @@
             z-index: 10;
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
         }
-
-        /* Found State (Permanent Green) */
+        /* Found State: No default background color. Color is applied via inline style for opacity blend */
         .grid-cell.found {
-            background-color: var(--found-color);
-            color: var(--color-text-light); 
+            /* Text color should remain readable */
+            color: var(--color-text-dark); 
             font-weight: 900;
-            border-color: var(--found-color);
         }
         
         /* Wrong Guess Flash (Red) */
         .grid-cell.wrong-flash {
-            background-color: var(--color-wrong);
+            background-color: var(--color-wrong) !important; /* !important to override inline found color temporarily */
             color: var(--color-text-light) !important;
             animation: wrongFlash 1s ease-out; 
         }
@@ -170,15 +183,13 @@
             font-weight: 700;
             color: var(--color-text-dark);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
         }
         
         .clue-item.found {
-            background-color: var(--found-color); 
-            color: var(--color-text-light);
             opacity: 1;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
             font-size: 1.1rem; 
-            transition: all 0.3s;
         }
         
         .clue-hint {
@@ -201,12 +212,27 @@
         }
         .clue-item.found .clue-word-text {
             display: block;
-            color: var(--color-text-light); 
+            color: var(--color-text-dark); /* Ensure text is readable against pastel background */
         }
-        
-        /* Generic Button Style */
+
+        /* Summary Screen Styles */
+        #summary-screen h2 {
+            font-size: 2rem;
+            color: var(--color-primary);
+            margin-bottom: 1.5rem;
+        }
+        .summary-stat {
+            background-color: #F3E5F5;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* --- BUTTON STYLES --- */
         .main-btn {
-            background-color: var(--color-secondary-select);
             color: var(--color-text-light);
             border: none;
             padding: 1rem;
@@ -214,14 +240,12 @@
             font-size: 1.3rem;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 4px 0 #3188d6;
             transition: transform 0.1s, box-shadow 0.1s;
             width: 100%;
             margin-top: 1rem;
         }
         .main-btn:active {
             transform: translateY(2px);
-            box-shadow: 0 2px 0 #3188d6;
         }
         .main-btn:disabled {
             opacity: 0.5;
@@ -229,6 +253,35 @@
             box-shadow: none;
             transform: none;
         }
+        .category-btn {
+            background-color: var(--color-category-btn);
+            box-shadow: 0 4px 0 #FFC107; 
+        }
+        .difficulty-btn {
+            background-color: var(--color-difficulty-btn);
+            box-shadow: 0 4px 0 #388E3C;
+        }
+        .difficulty-btn:active {
+            box-shadow: 0 2px 0 #388E3C;
+        }
+        .category-btn:active {
+            box-shadow: 0 2px 0 #FFC107;
+        }
+        #summary-btn {
+             background-color: var(--color-secondary-select);
+             box-shadow: 0 4px 0 #3188d6;
+        }
+        #summary-btn:active {
+            box-shadow: 0 2px 0 #3188d6;
+        }
+        #restart-btn {
+            background-color: var(--color-secondary-select);
+            box-shadow: 0 4px 0 #3188d6;
+        }
+         #restart-btn:active {
+            box-shadow: 0 2px 0 #3188d6;
+        }
+
 
     </style>
 </head>
@@ -239,29 +292,62 @@
             <h1>Word Search</h1>
         </header>
 
-        <div id="status-bar">
-            <span id="category-title">หมวดหมู่: สัตว์ป่า (Animals)</span>
-            <span id="score">คำศัพท์ที่พบ: 0/10</span>
+        <div id="start-screen" class="screen active-screen">
+            <h2>เลือกหมวดหมู่</h2>
+            <button class="main-btn category-btn" data-category="animals">
+                สัตว์ป่า (Animals)
+            </button>
+            <button class="main-btn category-btn" disabled>
+                หมวดหมู่ที่ 2 (กำลังจะมา)
+            </button>
         </div>
 
-        <div id="game-area">
+        <div id="difficulty-screen" class="screen">
+            <h2 id="difficulty-category-title">หมวดหมู่: สัตว์ป่า</h2>
+            <h3>เลือกระดับความยาก</h3>
+            <button class="main-btn difficulty-btn" data-difficulty="easy">
+                ง่าย (5x5, 8 คำ, 2-4 ตัวอักษร)
+            </button>
+            <button class="main-btn difficulty-btn" data-difficulty="hard">
+                ยาก (10x10, 10 คำ, 4-10 ตัวอักษร)
+            </button>
+        </div>
+
+        <div id="game-screen" class="screen">
+            <div id="status-bar">
+                <span id="category-title"></span>
+                <span id="score">คำศัพท์ที่พบ: 0/10</span>
+                <span id="timer-display">เวลา: 00:00</span>
+            </div>
+
             <div id="word-search-grid">
                 </div>
 
             <div id="clue-panel">
-                <h3>คำใบ้ (Thai Clues)</h3>
+                <h3>คำใบ้ (Clues)</h3>
                 <p style="font-size: 0.9rem; color: #5D4037;">*คลิกที่ตัวอักษรเริ่มต้น และคลิกอีกครั้งที่ตัวอักษรสิ้นสุดของคำศัพท์*</p>
                 <ul id="clue-list">
                     </ul>
             </div>
+        </div>
+        
+        <div id="summary-screen" class="screen">
+            <h2>สรุปผลการค้นหา</h2>
+            <div class="summary-stat">
+                <p id="summary-score"></p>
+            </div>
+            <div class="summary-stat">
+                <p id="summary-time"></p>
+            </div>
             
-            <button id="restart-btn" class="main-btn">
-                โหลดเกมใหม่
+            <button id="summary-btn" class="main-btn">
+                กลับหน้าหลัก
             </button>
         </div>
     </div>
 
     <script>
+        // --- AUDIO/SPEECH LOGIC (Unchanged) ---
         let audioContext;
         let voices = [];
         
@@ -270,7 +356,6 @@
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
         }
-
         function setupSpeech() {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.onvoiceschanged = () => {
@@ -278,84 +363,198 @@
                 };
             }
         }
-        
         function getVoice(lang) {
              return voices.find(v => v.lang.startsWith(lang)) || voices.find(v => v.lang.startsWith(lang.substring(0, 2))) || null;
         }
-
         function speakText(text, lang) {
             if (!('speechSynthesis' in window)) return;
-
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = lang;
             utterance.rate = (lang === 'en-US') ? 0.8 : 0.9; 
             utterance.volume = 1;
-
-            const targetVoice = (lang === 'en-US') ? getVoice('en-US') : getVoice('th-TH');
-            if (targetVoice) {
-                utterance.voice = targetVoice;
-            }
-
+            const targetVoice = getVoice('en-US');
+            if (targetVoice) utterance.voice = targetVoice;
             window.speechSynthesis.speak(utterance);
         }
-
         function createTone(frequency, duration, type, volume = 0.5) {
             initAudioContext();
             if (!audioContext || audioContext.state === 'suspended') return;
-            
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
-
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
-
             oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
             oscillator.type = type; 
-
             gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + duration);
-
             oscillator.start();
             oscillator.stop(audioContext.currentTime + duration);
         }
-
         function playSuccessTone() { createTone(660, 0.15, 'sine', 0.8); }
         function playFailTone() { createTone(150, 0.4, 'triangle', 0.7); }
+        // --- END AUDIO/SPEECH LOGIC ---
+
     </script>
 
     <script>
-        // --- DATA ---
-        const GRID_SIZE = 10;
-        const targetWords = [
-            { word: "TIGER", clue: "สัตว์ตระกูลแมวที่มีลายทางสีดำบนขนสีส้ม", found: false },
-            { word: "LION", clue: "ราชาแห่งป่า มีแผงคอใหญ่", found: false },
-            { word: "ZEBRA", clue: "ม้าลายที่มีลายทางสีดำและขาว", found: false },
-            { word: "FOX", clue: "สุนัขจิ้งจอก มีความเจ้าเล่ห์", found: false },
-            { word: "DEER", clue: "กวาง มีเขาที่สวยงาม", found: false },
-            { word: "BEAR", clue: "หมี สัตว์ตัวใหญ่ที่ชอบกินน้ำผึ้ง", found: false },
-            { word: "WOLF", clue: "หมาป่า มักล่าเหยื่อเป็นฝูง", found: false },
-            { word: "EAGLE", clue: "นกอินทรี นกล่าเหยื่อขนาดใหญ่", found: false },
-            { word: "SNAKE", clue: "สัตว์เลื้อยคลานที่ไม่มีขา", found: false },
-            { word: "CUB", clue: "ลูกสัตว์กินเนื้อ เช่น ลูกหมี ลูกสิงโต", found: false },
-        ].map(item => ({ ...item, word: item.word.toUpperCase() }));
-
+        // --- CONFIGURATION & DATA ---
         const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const WORD_CATEGORIES = {
+            'animals': {
+                name: 'สัตว์ป่า (Animals)',
+                easy: {
+                    size: 5,
+                    words: [
+                        { word: "CAT", clue: "แมว", found: false, colorIndex: -1 },
+                        { word: "DOG", clue: "สุนัข", found: false, colorIndex: -1 },
+                        { word: "FOX", clue: "สุนัขจิ้งจอก", found: false, colorIndex: -1 },
+                        { word: "LION", clue: "ราชาแห่งป่า", found: false, colorIndex: -1 },
+                        { word: "CUB", clue: "ลูกสิงโต/หมี", found: false, colorIndex: -1 },
+                        { word: "DEER", clue: "กวาง", found: false, colorIndex: -1 },
+                        { word: "WOLF", clue: "หมาป่า", found: false, colorIndex: -1 },
+                        { word: "EEL", clue: "ปลาไหล", found: false, colorIndex: -1 },
+                    ],
+                },
+                hard: {
+                    size: 10,
+                    words: [
+                        { word: "TIGER", clue: "สัตว์ตระกูลแมวที่มีลายทางสีดำบนขนสีส้ม", found: false, colorIndex: -1 },
+                        { word: "LION", clue: "ราชาแห่งป่า มีแผงคอใหญ่", found: false, colorIndex: -1 },
+                        { word: "ZEBRA", clue: "ม้าลายที่มีลายทางสีดำและขาว", found: false, colorIndex: -1 },
+                        { word: "FOX", clue: "สุนัขจิ้งจอก มีความเจ้าเล่ห์", found: false, colorIndex: -1 },
+                        { word: "DEER", clue: "กวาง มีเขาที่สวยงาม", found: false, colorIndex: -1 },
+                        { word: "BEAR", clue: "หมี สัตว์ตัวใหญ่ที่ชอบกินน้ำผึ้ง", found: false, colorIndex: -1 },
+                        { word: "WOLF", clue: "หมาป่า มักล่าเหยื่อเป็นฝูง", found: false, colorIndex: -1 },
+                        { word: "EAGLE", clue: "นกอินทรี นกล่าเหยื่อขนาดใหญ่", found: false, colorIndex: -1 },
+                        { word: "SNAKE", clue: "สัตว์เลื้อยคลานที่ไม่มีขา", found: false, colorIndex: -1 },
+                        { word: "CUB", clue: "ลูกสัตว์กินเนื้อ", found: false, colorIndex: -1 },
+                    ],
+                }
+            }
+        };
+
+        // Pastel colors with 50% opacity (Hex with 80 transparency)
+        const PASTEL_COLORS = [
+            '#FFC0CB80', // Pink
+            '#ADD8E680', // Light Blue
+            '#90EE9080', // Light Green
+            '#F0808080', // Light Coral
+            '#DDA0DD80', // Plum
+            '#B0E0E680', // Powder Blue
+            '#F5DEB380', // Wheat
+            '#AFEEEE80', // Pale Turquoise
+            '#E6E6FA80', // Lavender
+            '#FFE4B580'  // Moccasin
+        ];
+
 
         // --- GAME STATE ---
+        let GRID_SIZE = 10;
+        let targetWords = [];
         let grid = [];
         let placedWordsMeta = []; 
         let startCell = null; 
         let selectedCells = []; 
+        let currentConfig = null;
         
+        let timerInterval;
+        let startTime;
+        let totalTimeSeconds = 0;
+
+
         // --- ELEMENTS ---
+        const screens = {
+            'start-screen': document.getElementById('start-screen'),
+            'difficulty-screen': document.getElementById('difficulty-screen'),
+            'game-screen': document.getElementById('game-screen'),
+            'summary-screen': document.getElementById('summary-screen')
+        };
         const gridEl = document.getElementById('word-search-grid');
         const clueListEl = document.getElementById('clue-list');
         const scoreEl = document.getElementById('score');
-        const restartBtn = document.getElementById('restart-btn');
+        const categoryTitleEl = document.getElementById('category-title');
+        const timerDisplayEl = document.getElementById('timer-display');
 
 
-        // --- UTILS (Word Placement and Grid Functions) ---
+        // --- SCREEN MANAGEMENT ---
+        function showScreen(id) {
+            Object.values(screens).forEach(screen => {
+                screen.classList.remove('active-screen');
+                screen.classList.add('hidden-screen');
+            });
+            screens[id].classList.add('active-screen');
+            screens[id].classList.remove('hidden-screen');
+            
+            // Stop timer if leaving game screen
+            if (id !== 'game-screen') {
+                stopTimer();
+            }
+        }
+        
+        function selectCategory(categoryId) {
+            const category = WORD_CATEGORIES[categoryId];
+            document.getElementById('difficulty-category-title').textContent = `หมวดหมู่: ${category.name}`;
+            document.querySelectorAll('#difficulty-screen .difficulty-btn').forEach(btn => {
+                btn.dataset.categoryId = categoryId;
+            });
+            showScreen('difficulty-screen');
+        }
+
+        function startGame(categoryId, difficulty) {
+            const category = WORD_CATEGORIES[categoryId];
+            currentConfig = category[difficulty];
+            
+            // Set Dynamic Config
+            GRID_SIZE = currentConfig.size;
+            targetWords = currentConfig.words.map(w => ({ ...w, word: w.word.toUpperCase() }));
+            
+            // Reset Game State
+            targetWords.forEach(w => { w.found = false; w.colorIndex = -1; });
+            clearSelection(false);
+            
+            // Setup Grid and Clues
+            generatePuzzle();
+            renderGrid();
+            renderClues(category.name);
+
+            // Setup UI
+            categoryTitleEl.textContent = `หมวดหมู่: ${category.name} (${difficulty === 'easy' ? 'ง่าย' : 'ยาก'})`;
+            
+            // Start Timer and Show Game
+            startTimer();
+            showScreen('game-screen');
+        }
+
+
+        // --- TIMER LOGIC ---
+        function startTimer() {
+            startTime = Date.now();
+            updateTimerDisplay();
+            timerInterval = setInterval(updateTimerDisplay, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            if (startTime) {
+                totalTimeSeconds = Math.floor((Date.now() - startTime) / 1000);
+                startTime = null; // Clear start time after calculating total
+            }
+        }
+
+        function updateTimerDisplay() {
+            if (!startTime) return;
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            timerDisplayEl.textContent = 
+                `เวลา: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+        
+
+        // --- CORE GAME LOGIC (Puzzle Generation, Selection, Check) ---
+        
+        // --- Word Placement Logic (Uses dynamic GRID_SIZE) ---
         function createEmptyGrid() { grid = Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill('')); }
         function getRandomLetter() { return ALPHABET[Math.floor(Math.random() * ALPHABET.length)]; }
         function isSafe(r, c, len, direction) {
@@ -395,7 +594,7 @@
                 let placed = false;
                 let attempts = 0;
 
-                while (!placed && attempts < 200) { 
+                while (!placed && attempts < 500) { // Increased attempts for potentially dense grids
                     const r = Math.floor(Math.random() * GRID_SIZE);
                     const c = Math.floor(Math.random() * GRID_SIZE);
                     const direction = directions[Math.floor(Math.random() * directions.length)];
@@ -422,6 +621,8 @@
                 }
             }
         }
+
+        // --- Line Selection Logic (Uses dynamic GRID_SIZE) ---
         function getCellsInLine(r1, c1, r2, c2) {
             const cells = [];
             const dr = Math.sign(r2 - r1);
@@ -431,7 +632,7 @@
             const isVertical = c1 === c2 && r1 !== r2;
             const isDiagonal = Math.abs(r1 - r2) === Math.abs(c1 - c2) && r1 !== r2;
             
-            if (r1 === r2 && c1 === c2) { // Single cell selection (Only Start Cell)
+            if (r1 === r2 && c1 === c2) { 
                  const cellEl = gridEl.querySelector(`[data-row="${r1}"][data-col="${c1}"]`);
                  if (cellEl) cells.push(cellEl);
                  return cells;
@@ -456,41 +657,37 @@
             return cells;
         }
 
-        // --- CORE LOGIC (Selection, Check, Mark) ---
-
+        // --- Selection & Check Handlers ---
         function clearSelection(flash = false) {
             selectedCells.forEach(cell => {
                 cell.classList.remove('selected'); 
+                // Only reset transform if not a found cell (to preserve found state visual)
+                if (!cell.classList.contains('found')) { 
+                    cell.style.transform = 'scale(1)'; 
+                }
                 
                 if (flash) {
                     cell.classList.add('wrong-flash');
                     setTimeout(() => {
                         cell.classList.remove('wrong-flash');
-                        cell.style.transform = 'scale(1)'; 
                     }, 1000);
-                } else {
-                    cell.style.transform = 'scale(1)'; 
-                }
+                } 
             });
             
-            // Reset State for the next selection cycle
             selectedCells = [];
             startCell = null;
         }
         
         function handleWordCheck() {
-            // Check requires at least 2 cells to be selected
             if (selectedCells.length < 2) {
                 clearSelection(false);
                 return;
             }
             
             const selectedWord = selectedCells.map(cell => cell.textContent).join('');
-
             let foundIndex = -1;
 
             targetWords.forEach((wordObj, index) => {
-                // IMPORTANT: We only check words that haven't been found yet
                 if (wordObj.found) return;
 
                 const target = wordObj.word;
@@ -505,29 +702,40 @@
                 markAsFound(foundIndex, selectedCells, targetWords[foundIndex]);
             } else {
                 playFailTone();
-                clearSelection(true); // Incorrect Word: Flash Red and Clear
+                clearSelection(true); 
             }
         }
 
         function markAsFound(index, cells, wordDetails) {
-            targetWords[index].found = true;
+            const foundWordsCount = targetWords.filter(w => w.found).length;
+            const colorIndex = foundWordsCount % PASTEL_COLORS.length;
+            const uniqueColor = PASTEL_COLORS[colorIndex];
             
+            targetWords[index].found = true;
+            targetWords[index].colorIndex = colorIndex; // Store color index
+
+            // Apply unique color to all cells in the word
             cells.forEach(cell => {
                 cell.classList.remove('selected', 'wrong-flash');
                 cell.classList.add('found');
                 cell.style.transform = 'scale(1)'; 
+                
+                // IMPORTANT: Apply the color style directly with 50% opacity
+                cell.style.backgroundColor = uniqueColor;
+                // Preserve existing opacity for blending if it was already found by another word
+                // Since our PASTEL_COLORS already includes 50% opacity (80), this is sufficient.
             });
 
             const clueEl = clueListEl.querySelector(`[data-index="${index}"]`);
             if (clueEl) {
                 clueEl.classList.add('found');
+                // Clue list item uses the same base color but fully opaque (FF)
+                clueEl.style.backgroundColor = uniqueColor.substring(0, 7) + 'FF';
             }
             
             playSuccessTone();
-            
-            // FIX #2: Read only the English word, not the Thai clue.
             speakText(wordDetails.word, 'en-US'); 
-            
+
             checkWinCondition();
             
             selectedCells = [];
@@ -539,8 +747,6 @@
         function onCellClick(e) {
             const cell = e.target;
             
-            // FIX #1: Removed 'cell.classList.contains("found")' check.
-            // Now players can click cells that are already part of a found word.
             if (!cell.classList.contains('grid-cell')) return; 
 
             if (startCell === null) {
@@ -553,7 +759,6 @@
                 // Second click: Set End Cell, Check Line, and Auto-Check Word
                 const endCell = cell; 
                 
-                // If the user clicks the start cell again, clear the selection
                 if (startCell === endCell) {
                     clearSelection(false);
                     return;
@@ -596,6 +801,8 @@
         // --- RENDERING & UI UPDATES ---
         function renderGrid() {
             gridEl.innerHTML = '';
+            gridEl.style.gridTemplateColumns = `repeat(${GRID_SIZE}, 1fr)`;
+            
             for (let r = 0; r < GRID_SIZE; r++) {
                 for (let c = 0; c < GRID_SIZE; c++) {
                     const cell = document.createElement('div');
@@ -608,7 +815,7 @@
             }
         }
 
-        function renderClues() {
+        function renderClues(categoryName) {
             clueListEl.innerHTML = '';
             targetWords.forEach((wordObj, index) => {
                 const li = document.createElement('li');
@@ -626,6 +833,12 @@
                 li.appendChild(wordSpan);
                 li.appendChild(hintSpan);
                 clueListEl.appendChild(li);
+
+                if (wordObj.found) {
+                     // Ensure found item style is applied correctly (fully opaque color)
+                     const uniqueColor = PASTEL_COLORS[wordObj.colorIndex];
+                     li.style.backgroundColor = uniqueColor.substring(0, 7) + 'FF';
+                }
             });
             checkWinCondition();
         }
@@ -633,29 +846,33 @@
         function checkWinCondition() {
             const foundCount = targetWords.filter(w => w.found).length;
             scoreEl.textContent = `คำศัพท์ที่พบ: ${foundCount}/${targetWords.length}`;
+            
             if (foundCount === targetWords.length) {
-                alert("🎉 ยินดีด้วย! คุณค้นหาคำศัพท์ได้ครบทุกคำแล้ว!");
-                restartBtn.textContent = "เริ่มเกมใหม่!";
+                // Game Over - Transition to Summary Screen
+                showSummaryScreen();
             }
+        }
+        
+        function showSummaryScreen() {
+            stopTimer(); // Ensure timer is stopped and totalTimeSeconds is calculated
+            showScreen('summary-screen');
+
+            const minutes = Math.floor(totalTimeSeconds / 60);
+            const seconds = totalTimeSeconds % 60;
+            const timeString = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+            document.getElementById('summary-score').textContent = `คำศัพท์ที่พบ: ${targetWords.length}/${targetWords.length} คำ`;
+            document.getElementById('summary-time').textContent = `เวลาที่ใช้: ${timeString}`;
         }
 
 
-        // --- INITIALIZATION ---
+        // --- INITIALIZATION & EVENT LISTENERS ---
         function init() {
-            targetWords.forEach(w => w.found = false);
-            
-            generatePuzzle();
-            renderGrid();
-            renderClues();
-            
-            // Attach listeners only once
             if (!gridEl.dataset.listenersAttached) {
                 attachGridListeners(); 
                 gridEl.dataset.listenersAttached = 'true';
             }
-            
-            clearSelection(false);
-            restartBtn.textContent = "โหลดเกมใหม่";
+            showScreen('start-screen');
         }
         
         document.addEventListener('DOMContentLoaded', () => {
@@ -667,10 +884,32 @@
                 }
             }, { once: true });
             
+            // Initial setup to show the start screen
             init(); 
         });
+
+        // Event delegation for category selection
+        document.getElementById('start-screen').addEventListener('click', (e) => {
+            if (e.target.classList.contains('category-btn') && !e.target.disabled) {
+                selectCategory(e.target.dataset.category);
+            }
+        });
         
-        restartBtn.addEventListener('click', init);
+        // Event delegation for difficulty selection
+        document.getElementById('difficulty-screen').addEventListener('click', (e) => {
+            if (e.target.classList.contains('difficulty-btn')) {
+                const categoryId = e.target.dataset.categoryId;
+                const difficulty = e.target.dataset.difficulty;
+                startGame(categoryId, difficulty);
+            }
+        });
+        
+        // Event listener for Summary screen button
+        document.getElementById('summary-screen').addEventListener('click', (e) => {
+            if (e.target.id === 'summary-btn') {
+                showScreen('start-screen');
+            }
+        });
         
     </script>
 </body>
