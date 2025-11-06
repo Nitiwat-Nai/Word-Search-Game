@@ -3,26 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WordWise Word Search - เกมค้นหาคำศัพท์</title>
+    <title>Word Search</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        /* --- THEME & GLOBAL STYLES (Dark/Blue Theme) --- */
+        /* --- THEME & GLOBAL STYLES --- */
         :root {
-            --color-primary: #42A5F5; /* Blue - For emphasis, score, correct */
-            --color-secondary: #38C172; /* Green - For buttons */
-            --color-bg: #2C3E50; /* Dark Blue Gray */
-            --color-card: #34495E; /* Slightly Lighter Dark Gray */
-            --color-text-dark: #ECF0F1; /* Light Text */
+            --color-primary: #29B6F6; /* Brighter Blue */
+            --color-secondary-select: #42A5F5; /* Blue - For single selection */
+            --color-wrong: #EF5350; /* Red - For Incorrect Flash */
+            --color-bg: #80DEEA; /* Light Cyan/Aqua Background */
+            --color-card: #FFFFFF; /* White Card/Container */
+            --color-text-dark: #2C3E50; /* Dark Text */
             --color-text-light: #FFFFFF;
-            --color-grid-bg: #223040; /* Very Dark Blue for Grid */
-            --color-grid-hover: #1E88E5; /* Light Blue on hover */
-            --color-grid-selected: #4CAF50; /* Green highlight */
-            --color-grid-found: #FFC107; /* Gold/Yellow for found words */
-            --color-easy: #4CAF50;
-            --color-medium: #FFC107;
-            --color-hard: #F44336;
+            --color-header: var(--color-primary); 
+            --color-grid-line: #BBDEFB; /* Light Blue Grid Separator */
+            --color-category-btn: #FFD54F; /* Amber for category buttons */
+            --color-difficulty-btn: #66BB6A; /* Light Green for difficulty */
         }
 
+        /* Screen Management */
+        .screen {
+            padding: 0 1rem 1rem;
+            display: none;
+            flex-direction: column;
+            gap: 1rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .active-screen {
+            display: flex;
+        }
+
+        /* Responsive Container */
         body {
             font-family: 'Sarabun', sans-serif;
             background-color: var(--color-bg);
@@ -31,14 +43,14 @@
             padding: 0;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             min-height: 100vh;
             text-align: center;
         }
 
         .container {
             width: 100%;
-            max-width: 550px;
+            max-width: 500px; 
             box-sizing: border-box;
             background-color: var(--color-card);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
@@ -49,9 +61,10 @@
             padding: 0;
         }
 
+        /* Header */
         header {
-            background-color: var(--color-grid-bg);
-            color: var(--color-primary);
+            background-color: var(--color-header); 
+            color: var(--color-text-light);
             padding: 1.5rem 1rem;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
             margin-bottom: 1rem;
@@ -61,37 +74,175 @@
             margin: 0;
         }
 
-        /* --- Screen Management --- */
-        .screen {
-            padding: 1rem;
-            display: none; 
-            flex-grow: 1;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .screen.active {
+        /* Status Bar & Timer */
+        #status-bar {
             display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            padding: 0 1rem;
+            color: var(--color-text-dark);
+        }
+        #timer-display {
+            background-color: #E0E0E0;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 1.1rem;
         }
 
-        /* --- Start/End Screen --- */
-        .start-screen h2 {
+        /* --- GAME SPECIFIC STYLES --- */
+        
+        /* --- Grid (The Search Area) --- */
+        #word-search-grid {
+            display: grid;
+            width: 100%;
+            max-width: 480px; 
+            margin: 0 auto;
+            border: 2px solid var(--color-grid-line);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            user-select: none; 
+            touch-action: manipulation; 
+        }
+
+        .grid-cell {
+            aspect-ratio: 1 / 1; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            user-select: none;
+            color: var(--color-text-dark);
+            border: 1px solid var(--color-grid-line);
+            box-sizing: border-box;
+            transition: transform 0.1s;
+            background-color: transparent; 
+        }
+
+        /* Selection States */
+        .grid-cell.selected {
+            background-color: var(--color-secondary-select);
+            color: var(--color-text-light);
+            transform: scale(1.05); 
+            z-index: 10;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* Found State: Applied via inline style for dynamic color/opacity */
+        .grid-cell.found {
+            color: var(--color-text-dark); 
+            font-weight: 900;
+            /* background-color applied via JS with 50% opacity */
+        }
+        
+        /* Wrong Guess Flash (Red) */
+        .grid-cell.wrong-flash {
+            background-color: var(--color-wrong) !important; 
+            color: var(--color-text-light) !important;
+            animation: wrongFlash 1s ease-out; 
+        }
+        
+        @keyframes wrongFlash {
+            0% { background-color: var(--color-wrong); }
+            50% { background-color: var(--color-wrong); }
+            100% { background-color: inherit; color: inherit; } 
+        }
+
+        /* --- Clues Area (The List) --- */
+        #clue-panel {
+            text-align: left;
+            background-color: #F0F4C3; 
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        #clue-panel h3 {
+            margin-top: 0;
+            color: var(--color-text-dark);
+            font-size: 1.3rem;
+            border-bottom: 2px solid #C5E1A5;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+        #clue-list {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); 
+            gap: 10px;
+        }
+        .clue-item {
+            background-color: #E0E0E0; 
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--color-text-dark);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            cursor: pointer; 
+        }
+        
+        /* Styles when a word is solved/found */
+        .clue-item.found {
+            opacity: 1;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            font-size: 1.1rem; 
+            cursor: default;
+        }
+
+        /* Hint/Solve Specific Style */
+        .clue-item.hint-used {
+            background-color: #FFCDD2FF !important; 
+            border: 2px dashed #EF5350;
+            color: var(--color-text-dark); 
+        }
+        
+        .clue-hint {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: #757575; 
+            margin-top: 5px;
+        }
+        
+        .clue-word-text {
+            display: none; 
+            font-weight: 900;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+        }
+        
+        .clue-item.found .clue-hint {
+            display: none;
+        }
+        .clue-item.found .clue-word-text {
+            display: block;
+            color: var(--color-text-dark); 
+        }
+
+        /* Summary Screen Styles */
+        #summary-screen h2 {
             font-size: 2rem;
             color: var(--color-primary);
-            margin-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
         }
-        .start-screen .btn-group {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            width: 90%;
-            max-width: 400px;
-            margin: 0 auto 1rem;
-            overflow-y: auto;
-            max-height: 60vh;
-            padding: 0 5px;
+        .summary-stat {
+            background-color: #F3E5F5;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
+
+        /* --- BUTTON STYLES --- */
         .main-btn {
-            background-color: var(--color-secondary);
             color: var(--color-text-light);
             border: none;
             padding: 1rem;
@@ -99,367 +250,854 @@
             font-size: 1.3rem;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 4px 0 #32A860;
             transition: transform 0.1s, box-shadow 0.1s;
+            width: 100%;
+            margin-top: 1rem;
         }
         .main-btn:active {
             transform: translateY(2px);
-            box-shadow: 0 2px 0 #32A860;
         }
-        .main-btn.btn-level {
-            background-color: var(--color-primary);
-            box-shadow: 0 4px 0 #3188d6;
-            margin-top: 1rem;
-            font-size: 1.5rem;
+        .main-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
         }
-        .main-btn.btn-level:active {
+        .category-btn {
+            background-color: var(--color-category-btn);
+            box-shadow: 0 4px 0 #FFC107; 
+        }
+        .difficulty-btn {
+            background-color: var(--color-difficulty-btn);
+            box-shadow: 0 4px 0 #388E3C;
+        }
+        .difficulty-btn:active {
+            box-shadow: 0 2px 0 #388E3C;
+        }
+        .category-btn:active {
+            box-shadow: 0 2px 0 #FFC107;
+        }
+        #summary-btn, #restart-btn {
+             background-color: var(--color-secondary-select);
+             box-shadow: 0 4px 0 #3188d6;
+        }
+        #summary-btn:active, #restart-btn:active {
             box-shadow: 0 2px 0 #3188d6;
         }
 
-        /* Level Selector */
-        #level-select button {
-            background-color: var(--color-primary);
-            margin: 5px;
-            width: 120px;
-            padding: 0.8rem;
-            font-size: 1.1rem;
-        }
-        #level-select button.easy { background-color: var(--color-easy); box-shadow: 0 4px 0 #3A8E3D; }
-        #level-select button.medium { background-color: var(--color-medium); box-shadow: 0 4px 0 #DDA106; }
-        #level-select button.hard { background-color: var(--color-hard); box-shadow: 0 4px 0 #C1352A; }
-        #level-select button:disabled { opacity: 0.5; }
-        
-        /* --- Game Screen Components --- */
-        #game-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: bold;
-            margin-bottom: 1rem;
-            padding: 0 0.5rem;
-            color: var(--color-text-dark);
-            font-size: 1.1rem;
-        }
-        #grid-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            padding-bottom: 1rem;
-        }
-        #word-search-grid {
-            display: grid;
-            background-color: var(--color-grid-bg);
-            border: 3px solid var(--color-primary);
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
-        }
-        .grid-cell {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: var(--color-text-dark);
-            padding: 5px;
-            cursor: pointer;
-            user-select: none;
-            transition: background-color 0.1s;
-        }
-        .grid-cell:hover:not(.found):not(.selected) {
-            background-color: var(--color-grid-hover);
-        }
-        .grid-cell.selected {
-            background-color: var(--color-grid-selected);
-            color: var(--color-text-light);
-        }
-        .grid-cell.found {
-            background-color: var(--color-grid-found);
-            color: var(--color-bg);
-            font-size: 1.2rem;
-            transform: scale(1.05);
-            transition: background-color 0.3s, transform 0.3s;
-        }
-        
-        /* Word List */
-        #word-list-container {
-            background-color: var(--color-grid-bg);
-            border-radius: 10px;
-            padding: 0.8rem 1rem;
-            margin-top: 1rem;
-        }
-        #word-list-title {
-            font-size: 1.2rem;
-            color: var(--color-primary);
-            margin-bottom: 0.5rem;
-            font-weight: 700;
-        }
-        #word-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 8px 15px;
-        }
-        .word-item {
-            color: var(--color-text-dark);
-            font-size: 0.95rem;
-            font-weight: 400;
-            text-align: left;
-            cursor: pointer;
-            transition: color 0.3s;
-            position: relative;
-        }
-        .word-item.found {
-            color: var(--color-grid-found);
-            text-decoration: line-through;
-            font-weight: bold;
-            cursor: default;
-        }
 
-        /* Hint Box */
-        #hint-box {
-            background-color: var(--color-grid-bg);
-            border: 2px solid var(--color-secondary);
-            border-radius: 10px;
-            padding: 0.8rem 1rem;
-            margin-top: 1rem;
-            text-align: left;
-            font-size: 0.95rem;
-            color: var(--color-text-dark);
-            min-height: 80px;
-        }
-        .hint-item {
-            margin-bottom: 0.5rem;
-        }
-        .hint-label {
-            font-weight: bold;
-            color: var(--color-secondary);
-            margin-right: 5px;
-        }
-        #current-hint-display {
-            font-style: italic;
-            color: #BDC3C7;
-            display: block;
-        }
-        .hint-item.pos-example {
-            margin-top: 0.5rem;
-            padding-top: 0.5rem;
-            border-top: 1px dashed #34495E;
-        }
-        #current-pos-example {
-            color: #BDC3C7;
-            font-size: 0.9rem;
-        }
-        .pronounce-btn {
-            background: none;
-            border: none;
-            color: var(--color-primary);
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 1.1rem;
-            margin-left: 5px;
-            padding: 0;
-        }
-
-        /* --- End Game Screen --- */
-        #end-screen {
-            justify-content: center;
-        }
-        #end-screen h2 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-        #end-screen p {
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
-        }
-        .btn-restart {
-            background-color: var(--color-secondary);
-            box-shadow: 0 5px 0 #32A860;
-            width: 80%;
-            margin-top: 2rem;
-        }
     </style>
 </head>
 <body>
 
-    <div class="container" id="main-container">
+    <div class="container">
         <header>
-            <h1>WordWise Word Search</h1>
+            <h1>Word Search</h1>
         </header>
 
-        <div id="start-screen" class="screen active start-screen">
-            <h2>ยินดีต้อนรับสู่ Word Search!</h2>
-            <p>เลือกหมวดหมู่และระดับความยากเพื่อเริ่มเล่น:</p>
+        <div id="start-screen" class="screen active-screen">
+            <h2 style="color: var(--color-primary); margin-bottom: 0;">ยินดีต้อนรับสู่เกม Word Search! 🎉</h2>
+            <p style="font-size: 1.1rem; margin-top: 0.5rem; margin-bottom: 1.5rem;">โปรดเลือกหมวดหมู่และระดับความยากเพื่อเริ่มเกม</p>
             
-            <div id="level-select">
-                <button class="main-btn easy" data-level="EASY">ระดับง่าย (6 คำ)</button>
-                <button class="main-btn medium" data-level="MEDIUM">ระดับกลาง (8 คำ)</button>
-                <button class="main-btn hard" data-level="HARD">ระดับยาก (10 คำ)</button>
-            </div>
-            
-            <button id="start-btn-placeholder" class="main-btn btn-level" disabled>
-                ⬅️ เลือกระดับความยากก่อน
+            <h3>เลือกหมวดหมู่</h3>
+            <button class="main-btn category-btn" data-category="animals">
+                สัตว์ป่า (Animals)
             </button>
+            <button class="main-btn category-btn" data-category="fruits">
+                ผลไม้ (Fruits)
+            </button>
+        </div>
 
-            <div class="btn-group" id="category-selection" style="display: none; margin-top: 1rem;">
-                </div>
+        <div id="difficulty-screen" class="screen">
+            <h2 id="difficulty-category-title">หมวดหมู่: สัตว์ป่า</h2>
+            <h3>เลือกระดับความยาก</h3>
+            <button class="main-btn difficulty-btn" data-difficulty="easy">
+                ง่าย (6x6, 8 คำ, สุ่มจาก 20 คำ)
+            </button>
+            <button class="main-btn difficulty-btn" data-difficulty="hard">
+                ยาก (10x10, 10 คำ, สุ่มจาก 20 คำ)
+            </button>
         </div>
 
         <div id="game-screen" class="screen">
-            <div id="game-info">
-                <span id="category-title">หมวดหมู่: ...</span>
-                <span id="difficulty-level">ระดับ: ...</span>
+            <div id="status-bar">
+                <span id="category-title"></span>
+                <span id="score">คำศัพท์ที่พบ: 0/10</span>
+                <span id="timer-display">เวลา: 00:00</span>
+            </div>
+
+            <div id="word-search-grid">
+                </div>
+
+            <div id="clue-panel">
+                <h3>คำใบ้ (Clues)</h3>
+                <p style="font-size: 0.9rem; color: #5D4037;">*คลิกที่คำใบ้เพื่อเฉลย (- คะแนน)*</p>
+                <ul id="clue-list">
+                    </ul>
             </div>
             
-            <div id="grid-container">
-                <div id="word-search-grid">
-                    </div>
-            </div>
-
-            <div id="word-list-container">
-                <div id="word-list-title">คำศัพท์ที่ต้องค้นหา: <span id="found-count">0</span> / <span id="total-words">0</span></div>
-                <div id="word-list">
-                    </div>
-            </div>
-
-            <div id="hint-box">
-                <div class="hint-item">
-                    <span class="hint-label">คำใบ้สำหรับคำที่เลือก:</span> 
-                    <span id="current-hint-display">(คลิกที่คำศัพท์ด้านบนเพื่อดูคำใบ้)</span>
-                    <button id="pronounce-word-btn" class="pronounce-btn" title="กดเพื่อฟังการออกเสียง" style="display:none;">🔊</button>
-                </div>
-                <div class="hint-item pos-example">
-                    <span id="current-pos-example"></span>
-                </div>
-            </div>
-
-            <button id="give-up-btn" class="main-btn" style="background-color: #7F8C8D; box-shadow: 0 5px 0 #6A7A7B; width: 100%; margin-top: 1rem;">
-                จบเกม / กลับหน้าหลัก
+            <button id="restart-btn" class="main-btn">
+                กลับหน้าหลัก
             </button>
         </div>
         
-        <div id="end-screen" class="screen start-screen">
-            <div class="end-content">
-                <h2 id="end-message">🎉 ยินดีด้วย! คุณชนะแล้ว!</h2>
-                <p id="end-details">คุณสามารถค้นหาคำศัพท์ได้ครบทุกคำ</p>
-                <button id="restart-btn" class="main-btn btn-restart">กลับไปหน้าเลือกหมวดหมู่</button>
+        <div id="summary-screen" class="screen">
+            <h2>สรุปผลการค้นหา</h2>
+            <div class="summary-stat">
+                <p id="summary-score"></p>
             </div>
+            <div class="summary-stat">
+                <p id="summary-time"></p>
+            </div>
+            
+            <button id="summary-btn" class="main-btn">
+                กลับหน้าหลัก
+            </button>
         </div>
     </div>
 
     <script>
-        // --- DATA (Revised with more descriptive hints) ---
-        // คำศัพท์ชุดเต็ม 10 หมวด x 10 คำ (รวม 100 คำ)
-        // Note: For EASY level, only the first 6 words in each category will be used.
-        const wordData = {
-            "FRUIT": [
-                { word: "MANGO", descriptiveHint: "ผลไม้เขตร้อนที่มีสีเหลือง/เขียว รสชาติหวานฉ่ำ มีเมล็ดเดียวขนาดใหญ่", pos: "(N.)", example: "A ripe mango is very sweet and juicy." },
-                { word: "APPLE", descriptiveHint: "ผลไม้ทรงกลมสีแดงหรือเขียว ที่มีเรื่องเล่าว่าช่วยให้ห่างไกลจากหมอ", pos: "(N.)", example: "An apple a day keeps the doctor away." },
-                { word: "ORANGE", descriptiveHint: "ผลไม้สีส้มกลมๆ มีรสเปรี้ยวอมหวาน เป็นแหล่งวิตามินซีที่ดี", pos: "(N.)", example: "Drinking orange juice is a good way to start the day." },
-                { word: "BANANA", descriptiveHint: "ผลไม้รูปร่างยาวโค้ง เปลือกสีเหลือง เป็นอาหารโปรดของลิง", pos: "(N.)", example: "Monkeys love to eat a yellow banana." },
-                { word: "CHERRY", descriptiveHint: "ผลไม้ลูกเล็กสีแดงสด มักใช้ตกแต่งหน้าเค้กหรือไอศกรีม", pos: "(N.)", example: "The cake was topped with a bright red cherry." },
-                { word: "GRAPE", descriptiveHint: "ผลไม้ลูกเล็กๆ ที่อยู่รวมกันเป็นพวง และมักนำไปทำไวน์", pos: "(N.)", example: "I bought a bunch of sweet green grape." },
-                { word: "KIWI", descriptiveHint: "ผลไม้เล็กๆ ที่มีขนปกคลุม เนื้อด้านในสีเขียวสดใส", pos: "(N.)", example: "A slice of kiwi is a great addition to the fruit salad." },
-                { word: "LIME", descriptiveHint: "ผลไม้รสเปรี้ยว มีเปลือกสีเขียว มักใช้เพิ่มรสชาติในอาหารและเครื่องดื่ม", pos: "(N.)", example: "She squeezed a fresh lime into her water." },
-                { word: "PEACH", descriptiveHint: "ผลไม้มีขนอ่อนๆ ปกคลุม มีเมล็ดขนาดใหญ่ตรงกลาง", pos: "(N.)", example: "She took a bite of the soft, sweet peach." },
-                { word: "MELON", descriptiveHint: "ผลไม้ขนาดใหญ่ ผิวเรียบหรือมีตาข่าย เนื้อด้านในนุ่มหวานฉ่ำ", pos: "(N.)", example: "Watermelon and cantaloupe are types of melon." },
-            ],
-            "TRAVEL": [
-                { word: "TICKET", descriptiveHint: "เอกสารที่ใช้แสดงสิทธิ์ในการเข้าชม, ขึ้นรถ, หรือขึ้นเครื่องบิน", pos: "(N.)", example: "Don't forget your train ticket before you board." },
-                { word: "PASSPORT", descriptiveHint: "สมุดเล่มเล็กๆ ที่ใช้ยืนยันตัวตนเมื่อเดินทางข้ามประเทศ", pos: "(N.)", example: "You need your passport to cross the border." },
-                { word: "AIRPORT", descriptiveHint: "สถานที่ขนาดใหญ่สำหรับเครื่องบินขึ้นลงและขนส่งผู้โดยสาร", pos: "(N.)", example: "Our airplane took off from the airport." },
-                { word: "VOYAGE", descriptiveHint: "การเดินทางไกลที่น่าตื่นเต้น โดยเฉพาะอย่างยิ่งการเดินทางในทะเลหรืออวกาศ", pos: "(N.)", example: "The ancient sailors began their long voyage across the sea." },
-                { word: "HOTEL", descriptiveHint: "อาคารที่ให้บริการห้องพักและอาหารแก่นักเดินทางที่พักค้างคืน", pos: "(N.)", example: "We stayed in a five-star hotel near the ocean." },
-                { word: "JOURNEY", descriptiveHint: "การเดินทางจากที่หนึ่งไปอีกที่หนึ่ง ซึ่งมักใช้เวลาหลายชั่วโมงหรือหลายวัน", pos: "(N.)", example: "The journey from London to Paris was long." },
-                { word: "FLIGHT", descriptiveHint: "การเดินทางทางอากาศ โดยการใช้ยานพาหนะที่มีปีก", pos: "(N.)", example: "Our flight was delayed due to bad weather." },
-                { word: "CABIN", descriptiveHint: "ห้องโดยสารขนาดเล็กภายในเครื่องบินหรือเรือ", pos: "(N.)", example: "I stored my bag in the overhead cabin." },
-                { word: "LUGGAGE", descriptiveHint: "กระเป๋าเดินทางหรือสัมภาระที่คุณนำไปพร้อมกับการเดินทาง", pos: "(N.)", example: "Please keep your luggage with you at all times." },
-                { word: "TOURIST", descriptiveHint: "บุคคลที่เดินทางไปเยี่ยมชมสถานที่แห่งใหม่เพื่อความสนุกสนานหรือพักผ่อน", pos: "(N.)", example: "A lot of tourist visit Rome every summer." },
-            ],
-            "ABSTRACT": [
-                { word: "HONESTY", descriptiveHint: "คุณสมบัติของการพูดความจริง, การไม่หลอกลวง, หรือความซื่อสัตย์", pos: "(N.)", example: "Honesty is the best policy." },
-                { word: "COURAGE", descriptiveHint: "ความกล้าหาญในการเผชิญหน้ากับความกลัว, ความเจ็บปวด, หรืออันตราย", pos: "(N.)", example: "It takes great courage to admit you were wrong." },
-                { word: "PASSION", descriptiveHint: "ความรู้สึกรุนแรงของความรักหรือความสนใจในสิ่งใดสิ่งหนึ่ง", pos: "(N.)", example: "She has a strong passion for painting." },
-                { word: "SILENCE", descriptiveHint: "การขาดหายไปของเสียง หรือช่วงเวลาที่ไม่มีเสียงรบกวน", pos: "(N.)", example: "The deep silence of the night was calming." },
-                { word: "TRUTH", descriptiveHint: "ความสอดคล้องกับความเป็นจริง, การไม่โกหก", pos: "(N.)", example: "The detective was trying to find out the truth." },
-                { word: "WISDOM", descriptiveHint: "คุณภาพของการมีประสบการณ์, ความรู้, และการตัดสินใจที่ดี", pos: "(N.)", example: "The elder shared his wisdom with the young people." },
-                { word: "LOGIC", descriptiveHint: "หลักการหรือเหตุผลที่ใช้ในการคิดอย่างสมเหตุสมผล", pos: "(N.)", example: "You need to use clear logic to solve this puzzle." },
-                { word: "RHYTHM", descriptiveHint: "รูปแบบของจังหวะหรือการเคลื่อนไหวที่สม่ำเสมอและซ้ำๆ", pos: "(N.)", example: "Can you feel the rhythm of the drum?" },
-                { word: "BELIEF", descriptiveHint: "ความเชื่อถือหรือความไว้วางใจในบางสิ่งบางอย่าง", pos: "(N.)", example: "He has a strong belief in the power of music." },
-                { word: "DREAM", descriptiveHint: "ชุดของภาพ, ความคิด, และอารมณ์ที่เกิดขึ้นขณะนอนหลับ", pos: "(N.)", example: "I had a strange dream last night." },
-            ],
-            "ANIMALS": [
-                { word: "ELEPHANT", descriptiveHint: "สัตว์บกที่มีขนาดใหญ่ที่สุด มีงวงยาวและหูขนาดใหญ่", pos: "(N.)", example: "An elephant uses its trunk to drink water." },
-                { word: "TIGER", descriptiveHint: "สัตว์ตระกูลแมวที่มีขนาดใหญ่ มีลายทางสีดำบนขนสีส้ม", pos: "(N.)", example: "The Bengal tiger is an endangered species." },
-                { word: "ZEBRA", descriptiveHint: "ม้าลายจากแอฟริกา มีลายทางสีดำและขาวโดดเด่น", pos: "(N.)", example: "The zebra herd migrated across the plains." },
-                { word: "MONKEY", descriptiveHint: "สัตว์เลี้ยงลูกด้วยนมที่มีหางยาว ชอบปีนป่ายต้นไม้", pos: "(N.)", example: "The monkey was swinging from tree to tree." },
-                { word: "DOLPHIN", descriptiveHint: "สัตว์เลี้ยงลูกด้วยนมในทะเลที่ฉลาดและเป็นมิตร มีชื่อเสียงเรื่องการกระโดด", pos: "(N.)", example: "We saw a pod of dolphin swimming next to the boat." },
-                { word: "WOLF", descriptiveHint: "สัตว์กินเนื้อที่อยู่ในตระกูลสุนัข มักล่าเหยื่อเป็นฝูง", pos: "(N.)", example: "A lone wolf howled at the full moon." },
-                { word: "LION", descriptiveHint: "ราชาแห่งป่า สัตว์กินเนื้อขนาดใหญ่ มีแผงคอโดดเด่น (เฉพาะเพศผู้)", pos: "(N.)", example: "The male lion guarded the pride." },
-                { word: "EAGLE", descriptiveHint: "นกล่าเหยื่อขนาดใหญ่ มีสายตาเฉียบคม มักเป็นสัญลักษณ์ของอำนาจ", pos: "(N.)", example: "An eagle soared high above the mountains." },
-                { word: "SNAKE", descriptiveHint: "สัตว์เลื้อยคลานที่ไม่มีขา มีลำตัวยาว บางชนิดมีพิษร้ายแรง", pos: "(N.)", example: "Be careful when walking in the jungle; there might be a snake." },
-                { word: "BEAR", descriptiveHint: "สัตว์ขนาดใหญ่ที่กินทั้งพืชและเนื้อ บางชนิดชอบกินน้ำผึ้ง", pos: "(N.)", example: "The bear woke up from hibernation." },
-            ],
-            "FOOD": [
-                { word: "PIZZA", descriptiveHint: "ขนมปังแผ่นกลมแบนที่อบกับซอสมะเขือเทศ, ชีส, และส่วนผสมอื่นๆ", pos: "(N.)", example: "Let's order a large pizza for the party." },
-                { word: "WAFFLE", descriptiveHint: "ขนมปังแผ่นกรอบที่มีรอยบุ๋มเป็นตาราง มักกินเป็นอาหารเช้าพร้อมน้ำผึ้ง", pos: "(N.)", example: "I had a Belgian waffle topped with strawberries." },
-                { word: "NOODLE", descriptiveHint: "อาหารที่เป็นเส้นยาว ทำจากแป้งข้าวเจ้าหรือแป้งสาลี", pos: "(N.)", example: "She prefers egg noodle to thin rice vermicelli." },
-                { word: "SALAD", descriptiveHint: "อาหารที่ประกอบด้วยผักสดต่างๆ มักคลุกกับน้ำสลัด", pos: "(N.)", example: "I ordered a fresh green salad with grilled chicken." },
-                { word: "SOUP", descriptiveHint: "อาหารเหลวที่ทำจากเนื้อสัตว์หรือผัก มักกินร้อนๆ", pos: "(N.)", example: "Hot chicken soup is comforting when you are sick." },
-                { word: "BROCCOLI", descriptiveHint: "ผักสีเขียวที่มีก้านหนาและหัวคล้ายต้นไม้เล็กๆ มีประโยชน์ต่อสุขภาพ", pos: "(N.)", example: "Steamed broccoli is a healthy side dish." },
-                { word: "CHEESE", descriptiveHint: "ผลิตภัณฑ์นมที่ทำจากนมวัวหรือนมแพะ มีหลายชนิดและรสชาติ", pos: "(N.)", example: "Do you want extra cheese on your sandwich?" },
-                { word: "STEAK", descriptiveHint: "เนื้อชิ้นหนาที่ตัดมาจากส่วนต่างๆ ของวัว มักนำไปย่าง", pos: "(N.)", example: "He ordered a medium-rare steak for dinner." },
-                { word: "COFFEE", descriptiveHint: "เครื่องดื่มยอดนิยมที่ทำจากเมล็ดกาแฟ มักดื่มเพื่อเพิ่มพลังงานในตอนเช้า", pos: "(N.)", example: "I need a strong cup of coffee to wake up." },
-                { word: "PASTA", descriptiveHint: "อาหารหลักของอิตาลี มีหลายรูปทรง เช่น สปาเกตตี หรือมักกะโรนี", pos: "(N.)", example: "Spaghetti is a popular type of pasta." },
-            ],
-            "NATURE": [
-                { word: "OCEAN", descriptiveHint: "พื้นที่ขนาดใหญ่ของน้ำเค็มที่ปกคลุมโลก และเป็นที่อยู่ของปลาวาฬ", pos: "(N.)", example: "The Pacific ocean is the largest in the world." },
-                { word: "FOREST", descriptiveHint: "พื้นที่ขนาดใหญ่ที่เต็มไปด้วยต้นไม้หนาแน่น เป็นที่อยู่ของสัตว์ป่า", pos: "(N.)", example: "We went hiking deep into the forest." },
-                { word: "MOUNTAIN", descriptiveHint: "เนินสูงขนาดใหญ่บนโลก ที่สูงเสียดฟ้า และมักมีหิมะปกคลุม", pos: "(N.)", example: "Mount Everest is the tallest mountain." },
-                { word: "RIVER", descriptiveHint: "กระแสน้ำขนาดใหญ่ที่ไหลจากที่สูงลงสู่ทะเลหรือทะเลสาบ", pos: "(N.)", example: "The town is located by the river." },
-                { word: "ISLAND", descriptiveHint: "แผ่นดินที่ถูกล้อมรอบด้วยน้ำทะเลโดยรอบ", pos: "(N.)", example: "We spent our vacation on a beautiful tropical island." },
-                { word: "VOLCANO", descriptiveHint: "ภูเขาที่มีรูเปิดให้แมกมา, เถ้าถ่าน, และก๊าซพุ่งออกมา", pos: "(N.)", example: "The dormant volcano could erupt anytime." },
-                { word: "SUNSET", descriptiveHint: "ช่วงเวลาที่ดวงอาทิตย์ลับขอบฟ้าในตอนเย็น มักมีสีสันสวยงาม", pos: "(N.)", example: "We watched the beautiful red sunset on the beach." },
-                { word: "DESERT", descriptiveHint: "พื้นที่แห้งแล้งขนาดใหญ่ ที่มีฝนตกน้อยและมีอุณหภูมิสูง", pos: "(N.)", example: "The camel is adapted to live in the hot desert." },
-                { word: "STORM", descriptiveHint: "สภาพอากาศรุนแรงที่มีลมแรง, ฝนตกหนัก, หรือหิมะ", pos: "(N.)", example: "The ship was caught in a violent storm." },
-                { word: "CLOUDS", descriptiveHint: "ก้อนไอน้ำที่ลอยอยู่ในอากาศเหนือพื้นโลก มักนำพาฝนมา", pos: "(N.)", example: "The sky was covered with dark clouds." },
-            ],
-            "HOME": [
-                { word: "KITCHEN", descriptiveHint: "ห้องที่ใช้สำหรับเตรียมและปรุงอาหารในบ้าน", pos: "(N.)", example: "She spends a lot of time cooking in the kitchen." },
-                { word: "SOFA", descriptiveHint: "ที่นั่งยาวนุ่มสำหรับหลายคน มักวางอยู่ในห้องนั่งเล่น", pos: "(N.)", example: "The whole family can fit on the new sofa." },
-                { word: "WINDOW", descriptiveHint: "ช่องกระจกที่มองเห็นภายนอกได้ ใช้ระบายอากาศและรับแสง", pos: "(N.)", example: "Open the window to let in some fresh air." },
-                { word: "BEDROOM", descriptiveHint: "ห้องในบ้านที่ใช้สำหรับนอนหลับพักผ่อน", pos: "(N.)", example: "I have a small desk in my bedroom." },
-                { word: "CHAIR", descriptiveHint: "เฟอร์นิเจอร์สำหรับนั่งที่มีพนักพิง มักใช้คู่กับโต๊ะอาหาร", pos: "(N.)", example: "Take a seat in that comfortable chair." },
-                { word: "BALCONY", descriptiveHint: "พื้นที่ยื่นออกมาจากผนังอาคาร มักอยู่ชั้นบน สำหรับยืนชมวิว", pos: "(N.)", example: "We sat on the balcony enjoying the sunset." },
-                { word: "TABLE", descriptiveHint: "เฟอร์นิเจอร์ที่มีพื้นผิวเรียบและมีขา มักใช้สำหรับรับประทานอาหาร", pos: "(N.)", example: "Set the table for dinner." },
-                { word: "DOOR", descriptiveHint: "ช่องทางเข้าออกอาคารหรือห้อง ที่สามารถเปิดปิดได้", pos: "(N.)", example: "Please close the door quietly behind you." },
-                { word: "MIRROR", descriptiveHint: "พื้นผิวเรียบที่สะท้อนภาพของผู้มองเห็น มักแขวนในห้องน้ำ", pos: "(N.)", example: "She looked in the mirror before leaving." },
-                { word: "CLOSET", descriptiveHint: "ตู้ขนาดใหญ่หรือช่องเก็บของสำหรับแขวนเสื้อผ้า", pos: "(N.)", example: "I need to put my clean shirts back in the closet." },
-            ],
-            "BODY": [
-                { word: "STOMACH", descriptiveHint: "อวัยวะที่ย่อยอาหารที่เรากินเข้าไป และมักร้องเมื่อคุณหิว", pos: "(N.)", example: "My stomach hurts because I ate too much." },
-                { word: "SHOULDER", descriptiveHint: "ส่วนของร่างกายที่เชื่อมต่อแขนกับลำตัว มักใช้สะพายกระเป๋า", pos: "(N.)", example: "He tapped me on the shoulder." },
-                { word: "LUNGS", descriptiveHint: "อวัยวะคู่หนึ่งในทรวงอกที่ใช้ในการหายใจและนำออกซิเจนเข้าสู่เลือด", pos: "(N.)", example: "Smoking is bad for your lungs." },
-                { word: "HEART", descriptiveHint: "อวัยวะสำคัญที่สูบฉีดเลือดไปทั่วร่างกาย และเป็นสัญลักษณ์ของความรัก", pos: "(N.)", example: "The doctor listened to the patient's heart." },
-                { word: "BRAIN", descriptiveHint: "อวัยวะหลักของการคิด, การเรียนรู้, และความจำ", pos: "(N.)", example: "The human brain is highly complex." },
-                { word: "FINGER", descriptiveHint: "ส่วนปลายของมือที่ใช้ชี้, จับ, และพิมพ์ข้อความ", pos: "(N.)", example: "She wore a ring on her finger." },
-                { word: "ELBOW", descriptiveHint: "ข้อต่อที่อยู่กึ่งกลางระหว่างต้นแขนและปลายแขน", pos: "(N.)", example: "He accidentally hit his elbow on the table." },
-                { word: "WRIST", descriptiveHint: "ข้อต่อที่เชื่อมระหว่างปลายแขนกับมือ มักสวมนาฬิกา", pos: "(N.)", example: "She twisted her wrist while playing tennis." },
-                { word: "TONGUE", descriptiveHint: "กล้ามเนื้อในปากที่ช่วยในการพูดและการลิ้มรส", pos: "(N.)", example: "The doctor asked him to stick out his tongue." },
-                { word: "KNEE", descriptiveHint: "ข้อต่อขนาดใหญ่ที่เชื่อมระหว่างกระดูกต้นขาและหน้าแข้ง", pos: "(N.)", example: "He fell and scraped his knee." },
-            ],
-            "JOBS": [
-                { word: "DOCTOR", descriptiveHint: "ผู้ที่รักษาอาการเจ็บป่วย, บาดเจ็บ, และดูแลสุขภาพของคนไข้", pos: "(N.)", example: "I went to see the doctor about my fever." },
-                { word: "NURSE", descriptiveHint: "ผู้ที่ดูแลผู้ป่วยในโรงพยาบาล มักให้ยาและช่วยเหลือแพทย์", pos: "(N.)", example: "The kind nurse gave me my medication." },
-                { word: "TEACHER", descriptiveHint: "ผู้ที่ให้ความรู้และฝึกฝนนักเรียนในโรงเรียนหรือมหาวิทยาลัย", pos: "(N.)", example: "My favorite teacher taught us about history." },
-                { word: "ACTOR", descriptiveHint: "ผู้ที่แสดงบทบาทในภาพยนตร์, ละคร, หรือเวที", pos: "(N.)", example: "He dreams of becoming a famous movie actor." },
-                { word: "FARMER", descriptiveHint: "ผู้ที่เลี้ยงสัตว์และปลูกพืชเพื่อการเกษตร", pos: "(N.)", example: "The farmer harvested the corn in the field." },
-                { word: "CHEF", descriptiveHint: "หัวหน้าพ่อครัวมืออาชีพที่รับผิดชอบการทำอาหารในร้านอาหารขนาดใหญ่", pos: "(N.)", example: "The restaurant hired a famous chef." },
-                { word: "PILOT", descriptiveHint: "ผู้ที่ควบคุมและบังคับเครื่องบินพาณิชย์หรือเครื่องบินรบ", pos: "(N.)", example: "The pilot safely landed the plane in the storm." },
-                { word: "JUDGE", descriptiveHint: "เจ้าหน้าที่สาธารณะที่มีอำนาจตัดสินคดีในศาล", pos: "(N.)", example: "The judge declared the defendant guilty." },
-                { word: "ARTIST", descriptiveHint: "ผู้ที่มีทักษะในการสร้างสรรค์งานศิลปะ เช่น การวาดภาพ หรือประติมากรรม", pos: "(N.)", example: "The street artist painted a mural on the wall." },
-                { word: "ENGINEER", descriptiveHint: "ผู้ที่ออกแบบ, สร้าง, หรือบำรุงรักษาเครื่องจักร, ระบบ, หรือโครงสร้าง", pos: "(N.)", example: "A civil engineer designed this bridge." },
-            ],
-            "ADJECTIVES": [
-                { word: "HAPPY", descriptiveHint: "ความรู้สึกยินดี, พอใจ, หรือสนุกสนาน", pos: "(Adj.)", example: "She was so happy to see her friends." },
-                { word: "CLEVER", descriptiveHint: "ความสามารถในการเรียนรู้และทำความเข้าใจสิ่งต่างๆ ได้อย่างรวดเร็ว", pos: "(Adj.)", example: "The student came up with a clever solution." },
-                { word: "ROUGH", descriptiveHint: "มีพื้นผิวที่ไม่เรียบ, ขรุขระ, หรือไม่ราบรื่น", pos: "(Adj
+        // --- AUDIO/SPEECH LOGIC ---
+        let audioContext;
+        let voices = [];
+        
+        function initAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+        function setupSpeech() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.onvoiceschanged = () => {
+                    voices = window.speechSynthesis.getVoices();
+                };
+            }
+        }
+        function getVoice(lang) {
+             return voices.find(v => v.lang.startsWith(lang)) || voices.find(v => v.lang.startsWith(lang.substring(0, 2))) || null;
+        }
+        function speakText(text, lang) {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = lang;
+            // Use a slightly slower rate for better English word recognition
+            utterance.rate = (lang === 'en-US') ? 0.75 : 0.9; 
+            utterance.volume = 1;
+            const targetVoice = getVoice('en-US');
+            if (targetVoice) utterance.voice = targetVoice;
+            window.speechSynthesis.speak(utterance);
+        }
+        function createTone(frequency, duration, type, volume = 0.5) {
+            initAudioContext();
+            if (!audioContext || audioContext.state === 'suspended') return;
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+            oscillator.type = type; 
+            gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + duration);
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+        function playSuccessTone() { createTone(660, 0.15, 'sine', 0.8); }
+        function playFailTone() { createTone(150, 0.4, 'triangle', 0.7); }
+        // --- END AUDIO/SPEECH LOGIC ---
+
+    </script>
+
+    <script>
+        // --- CONFIGURATION & DATA (Updated with 'Fruits' category) ---
+        const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const WORD_CATEGORIES = {
+            'animals': {
+                name: 'สัตว์ป่า (Animals)',
+                easyWordsPool: [
+                    { word: "CAT", clue: "แมว" },
+                    { word: "DOG", clue: "สุนัข" },
+                    { word: "FOX", clue: "สุนัขจิ้งจอก" },
+                    { word: "LION", clue: "ราชาแห่งป่า" },
+                    { word: "CUB", clue: "ลูกสิงโต/หมี" },
+                    { word: "DEER", clue: "กวาง" },
+                    { word: "WOLF", clue: "หมาป่า" },
+                    { word: "EEL", clue: "ปลาไหล" },
+                    { word: "BAT", clue: "ค้างคาว" },
+                    { word: "PIG", clue: "หมู" },
+                    { word: "RAT", clue: "หนู" },
+                    { word: "COW", clue: "วัว" },
+                    { word: "BULL", clue: "วัวตัวผู้" },
+                    { word: "GOAT", clue: "แพะ" },
+                    { word: "SHEEP", clue: "แกะ" },
+                    { word: "CRAB", clue: "ปู" },
+                    { word: "FISH", clue: "ปลา" },
+                    { word: "FROG", clue: "กบ" },
+                    { word: "DUCK", clue: "เป็ด" },
+                    { word: "OWL", clue: "นกฮูก" },
+                ],
+                hardWordsPool: [
+                    { word: "TIGER", clue: "สัตว์ตระกูลแมวที่มีลายทางสีดำบนขนสีส้ม" },
+                    { word: "ZEBRA", clue: "ม้าลายที่มีลายทางสีดำและขาว" },
+                    { word: "BEAR", clue: "หมี สัตว์ตัวใหญ่ที่ชอบกินน้ำผึ้ง" },
+                    { word: "EAGLE", clue: "นกอินทรี นกล่าเหยื่อขนาดใหญ่" },
+                    { word: "SNAKE", clue: "สัตว์เลื้อยคลานที่ไม่มีขา" },
+                    { word: "DOLPHIN", clue: "โลมา สัตว์เลี้ยงลูกด้วยนมในทะเล" },
+                    { word: "ELEPHANT", clue: "ช้าง สัตว์บกที่ใหญ่ที่สุด" },
+                    { word: "GIRAFFE", clue: "ยีราฟ คอยาว" },
+                    { word: "MONKEY", clue: "ลิง สัตว์เลี้ยงลูกด้วยนมที่ชอบปีนป่าย" },
+                    { word: "RABBIT", clue: "กระต่าย หูยาว ชอบกินแครอท" },
+                    { word: "PENGUIN", clue: "นกเพนกวิน บินไม่ได้ อาศัยในขั้วโลก" },
+                    { word: "PARROT", clue: "นกแก้ว นกพูดได้" },
+                    { word: "CHIMPANZEE", clue: "ลิงชิมแปนซี" },
+                    { word: "RHINOS", clue: "แรด" },
+                    { word: "CAMEL", clue: "อูฐ" },
+                    { word: "TURTLE", clue: "เต่า" },
+                    { word: "CROCODILE", clue: "จระเข้" },
+                    { word: "KANGAROO", clue: "จิงโจ้" },
+                    { word: "OSTRICH", clue: "นกกระจอกเทศ" },
+                    { word: "HIPPO", clue: "ฮิปโป" },
+                ],
+                easy: {
+                    size: 6, 
+                    targetWordCount: 8, 
+                    poolKey: 'easyWordsPool'
+                },
+                hard: {
+                    size: 10,
+                    targetWordCount: 10, 
+                    poolKey: 'hardWordsPool'
+                }
+            },
+            'fruits': { // NEW CATEGORY
+                name: 'ผลไม้ (Fruits)',
+                easyWordsPool: [
+                    { word: "APPLE", clue: "แอปเปิ้ล" },
+                    { word: "BANANA", clue: "กล้วย" },
+                    { word: "GRAPE", clue: "องุ่น" },
+                    { word: "PEAR", clue: "ลูกแพร์" },
+                    { word: "KIWI", clue: "กีวี่" },
+                    { word: "LIME", clue: "มะนาว" },
+                    { word: "FIG", clue: "มะเดื่อ" },
+                    { word: "BERRY", clue: "ผลเบอร์รี่" },
+                    { word: "MELON", clue: "แตงโม" },
+                    { word: "DATE", clue: "อินทผลัม" },
+                    { word: "PLUM", clue: "ลูกพลัม" },
+                    { word: "MANGO", clue: "มะม่วง" },
+                    { word: "PEACH", clue: "ลูกพีช" },
+                    { word: "CHERRY", clue: "เชอร์รี่" },
+                    { word: "GUAVA", clue: "ฝรั่ง" },
+                    { word: "SAGO", clue: "สาคู" },
+                    { word: "COCOA", clue: "เมล็ดโกโก้" },
+                    { word: "LEMON", clue: "มะนาวเหลือง" },
+                    { word: "MINT", clue: "สะระแหน่" },
+                    { word: "ORANGE", clue: "ส้ม" },
+                ],
+                hardWordsPool: [
+                    { word: "PINEAPPLE", clue: "สับปะรด" },
+                    { word: "STRAWBERRY", clue: "สตรอว์เบอร์รี" },
+                    { word: "WATERMELON", clue: "แตงโมลูกใหญ่" },
+                    { word: "AVOCADO", clue: "อะโวคาโด" },
+                    { word: "BLUEBERRY", clue: "บลูเบอร์รี" },
+                    { word: "RASPBERRY", clue: "ราสเบอร์รี" },
+                    { word: "GRAPEFRUIT", clue: "ส้มโอฝรั่ง" },
+                    { word: "POMEGRANATE", clue: "ทับทิม" },
+                    { word: "TANGERINE", clue: "ส้มเขียวหวาน" },
+                    { word: "APRICOT", clue: "แอปริคอท" },
+                    { word: "COCONUT", clue: "มะพร้าว" },
+                    { word: "PAPAYA", clue: "มะละกอ" },
+                    { word: "DURIAN", clue: "ทุเรียน" },
+                    { word: "LYCHEE", clue: "ลิ้นจี่" },
+                    { word: "RAMBUTAN", clue: "เงาะ" },
+                    { word: "PASSIONFRUIT", clue: "เสาวรส" },
+                    { word: "CANTALOUPE", clue: "แคนตาลูป" },
+                    { word: "DRAGONFRUIT", clue: "แก้วมังกร" },
+                    { word: "STARFRUIT", clue: "มะเฟือง" },
+                    { word: "POMELO", clue: "ส้มโอ" },
+                ],
+                easy: {
+                    size: 6, 
+                    targetWordCount: 8, 
+                    poolKey: 'easyWordsPool'
+                },
+                hard: {
+                    size: 10,
+                    targetWordCount: 10, 
+                    poolKey: 'hardWordsPool'
+                }
+            }
+        };
+
+        // Pastel colors with 50% opacity (Hex with 80 transparency)
+        const PASTEL_COLORS = [
+            '#FFC0CB80', // Pink
+            '#ADD8E680', // Light Blue
+            '#90EE9080', // Light Green
+            '#F0808080', // Light Coral
+            '#DDA0DD80', // Plum
+            '#B0E0E680', // Powder Blue
+            '#F5DEB380', // Wheat
+            '#AFEEEE80', // Pale Turquoise
+            '#E6E6FA80', // Lavender
+            '#FFE4B580'  // Moccasin
+        ];
+
+
+        // --- GAME STATE ---
+        let GRID_SIZE = 10;
+        let targetWords = [];
+        let grid = [];
+        let placedWordsMeta = []; 
+        let startCell = null; 
+        let selectedCells = []; 
+        let currentConfig = null;
+        
+        let timerInterval;
+        let startTime;
+        let totalTimeSeconds = 0;
+
+
+        // --- ELEMENTS ---
+        const screens = {
+            'start-screen': document.getElementById('start-screen'),
+            'difficulty-screen': document.getElementById('difficulty-screen'),
+            'game-screen': document.getElementById('game-screen'),
+            'summary-screen': document.getElementById('summary-screen')
+        };
+        const gridEl = document.getElementById('word-search-grid');
+        const clueListEl = document.getElementById('clue-list');
+        const scoreEl = document.getElementById('score');
+        const categoryTitleEl = document.getElementById('category-title');
+        const timerDisplayEl = document.getElementById('timer-display');
+
+
+        // --- SCREEN MANAGEMENT ---
+        function showScreen(id) {
+            Object.values(screens).forEach(screen => {
+                screen.classList.remove('active-screen');
+                screen.classList.add('hidden-screen');
+            });
+            screens[id].classList.add('active-screen');
+            screens[id].classList.remove('hidden-screen');
+            
+            if (id !== 'game-screen') {
+                stopTimer();
+            }
+        }
+        
+        function selectCategory(categoryId) {
+            const category = WORD_CATEGORIES[categoryId];
+            document.getElementById('difficulty-category-title').textContent = `หมวดหมู่: ${category.name}`;
+            document.querySelectorAll('#difficulty-screen .difficulty-btn').forEach(btn => {
+                btn.dataset.categoryId = categoryId;
+            });
+            showScreen('difficulty-screen');
+        }
+
+        function startGame(categoryId, difficulty) {
+            const category = WORD_CATEGORIES[categoryId];
+            currentConfig = category[difficulty];
+            currentConfig.categoryId = categoryId; 
+            
+            // 1. Select Random Words
+            const pool = category[currentConfig.poolKey];
+            const filteredPool = pool.filter(w => w.word.length <= currentConfig.size);
+            const shuffledPool = [...filteredPool].sort(() => 0.5 - Math.random());
+            
+            targetWords = shuffledPool.slice(0, currentConfig.targetWordCount).map(w => ({ 
+                ...w, 
+                word: w.word.toUpperCase(), 
+                found: false, 
+                colorIndex: -1, 
+                hintUsed: false 
+            }));
+
+            // 2. Set Dynamic Config & State
+            GRID_SIZE = currentConfig.size;
+            clearSelection(false);
+            
+            // 3. Setup Grid and Clues
+            generatePuzzle();
+            renderGrid();
+            renderClues();
+
+            // 4. Setup UI and Start Timer
+            categoryTitleEl.textContent = `หมวดหมู่: ${category.name} (${difficulty === 'easy' ? 'ง่าย 6x6' : 'ยาก 10x10'})`;
+            
+            // Re-enable pointer events at the start of a new game
+            gridEl.style.pointerEvents = 'auto'; 
+            
+            startTimer();
+            showScreen('game-screen');
+        }
+
+
+        // --- TIMER LOGIC ---
+        function startTimer() {
+            startTime = Date.now();
+            updateTimerDisplay();
+            timerInterval = setInterval(updateTimerDisplay, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            if (startTime) {
+                totalTimeSeconds = Math.floor((Date.now() - startTime) / 1000);
+                startTime = null; 
+            }
+        }
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+        }
+
+        function updateTimerDisplay() {
+            if (!startTime) return;
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            timerDisplayEl.textContent = `เวลา: ${formatTime(elapsed)}`;
+        }
+        
+
+        // --- CORE GAME LOGIC (Puzzle Generation, Selection, Check) ---
+        
+        function createEmptyGrid() { grid = Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill('')); }
+        function getRandomLetter() { return ALPHABET[Math.floor(Math.random() * ALPHABET.length)]; }
+        function isSafe(r, c, len, direction) {
+            const [dr, dc] = direction;
+            if (r < 0 || r >= GRID_SIZE || c < 0 || c >= GRID_SIZE) return false;
+            const newR = r + (len - 1) * dr;
+            const newC = c + (len - 1) * dc;
+            return newR >= 0 && newR < GRID_SIZE && newC >= 0 && newC < GRID_SIZE;
+        }
+        function checkWordFit(r, c, word, direction) {
+            const [dr, dc] = direction;
+            const len = word.length;
+            if (!isSafe(r, c, len, direction)) return false;
+
+            for (let i = 0; i < len; i++) {
+                const char = grid[r + i * dr][c + i * dc];
+                if (char !== '' && char !== word[i]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        function placeWord(r, c, word, direction) {
+            const [dr, dc] = direction;
+            for (let i = 0; i < word.length; i++) {
+                grid[r + i * dr][c + i * dc] = word[i];
+            }
+        }
+        function generatePuzzle() {
+            createEmptyGrid();
+            const directions = [ [0, 1], [1, 0], [1, 1], [-1, 0], [0, -1], [-1, -1], [1, -1], [-1, 1] ];
+            placedWordsMeta = [];
+            
+            const placementWords = [...targetWords].sort((a, b) => b.word.length - a.word.length); 
+            
+            placementWords.forEach(wordObj => {
+                const word = wordObj.word;
+                let placed = false;
+                let attempts = 0;
+
+                while (!placed && attempts < 1000) { 
+                    const r = Math.floor(Math.random() * GRID_SIZE);
+                    const c = Math.floor(Math.random() * GRID_SIZE);
+                    const direction = directions[Math.floor(Math.random() * directions.length)];
+
+                    if (checkWordFit(r, c, word, direction)) {
+                        placeWord(r, c, word, direction);
+                        placedWordsMeta.push({ 
+                            word: word, 
+                            start: { r: r, c: c }, 
+                            end: { r: r + (word.length - 1) * direction[0], c: c + (word.length - 1) * direction[1] } 
+                        });
+                        placed = true;
+                    }
+                    attempts++;
+                }
+                if (!placed) {
+                    console.warn(`Could not place word: ${word}.`);
+                }
+            });
+
+            // Fill Empty Cells
+            for (let r = 0; r < GRID_SIZE; r++) {
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    if (grid[r][c] === '') {
+                        grid[r][c] = getRandomLetter();
+                    }
+                }
+            }
+        }
+
+        function getCellsInLine(r1, c1, r2, c2) {
+            const cells = [];
+            const dr = Math.sign(r2 - r1);
+            const dc = Math.sign(c2 - c1);
+            
+            const isHorizontal = r1 === r2 && c1 !== c2;
+            const isVertical = c1 === c2 && r1 !== r2;
+            const isDiagonal = Math.abs(r1 - r2) === Math.abs(c1 - c2) && r1 !== r2;
+            
+            if (r1 === r2 && c1 === c2) { 
+                 const cellEl = gridEl.querySelector(`[data-row="${r1}"][data-col="${c1}"]`);
+                 if (cellEl) cells.push(cellEl);
+                 return cells;
+            }
+            
+            if (!isHorizontal && !isVertical && !isDiagonal) return [];
+
+            let r = r1;
+            let c = c1;
+
+            while (true) {
+                const cellEl = gridEl.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+                if (cellEl) cells.push(cellEl);
+
+                if (r === r2 && c === c2) break;
+                
+                r += dr;
+                c += dc;
+
+                if (r < 0 || r >= GRID_SIZE || c < 0 || c >= GRID_SIZE) break;
+            }
+            return cells;
+        }
+
+        // --- Selection & Check Handlers ---
+        function clearSelection(flash = false) {
+            selectedCells.forEach(cell => {
+                cell.classList.remove('selected'); 
+                if (!cell.classList.contains('found')) { 
+                    cell.style.transform = 'scale(1)'; 
+                }
+                
+                if (flash) {
+                    cell.classList.add('wrong-flash');
+                    setTimeout(() => {
+                        cell.classList.remove('wrong-flash');
+                    }, 1000);
+                } 
+            });
+            
+            selectedCells = [];
+            startCell = null;
+        }
+        
+        function handleWordCheck() {
+            if (selectedCells.length < 2) {
+                clearSelection(false);
+                return;
+            }
+            
+            const selectedWord = selectedCells.map(cell => cell.textContent).join('');
+            let foundIndex = -1;
+
+            targetWords.forEach((wordObj, index) => {
+                if (wordObj.found) return;
+
+                const target = wordObj.word;
+                const reversedTarget = target.split('').reverse().join('');
+
+                if (selectedWord === target || selectedWord === reversedTarget) {
+                    foundIndex = index;
+                }
+            });
+
+            if (foundIndex !== -1) {
+                markAsFound(foundIndex, selectedCells, targetWords[foundIndex]);
+            } else {
+                playFailTone();
+                clearSelection(true); 
+            }
+        }
+
+        function markAsFound(index, cells, wordDetails) {
+            const foundWordsCountBefore = targetWords.filter(w => w.found).length;
+            
+            if (wordDetails.colorIndex === -1) {
+                const colorIndex = foundWordsCountBefore % PASTEL_COLORS.length;
+                wordDetails.colorIndex = colorIndex; 
+            }
+            
+            const uniqueColor = PASTEL_COLORS[wordDetails.colorIndex];
+            
+            wordDetails.found = true;
+            
+
+            cells.forEach(cell => {
+                cell.classList.remove('selected', 'wrong-flash');
+                cell.classList.add('found');
+                cell.style.transform = 'scale(1)'; 
+                
+                cell.style.backgroundColor = uniqueColor;
+            });
+
+            const clueEl = clueListEl.querySelector(`[data-index="${index}"]`);
+            if (clueEl) {
+                clueEl.classList.add('found');
+                
+                clueEl.style.backgroundColor = uniqueColor.substring(0, 7) + 'FF';
+                
+                if (wordDetails.hintUsed) {
+                    clueEl.classList.add('hint-used');
+                }
+            }
+            
+            playSuccessTone();
+            
+            // **FIX 1: Pronunciation Fix** - Convert to lowercase before speaking
+            speakText(wordDetails.word.toLowerCase(), 'en-US'); 
+            
+            checkWinCondition();
+            
+            selectedCells = [];
+            startCell = null;
+            
+            renderClues();
+        }
+
+        // --- HINT/SOLVE SYSTEM ---
+        function solveWord(index) {
+            const wordDetails = targetWords[index];
+            if (wordDetails.found) return;
+
+            // 1. Mark as Hint Used
+            wordDetails.hintUsed = true;
+            
+            // 2. Find placement data for highlighting
+            const wordToSolve = wordDetails.word;
+            const placement = placedWordsMeta.find(meta => meta.word === wordToSolve);
+
+            if (!placement) {
+                alert(`ขออภัย! คำว่า "${wordToSolve}" ไม่ถูกวางลงในตาราง (เกิดข้อผิดพลาดในการสร้างปริศนา)`);
+                return;
+            }
+            
+            // 3. Get cells and highlight
+            const r1 = placement.start.r;
+            const c1 = placement.start.c;
+            const r2 = placement.end.r;
+            const c2 = placement.end.c;
+            
+            const cellsToHighlight = getCellsInLine(r1, c1, r2, c2);
+
+            // Use markAsFound to handle coloring, scoring, and speaking
+            markAsFound(index, cellsToHighlight, wordDetails);
+        }
+
+
+        // --- CLICK SELECTION HANDLER (START/END) ---
+        function onCellClick(e) {
+            const cell = e.target;
+            
+            if (!cell.classList.contains('grid-cell')) return; 
+
+            if (startCell === null) {
+                // First click: Set Start Cell
+                clearSelection(false); 
+                startCell = cell;
+                startCell.classList.add('selected');
+                selectedCells = [startCell];
+            } else {
+                // Second click: Set End Cell, Check Line, and Auto-Check Word
+                const endCell = cell; 
+                
+                if (startCell === endCell) {
+                    clearSelection(false);
+                    return;
+                }
+
+                const r1 = parseInt(startCell.dataset.row);
+                const c1 = parseInt(startCell.dataset.col);
+                const r2 = parseInt(endCell.dataset.row);
+                const c2 = parseInt(endCell.dataset.col);
+                
+                const isHorizontal = r1 === r2;
+                const isVertical = c1 === c2;
+                const isDiagonal = Math.abs(r1 - r2) === Math.abs(c1 - c2);
+
+                if (isHorizontal || isVertical || isDiagonal) {
+                    // Valid Line: Highlight the full path
+                    selectedCells.forEach(c => c.classList.remove('selected'));
+                    selectedCells = getCellsInLine(r1, c1, r2, c2);
+                    selectedCells.forEach(c => c.classList.add('selected'));
+                    
+                    // Auto-check the word
+                    handleWordCheck();
+                } else {
+                    // Invalid Line: Flash the start and end cell, then clear
+                    selectedCells.forEach(c => c.classList.remove('selected'));
+                    startCell.classList.add('selected');
+                    endCell.classList.add('selected');
+                    selectedCells = [startCell, endCell]; 
+                    
+                    playFailTone();
+                    clearSelection(true); 
+                }
+            }
+        }
+        
+        function attachGridListeners() {
+            // Attach listener only once globally
+            if (!gridEl.dataset.listenersAttached) {
+                gridEl.addEventListener('click', onCellClick);
+                gridEl.dataset.listenersAttached = 'true';
+            }
+        }
+        
+        // --- RENDERING & UI UPDATES ---
+        function renderGrid() {
+            gridEl.innerHTML = '';
+            gridEl.style.gridTemplateColumns = `repeat(${GRID_SIZE}, 1fr)`;
+            
+            for (let r = 0; r < GRID_SIZE; r++) {
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    cell.textContent = grid[r][c];
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
+                    gridEl.appendChild(cell);
+                }
+            }
+            
+            // Re-apply found state for persistence
+            targetWords.filter(w => w.found).forEach(wordObj => {
+                const wordMeta = placedWordsMeta.find(meta => meta.word === wordObj.word);
+                if (wordMeta) {
+                     const cells = getCellsInLine(wordMeta.start.r, wordMeta.start.c, wordMeta.end.r, wordMeta.end.c);
+                     const uniqueColor = PASTEL_COLORS[wordObj.colorIndex];
+                     cells.forEach(cell => {
+                        cell.classList.add('found');
+                        cell.style.backgroundColor = uniqueColor;
+                     });
+                }
+            });
+        }
+
+        function renderClues() {
+            clueListEl.innerHTML = '';
+            targetWords.forEach((wordObj, index) => {
+                const li = document.createElement('li');
+                li.className = 'clue-item' + (wordObj.found ? ' found' : '');
+                li.dataset.index = index;
+                
+                const hintSpan = document.createElement('span');
+                hintSpan.className = 'clue-hint';
+                hintSpan.textContent = wordObj.clue;
+                
+                const wordSpan = document.createElement('span');
+                wordSpan.className = 'clue-word-text';
+                wordSpan.textContent = wordObj.word;
+                
+                li.appendChild(wordSpan);
+                li.appendChild(hintSpan);
+                clueListEl.appendChild(li);
+
+                if (wordObj.found) {
+                     const uniqueColor = PASTEL_COLORS[wordObj.colorIndex];
+                     li.style.backgroundColor = uniqueColor.substring(0, 7) + 'FF';
+                     if (wordObj.hintUsed) {
+                         li.classList.add('hint-used');
+                     }
+                } else {
+                    // Attach listener only if not found
+                    li.addEventListener('click', () => solveWord(index));
+                }
+            });
+            checkWinCondition(); 
+        }
+        
+        function checkWinCondition() {
+            const foundCount = targetWords.filter(w => w.found).length;
+            scoreEl.textContent = `คำศัพท์ที่พบ: ${foundCount}/${targetWords.length}`;
+            
+            if (foundCount === targetWords.length) {
+                // Game Over - Add 1 second delay
+                
+                // 1. Temporarily disable grid interaction to prevent clicks during pause
+                gridEl.style.pointerEvents = 'none'; 
+                
+                // 2. Set timeout for transition
+                setTimeout(() => {
+                    gridEl.style.pointerEvents = 'auto'; 
+                    showSummaryScreen();
+                }, 1000); // 1000 milliseconds = 1 second delay
+            }
+        }
+        
+        function showSummaryScreen() {
+            stopTimer(); 
+            showScreen('summary-screen');
+
+            const timeString = formatTime(totalTimeSeconds);
+
+            const totalFound = targetWords.length;
+            const hintsUsed = targetWords.filter(w => w.hintUsed).length;
+            const finalScore = Math.max(0, totalFound - hintsUsed); 
+            
+            document.getElementById('summary-score').innerHTML = `
+                คำศัพท์ทั้งหมด: ${totalFound} คำ<br>
+                ค้นหาเอง: ${totalFound - hintsUsed} คำ<br>
+                ใช้ตัวช่วย (เฉลย): ${hintsUsed} คำ<br>
+                <hr style="margin: 8px 0; border-color: #DDD;">
+                <p style="font-size: 1.5rem; color: ${finalScore > 0 ? 'var(--color-primary)' : 'var(--color-wrong)'}; margin: 0;">
+                    คะแนนสุดท้าย: **${finalScore}/${totalFound}** คำ
+                </p>
+            `;
+            document.getElementById('summary-time').textContent = `เวลาที่ใช้: ${timeString}`;
+        }
+
+
+        // --- INITIALIZATION & EVENT LISTENERS ---
+        function init() {
+            attachGridListeners(); 
+            showScreen('start-screen');
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            setupSpeech();
+            document.addEventListener('click', () => {
+                initAudioContext();
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+            }, { once: true });
+            
+            init(); 
+        });
+
+        // Event listeners for screen transitions
+        document.getElementById('start-screen').addEventListener('click', (e) => {
+            if (e.target.classList.contains('category-btn')) {
+                selectCategory(e.target.dataset.category);
+            }
+        });
+        
+        document.getElementById('difficulty-screen').addEventListener('click', (e) => {
+            if (e.target.classList.contains('difficulty-btn')) {
+                const categoryId = e.target.dataset.categoryId;
+                const difficulty = e.target.dataset.difficulty;
+                startGame(categoryId, difficulty);
+            }
+        });
+        
+        document.getElementById('summary-screen').addEventListener('click', (e) => {
+            if (e.target.id === 'summary-btn') {
+                showScreen('start-screen');
+            }
+        });
+
+        document.getElementById('restart-btn').addEventListener('click', (e) => {
+             if (confirm("คุณแน่ใจที่จะเริ่มใหม่? ข้อมูลเกมปัจจุบันจะหายไป")) {
+                 showScreen('start-screen');
+             }
+        });
+        
+    </script>
+</body>
+</html>
