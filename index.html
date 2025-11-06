@@ -184,7 +184,7 @@
             color: var(--color-text-dark);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             transition: all 0.3s;
-            cursor: pointer; /* Enable click/tap for hint */
+            cursor: pointer; 
         }
         
         /* Styles when a word is solved/found */
@@ -197,7 +197,6 @@
 
         /* Hint/Solve Specific Style */
         .clue-item.hint-used {
-             /* Light red tone for solved by hint */
             background-color: #FFCDD2FF !important; 
             border: 2px dashed #EF5350;
             color: var(--color-text-dark); 
@@ -537,11 +536,10 @@
         function startGame(categoryId, difficulty) {
             const category = WORD_CATEGORIES[categoryId];
             currentConfig = category[difficulty];
-            currentConfig.categoryId = categoryId; /* Store for rendering */
+            currentConfig.categoryId = categoryId; 
             
             // 1. Select Random Words
             const pool = category[currentConfig.poolKey];
-            // 1.1 Add word length check to ensure compatibility with grid size (optional but safe)
             const filteredPool = pool.filter(w => w.word.length <= currentConfig.size);
             const shuffledPool = [...filteredPool].sort(() => 0.5 - Math.random());
             
@@ -550,7 +548,7 @@
                 word: w.word.toUpperCase(), 
                 found: false, 
                 colorIndex: -1, 
-                hintUsed: false /* New flag for score deduction */
+                hintUsed: false 
             }));
 
             // 2. Set Dynamic Config & State
@@ -560,10 +558,14 @@
             // 3. Setup Grid and Clues
             generatePuzzle();
             renderGrid();
-            renderClues(category.name);
+            renderClues();
 
             // 4. Setup UI and Start Timer
             categoryTitleEl.textContent = `หมวดหมู่: ${category.name} (${difficulty === 'easy' ? 'ง่าย 6x6' : 'ยาก 10x10'})`;
+            
+            // Re-enable pointer events at the start of a new game (FIX)
+            gridEl.style.pointerEvents = 'auto'; 
+            
             startTimer();
             showScreen('game-screen');
         }
@@ -632,7 +634,6 @@
             const directions = [ [0, 1], [1, 0], [1, 1], [-1, 0], [0, -1], [-1, -1], [1, -1], [-1, 1] ];
             placedWordsMeta = [];
             
-            // Attempt to place words in descending length order for better fitting
             const placementWords = [...targetWords].sort((a, b) => b.word.length - a.word.length); 
             
             placementWords.forEach(wordObj => {
@@ -640,7 +641,7 @@
                 let placed = false;
                 let attempts = 0;
 
-                while (!placed && attempts < 1000) { /* Increased attempts for higher success rate */
+                while (!placed && attempts < 1000) { 
                     const r = Math.floor(Math.random() * GRID_SIZE);
                     const c = Math.floor(Math.random() * GRID_SIZE);
                     const direction = directions[Math.floor(Math.random() * directions.length)];
@@ -657,7 +658,7 @@
                     attempts++;
                 }
                 if (!placed) {
-                    console.warn(`Could not place word: ${word}. This can be ignored unless all words fail.`);
+                    console.warn(`Could not place word: ${word}.`);
                 }
             });
 
@@ -754,11 +755,11 @@
         }
 
         function markAsFound(index, cells, wordDetails) {
-            const foundWordsCount = targetWords.filter(w => w.found).length;
+            const foundWordsCountBefore = targetWords.filter(w => w.found).length;
             
             // Only assign new color if it hasn't been found/solved yet
             if (wordDetails.colorIndex === -1) {
-                const colorIndex = foundWordsCount % PASTEL_COLORS.length;
+                const colorIndex = foundWordsCountBefore % PASTEL_COLORS.length;
                 wordDetails.colorIndex = colorIndex; 
             }
             
@@ -772,17 +773,15 @@
                 cell.classList.add('found');
                 cell.style.transform = 'scale(1)'; 
                 
-                // Apply the color style directly with 50% opacity for blending
                 cell.style.backgroundColor = uniqueColor;
             });
 
             const clueEl = clueListEl.querySelector(`[data-index="${index}"]`);
             if (clueEl) {
                 clueEl.classList.add('found');
-                // Clue list item uses the same base color but fully opaque (FF)
+                
                 clueEl.style.backgroundColor = uniqueColor.substring(0, 7) + 'FF';
                 
-                // Add hint-used class if applicable
                 if (wordDetails.hintUsed) {
                     clueEl.classList.add('hint-used');
                 }
@@ -796,11 +795,11 @@
             selectedCells = [];
             startCell = null;
             
-            // Re-render clues to update listeners (remove solved word listener)
-            renderClues(WORD_CATEGORIES[currentConfig.categoryId].name);
+            // Re-render clues to update listeners 
+            renderClues();
         }
 
-        // --- HINT/SOLVE SYSTEM (NEW) ---
+        // --- HINT/SOLVE SYSTEM ---
         function solveWord(index) {
             const wordDetails = targetWords[index];
             if (wordDetails.found) return;
@@ -882,7 +881,11 @@
         }
         
         function attachGridListeners() {
-            gridEl.addEventListener('click', onCellClick);
+            // Attach listener only once globally
+            if (!gridEl.dataset.listenersAttached) {
+                gridEl.addEventListener('click', onCellClick);
+                gridEl.dataset.listenersAttached = 'true';
+            }
         }
         
         // --- RENDERING & UI UPDATES ---
@@ -945,19 +948,24 @@
                     li.addEventListener('click', () => solveWord(index));
                 }
             });
-            checkWinCondition(false);
+            checkWinCondition(); // Check for win after rendering/updates
         }
         
-        function checkWinCondition(shouldAlert = true) {
+        function checkWinCondition() {
             const foundCount = targetWords.filter(w => w.found).length;
             scoreEl.textContent = `คำศัพท์ที่พบ: ${foundCount}/${targetWords.length}`;
             
             if (foundCount === targetWords.length) {
-                // Game Over - Transition to Summary Screen
-                if (shouldAlert) {
-                    // Optional: Brief alert before showing summary
-                }
-                showSummaryScreen();
+                // **NEW: Game Over - Add 1 second delay**
+                
+                // 1. Temporarily disable grid interaction to prevent clicks during pause
+                gridEl.style.pointerEvents = 'none'; 
+                
+                // 2. Set timeout for transition
+                setTimeout(() => {
+                    gridEl.style.pointerEvents = 'auto'; // Re-enable for summary screen context (though not strictly necessary)
+                    showSummaryScreen();
+                }, 1000); // 1000 milliseconds = 1 second
             }
         }
         
@@ -969,7 +977,7 @@
 
             const totalFound = targetWords.length;
             const hintsUsed = targetWords.filter(w => w.hintUsed).length;
-            const finalScore = Math.max(0, totalFound - hintsUsed); // Score cannot be negative
+            const finalScore = Math.max(0, totalFound - hintsUsed); 
             
             document.getElementById('summary-score').innerHTML = `
                 คำศัพท์ทั้งหมด: ${totalFound} คำ<br>
@@ -986,10 +994,7 @@
 
         // --- INITIALIZATION & EVENT LISTENERS ---
         function init() {
-            if (!gridEl.dataset.listenersAttached) {
-                attachGridListeners(); 
-                gridEl.dataset.listenersAttached = 'true';
-            }
+            attachGridListeners(); // Ensure the global listener is attached once
             showScreen('start-screen');
         }
         
@@ -1005,14 +1010,13 @@
             init(); 
         });
 
-        // Start screen (Category selection)
+        // Event listeners for screen transitions
         document.getElementById('start-screen').addEventListener('click', (e) => {
             if (e.target.classList.contains('category-btn') && !e.target.disabled) {
                 selectCategory(e.target.dataset.category);
             }
         });
         
-        // Difficulty screen (Difficulty selection)
         document.getElementById('difficulty-screen').addEventListener('click', (e) => {
             if (e.target.classList.contains('difficulty-btn')) {
                 const categoryId = e.target.dataset.categoryId;
@@ -1021,16 +1025,13 @@
             }
         });
         
-        // Summary screen (Go back to main menu)
         document.getElementById('summary-screen').addEventListener('click', (e) => {
             if (e.target.id === 'summary-btn') {
                 showScreen('start-screen');
             }
         });
 
-        // Game screen (Restart button)
         document.getElementById('restart-btn').addEventListener('click', (e) => {
-             // FIX 1: Bring back the restart button
              if (confirm("คุณแน่ใจที่จะเริ่มใหม่? ข้อมูลเกมปัจจุบันจะหายไป")) {
                  showScreen('start-screen');
              }
