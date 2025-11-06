@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Word Search</title>
+    <title>Word Search Game</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         /* --- THEME & GLOBAL STYLES --- */
@@ -296,12 +296,15 @@
         </header>
 
         <div id="start-screen" class="screen active-screen">
-            <h2>เลือกหมวดหมู่</h2>
+            <h2 style="color: var(--color-primary); margin-bottom: 0;">ยินดีต้อนรับสู่เกม Word Search! 🎉</h2>
+            <p style="font-size: 1.1rem; margin-top: 0.5rem; margin-bottom: 1.5rem;">โปรดเลือกหมวดหมู่และระดับความยากเพื่อเริ่มเกม</p>
+            
+            <h3>เลือกหมวดหมู่</h3>
             <button class="main-btn category-btn" data-category="animals">
                 สัตว์ป่า (Animals)
             </button>
-            <button class="main-btn category-btn" disabled>
-                หมวดหมู่ที่ 2 (กำลังจะมา)
+            <button class="main-btn category-btn" data-category="fruits">
+                ผลไม้ (Fruits)
             </button>
         </div>
 
@@ -354,7 +357,7 @@
     </div>
 
     <script>
-        // --- AUDIO/SPEECH LOGIC (Unchanged) ---
+        // --- AUDIO/SPEECH LOGIC ---
         let audioContext;
         let voices = [];
         
@@ -378,7 +381,8 @@
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = lang;
-            utterance.rate = (lang === 'en-US') ? 0.8 : 0.9; 
+            // Use a slightly slower rate for better English word recognition
+            utterance.rate = (lang === 'en-US') ? 0.75 : 0.9; 
             utterance.volume = 1;
             const targetVoice = getVoice('en-US');
             if (targetVoice) utterance.voice = targetVoice;
@@ -405,7 +409,7 @@
     </script>
 
     <script>
-        // --- CONFIGURATION & DATA (Expanded and Restructured) ---
+        // --- CONFIGURATION & DATA (Updated with 'Fruits' category) ---
         const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         const WORD_CATEGORIES = {
             'animals': {
@@ -455,7 +459,64 @@
                     { word: "HIPPO", clue: "ฮิปโป" },
                 ],
                 easy: {
-                    size: 6, /* Changed from 5 to 6 */
+                    size: 6, 
+                    targetWordCount: 8, 
+                    poolKey: 'easyWordsPool'
+                },
+                hard: {
+                    size: 10,
+                    targetWordCount: 10, 
+                    poolKey: 'hardWordsPool'
+                }
+            },
+            'fruits': { // NEW CATEGORY
+                name: 'ผลไม้ (Fruits)',
+                easyWordsPool: [
+                    { word: "APPLE", clue: "แอปเปิ้ล" },
+                    { word: "BANANA", clue: "กล้วย" },
+                    { word: "GRAPE", clue: "องุ่น" },
+                    { word: "PEAR", clue: "ลูกแพร์" },
+                    { word: "KIWI", clue: "กีวี่" },
+                    { word: "LIME", clue: "มะนาว" },
+                    { word: "FIG", clue: "มะเดื่อ" },
+                    { word: "BERRY", clue: "ผลเบอร์รี่" },
+                    { word: "MELON", clue: "แตงโม" },
+                    { word: "DATE", clue: "อินทผลัม" },
+                    { word: "PLUM", clue: "ลูกพลัม" },
+                    { word: "MANGO", clue: "มะม่วง" },
+                    { word: "PEACH", clue: "ลูกพีช" },
+                    { word: "CHERRY", clue: "เชอร์รี่" },
+                    { word: "GUAVA", clue: "ฝรั่ง" },
+                    { word: "SAGO", clue: "สาคู" },
+                    { word: "COCOA", clue: "เมล็ดโกโก้" },
+                    { word: "LEMON", clue: "มะนาวเหลือง" },
+                    { word: "MINT", clue: "สะระแหน่" },
+                    { word: "ORANGE", clue: "ส้ม" },
+                ],
+                hardWordsPool: [
+                    { word: "PINEAPPLE", clue: "สับปะรด" },
+                    { word: "STRAWBERRY", clue: "สตรอว์เบอร์รี" },
+                    { word: "WATERMELON", clue: "แตงโมลูกใหญ่" },
+                    { word: "AVOCADO", clue: "อะโวคาโด" },
+                    { word: "BLUEBERRY", clue: "บลูเบอร์รี" },
+                    { word: "RASPBERRY", clue: "ราสเบอร์รี" },
+                    { word: "GRAPEFRUIT", clue: "ส้มโอฝรั่ง" },
+                    { word: "POMEGRANATE", clue: "ทับทิม" },
+                    { word: "TANGERINE", clue: "ส้มเขียวหวาน" },
+                    { word: "APRICOT", clue: "แอปริคอท" },
+                    { word: "COCONUT", clue: "มะพร้าว" },
+                    { word: "PAPAYA", clue: "มะละกอ" },
+                    { word: "DURIAN", clue: "ทุเรียน" },
+                    { word: "LYCHEE", clue: "ลิ้นจี่" },
+                    { word: "RAMBUTAN", clue: "เงาะ" },
+                    { word: "PASSIONFRUIT", clue: "เสาวรส" },
+                    { word: "CANTALOUPE", clue: "แคนตาลูป" },
+                    { word: "DRAGONFRUIT", clue: "แก้วมังกร" },
+                    { word: "STARFRUIT", clue: "มะเฟือง" },
+                    { word: "POMELO", clue: "ส้มโอ" },
+                ],
+                easy: {
+                    size: 6, 
                     targetWordCount: 8, 
                     poolKey: 'easyWordsPool'
                 },
@@ -563,7 +624,7 @@
             // 4. Setup UI and Start Timer
             categoryTitleEl.textContent = `หมวดหมู่: ${category.name} (${difficulty === 'easy' ? 'ง่าย 6x6' : 'ยาก 10x10'})`;
             
-            // Re-enable pointer events at the start of a new game (FIX)
+            // Re-enable pointer events at the start of a new game
             gridEl.style.pointerEvents = 'auto'; 
             
             startTimer();
@@ -757,7 +818,6 @@
         function markAsFound(index, cells, wordDetails) {
             const foundWordsCountBefore = targetWords.filter(w => w.found).length;
             
-            // Only assign new color if it hasn't been found/solved yet
             if (wordDetails.colorIndex === -1) {
                 const colorIndex = foundWordsCountBefore % PASTEL_COLORS.length;
                 wordDetails.colorIndex = colorIndex; 
@@ -788,14 +848,15 @@
             }
             
             playSuccessTone();
-            speakText(wordDetails.word, 'en-US'); 
-
+            
+            // **FIX 1: Pronunciation Fix** - Convert to lowercase before speaking
+            speakText(wordDetails.word.toLowerCase(), 'en-US'); 
+            
             checkWinCondition();
             
             selectedCells = [];
             startCell = null;
             
-            // Re-render clues to update listeners 
             renderClues();
         }
 
@@ -948,7 +1009,7 @@
                     li.addEventListener('click', () => solveWord(index));
                 }
             });
-            checkWinCondition(); // Check for win after rendering/updates
+            checkWinCondition(); 
         }
         
         function checkWinCondition() {
@@ -956,16 +1017,16 @@
             scoreEl.textContent = `คำศัพท์ที่พบ: ${foundCount}/${targetWords.length}`;
             
             if (foundCount === targetWords.length) {
-                // **NEW: Game Over - Add 1 second delay**
+                // Game Over - Add 1 second delay
                 
                 // 1. Temporarily disable grid interaction to prevent clicks during pause
                 gridEl.style.pointerEvents = 'none'; 
                 
                 // 2. Set timeout for transition
                 setTimeout(() => {
-                    gridEl.style.pointerEvents = 'auto'; // Re-enable for summary screen context (though not strictly necessary)
+                    gridEl.style.pointerEvents = 'auto'; 
                     showSummaryScreen();
-                }, 1000); // 1000 milliseconds = 1 second
+                }, 1000); // 1000 milliseconds = 1 second delay
             }
         }
         
@@ -994,7 +1055,7 @@
 
         // --- INITIALIZATION & EVENT LISTENERS ---
         function init() {
-            attachGridListeners(); // Ensure the global listener is attached once
+            attachGridListeners(); 
             showScreen('start-screen');
         }
         
@@ -1012,7 +1073,7 @@
 
         // Event listeners for screen transitions
         document.getElementById('start-screen').addEventListener('click', (e) => {
-            if (e.target.classList.contains('category-btn') && !e.target.disabled) {
+            if (e.target.classList.contains('category-btn')) {
                 selectCategory(e.target.dataset.category);
             }
         });
