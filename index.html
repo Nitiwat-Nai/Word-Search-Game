@@ -90,8 +90,8 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
             overflow: hidden;
-            user-select: none; /* Helps with click selection on PC */
-            touch-action: manipulation; /* Allows taps/clicks on mobile */
+            user-select: none; 
+            touch-action: manipulation; 
         }
 
         .grid-cell {
@@ -345,8 +345,8 @@
         // --- GAME STATE ---
         let grid = [];
         let placedWordsMeta = []; 
-        let startCell = null; // Used for the first click
-        let selectedCells = []; // Used for the current selection
+        let startCell = null; 
+        let selectedCells = []; 
         
         // --- ELEMENTS ---
         const gridEl = document.getElementById('word-search-grid');
@@ -490,6 +490,7 @@
             let foundIndex = -1;
 
             targetWords.forEach((wordObj, index) => {
+                // IMPORTANT: We only check words that haven't been found yet
                 if (wordObj.found) return;
 
                 const target = wordObj.word;
@@ -524,11 +525,9 @@
             
             playSuccessTone();
             
+            // FIX #2: Read only the English word, not the Thai clue.
             speakText(wordDetails.word, 'en-US'); 
-            setTimeout(() => {
-                 speakText(wordDetails.clue, 'th-TH');
-            }, 1000); 
-
+            
             checkWinCondition();
             
             selectedCells = [];
@@ -536,14 +535,17 @@
         }
 
 
-        // --- NEW CLICK SELECTION HANDLER (START/END) ---
+        // --- CLICK SELECTION HANDLER (START/END) ---
         function onCellClick(e) {
             const cell = e.target;
-            if (!cell.classList.contains('grid-cell') || cell.classList.contains('found')) return;
+            
+            // FIX #1: Removed 'cell.classList.contains("found")' check.
+            // Now players can click cells that are already part of a found word.
+            if (!cell.classList.contains('grid-cell')) return; 
 
             if (startCell === null) {
                 // First click: Set Start Cell
-                clearSelection(false); // Ensure any lingering selection is cleared
+                clearSelection(false); 
                 startCell = cell;
                 startCell.classList.add('selected');
                 selectedCells = [startCell];
@@ -562,7 +564,6 @@
                 const r2 = parseInt(endCell.dataset.row);
                 const c2 = parseInt(endCell.dataset.col);
                 
-                // 1. Check if the line is straight (H, V, or D)
                 const isHorizontal = r1 === r2;
                 const isVertical = c1 === c2;
                 const isDiagonal = Math.abs(r1 - r2) === Math.abs(c1 - c2);
@@ -580,7 +581,7 @@
                     selectedCells.forEach(c => c.classList.remove('selected'));
                     startCell.classList.add('selected');
                     endCell.classList.add('selected');
-                    selectedCells = [startCell, endCell]; // Temp selection for flashing
+                    selectedCells = [startCell, endCell]; 
                     
                     playFailTone();
                     clearSelection(true); 
@@ -589,7 +590,6 @@
         }
         
         function attachGridListeners() {
-            // Use a single click listener on the grid container for delegation
             gridEl.addEventListener('click', onCellClick);
         }
         
