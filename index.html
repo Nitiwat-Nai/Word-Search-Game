@@ -306,6 +306,12 @@
             <button class="main-btn category-btn" data-category="fruits">
                 ผลไม้ (Fruits)
             </button>
+            <button class="main-btn category-btn" data-category="colors">
+                สี (Colors)
+            </button>
+            <button class="main-btn category-btn" data-category="foods">
+                อาหาร (Foods)
+            </button>
         </div>
 
         <div id="difficulty-screen" class="screen">
@@ -460,9 +466,7 @@
                 ],
                 easy: {
                     size: 6, 
-                    // *** START OF MODIFICATION 1: Change targetWordCount from 8 to 6 ***
-                    targetWordCount: 6, 
-                    // *** END OF MODIFICATION 1 ***
+                    targetWordCount: 6, // แก้ไข: ลดเหลือ 6 คำ
                     poolKey: 'easyWordsPool'
                 },
                 hard: {
@@ -471,7 +475,7 @@
                     poolKey: 'hardWordsPool'
                 }
             },
-            'fruits': { // NEW CATEGORY
+            'fruits': { 
                 name: 'ผลไม้ (Fruits)',
                 easyWordsPool: [
                     { word: "APPLE", clue: "แอปเปิ้ล" },
@@ -519,9 +523,123 @@
                 ],
                 easy: {
                     size: 6, 
-                    // *** START OF MODIFICATION 1: Change targetWordCount from 8 to 6 ***
-                    targetWordCount: 6, 
-                    // *** END OF MODIFICATION 1 ***
+                    targetWordCount: 6, // แก้ไข: ลดเหลือ 6 คำ
+                    poolKey: 'easyWordsPool'
+                },
+                hard: {
+                    size: 10,
+                    targetWordCount: 10, 
+                    poolKey: 'hardWordsPool'
+                }
+            },
+            // --- เพิ่มหมวดหมู่ "สี (Colors)" ใหม่ ---
+            'colors': { 
+                name: 'สี (Colors)',
+                easyWordsPool: [
+                    { word: "RED", clue: "สีแดง" },
+                    { word: "BLUE", clue: "สีน้ำเงิน" },
+                    { word: "GREEN", clue: "สีเขียว" },
+                    { word: "PINK", clue: "สีชมพู" },
+                    { word: "BLACK", clue: "สีดำ" },
+                    { word: "WHITE", clue: "สีขาว" },
+                    { word: "GREY", clue: "สีเทา" },
+                    { word: "GOLD", clue: "สีทอง" },
+                    { word: "SILVER", clue: "สีเงิน" },
+                    { word: "ORANGE", clue: "สีส้ม" },
+                    { word: "PURPLE", clue: "สีม่วง" },
+                    { word: "BROWN", clue: "สีน้ำตาล" },
+                    { word: "YELLOW", clue: "สีเหลือง" },
+                    { word: "VIOLET", clue: "สีไวโอเลต" },
+                    { word: "CYAN", clue: "สีฟ้าอ่อน" },
+                    { word: "TEAL", clue: "สีเขียวน้ำทะเล" },
+                    { word: "BEIGE", clue: "สีเบจ" },
+                    { word: "LIME", clue: "สีเขียวมะนาว" },
+                    { word: "NAVY", clue: "สีกรมท่า" },
+                    { word: "ROSE", clue: "สีดอกกุหลาบ" },
+                ],
+                hardWordsPool: [
+                    { word: "CRIMSON", clue: "สีแดงเข้ม" },
+                    { word: "MAGENTA", clue: "สีม่วงแดง" },
+                    { word: "TURQUOISE", clue: "สีฟ้าอมเขียว" },
+                    { word: "AQUAMARINE", clue: "สีเขียวน้ำทะเลอ่อน" },
+                    { word: "CHOCOLATE", clue: "สีช็อกโกแลต" },
+                    { word: "INDIGO", clue: "สีคราม" },
+                    { word: "SCARLET", clue: "สีแดงสด" },
+                    { word: "EMERALD", clue: "สีเขียวมรกต" },
+                    { word: "MAROON", clue: "สีแดงเลือดหมู" },
+                    { word: "CHARCOAL", clue: "สีเทาเข้ม" },
+                    { word: "FUCHSIA", clue: "สีบานเย็น" },
+                    { word: "LAVENDER", clue: "สีม่วงอ่อน" },
+                    { word: "BRONZE", clue: "สีทองแดง" },
+                    { word: "MUSTARD", clue: "สีเหลืองมัสตาร์ด" },
+                    { word: "OLIVE", clue: "สีเขียวมะกอก" },
+                    { word: "SALMON", clue: "สีส้มอมชมพู" },
+                    { word: "TAN", clue: "สีน้ำตาลอ่อน" },
+                    { word: "AZURE", clue: "สีฟ้าคราม" },
+                    { word: "KHAKI", clue: "สีน้ำตาลแกมเขียว" },
+                    { word: "JADE", clue: "สีเขียวหยก" },
+                ],
+                easy: {
+                    size: 6, 
+                    targetWordCount: 6, // แก้ไข: ลดเหลือ 6 คำ
+                    poolKey: 'easyWordsPool'
+                },
+                hard: {
+                    size: 10,
+                    targetWordCount: 10, 
+                    poolKey: 'hardWordsPool'
+                }
+            },
+            // --- เพิ่มหมวดหมู่ "อาหาร (Foods)" ใหม่ ---
+            'foods': { 
+                name: 'อาหาร (Foods)',
+                easyWordsPool: [
+                    { word: "RICE", clue: "ข้าว" },
+                    { word: "MEAT", clue: "เนื้อ" },
+                    { word: "FISH", clue: "ปลา" },
+                    { word: "BREAD", clue: "ขนมปัง" },
+                    { word: "EGG", clue: "ไข่" },
+                    { word: "SOUP", clue: "ซุป" },
+                    { word: "CAKE", clue: "เค้ก" },
+                    { word: "PIZZA", clue: "พิซซ่า" },
+                    { word: "NOODLE", clue: "ก๋วยเตี๋ยว/บะหมี่" },
+                    { word: "SALAD", clue: "สลัด" },
+                    { word: "BEAN", clue: "ถั่ว" },
+                    { word: "CHEESE", clue: "เนยแข็ง" },
+                    { word: "ONION", clue: "หัวหอม" },
+                    { word: "CORN", clue: "ข้าวโพด" },
+                    { word: "SUGAR", clue: "น้ำตาล" },
+                    { word: "SALT", clue: "เกลือ" },
+                    { word: "MILK", clue: "นม" },
+                    { word: "OAT", clue: "ข้าวโอ๊ต" },
+                    { word: "TEA", clue: "ชา" },
+                    { word: "COFFEE", clue: "กาแฟ" },
+                ],
+                hardWordsPool: [
+                    { word: "SPAGHETTI", clue: "สปาเกตตี" },
+                    { word: "SANDWICH", clue: "แซนด์วิช" },
+                    { word: "HAMBURGER", clue: "แฮมเบอร์เกอร์" },
+                    { word: "PANCAKE", clue: "แพนเค้ก" },
+                    { word: "CEREAL", clue: "ซีเรียล" },
+                    { word: "BROCCOLI", clue: "บรอกโคลี" },
+                    { word: "CARROT", clue: "แครอท" },
+                    { word: "POTATO", clue: "มันฝรั่ง" },
+                    { word: "CHICKEN", clue: "ไก่" },
+                    { word: "BURRITO", clue: "บูร์ริโต" },
+                    { word: "TACO", clue: "ทาโก้" },
+                    { word: "SUSHI", clue: "ซูชิ" },
+                    { word: "BACON", clue: "เบคอน" },
+                    { word: "DONUT", clue: "โดนัท" },
+                    { word: "WAFFLE", clue: "วาฟเฟิล" },
+                    { word: "KETCHUP", clue: "ซอสมะเขือเทศ" },
+                    { word: "MAYO", clue: "มายองเนส" },
+                    { word: "VINEGAR", clue: "น้ำส้มสายชู" },
+                    { word: "YOGURT", clue: "โยเกิร์ต" },
+                    { word: "COLA", clue: "น้ำอัดลมโคล่า" },
+                ],
+                easy: {
+                    size: 6, 
+                    targetWordCount: 6, // แก้ไข: ลดเหลือ 6 คำ
                     poolKey: 'easyWordsPool'
                 },
                 hard: {
