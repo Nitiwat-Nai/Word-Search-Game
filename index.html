@@ -261,12 +261,13 @@
             border: none;
             padding: 1rem;
             border-radius: 12px;
-            font-size: 1.3rem;
+            font-size: 1.1rem; /* Adjusted for 8 buttons */
             font-weight: bold;
             cursor: pointer;
             transition: transform 0.1s, box-shadow 0.1s;
             width: 100%;
-            margin-top: 1rem;
+            margin-top: 0;
+            white-space: nowrap;
         }
         .main-btn:active {
             transform: translateY(2px);
@@ -284,6 +285,7 @@
         .difficulty-btn {
             background-color: var(--color-difficulty-btn);
             box-shadow: 0 4px 0 #388E3C;
+            margin-top: 1rem;
         }
         .difficulty-btn:active {
             box-shadow: 0 2px 0 #388E3C;
@@ -312,13 +314,17 @@
             <h2 style="color: var(--color-primary); margin-bottom: 0;">ยินดีต้อนรับสู่เกม Word Search! 🔍</h2>
             <p style="font-size: 1.1rem; margin-top: 0.5rem; margin-bottom: 1.5rem;">โปรดเลือกหมวดหมู่และระดับความยากเพื่อเริ่มเกม</p>
             
-            <h3>เลือกหมวดหมู่</h3>
-            <button class="main-btn category-btn" data-category="animals">
-                สัตว์ป่า (Animals)
-            </button>
-            <button class="main-btn category-btn" data-category="fruits">
-                ผลไม้ (Fruits)
-            </button>
+            <h3>เลือกหมวดหมู่ (8 หมวด)</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <button class="main-btn category-btn" data-category="animals">สัตว์ป่า (Animals)</button>
+                <button class="main-btn category-btn" data-category="fruits">ผลไม้ (Fruits)</button>
+                <button class="main-btn category-btn" data-category="countries">ประเทศ (Countries)</button>
+                <button class="main-btn category-btn" data-category="jobs">อาชีพ (Jobs)</button>
+                <button class="main-btn category-btn" data-category="colors">สี (Colors)</button>
+                <button class="main-btn category-btn" data-category="sports">กีฬา (Sports)</button>
+                <button class="main-btn category-btn" data-category="foods">อาหาร (Foods)</button>
+                <button class="main-btn category-btn" data-category="vehicles">ยานพาหนะ (Vehicles)</button>
+            </div>
         </div>
 
         <div id="difficulty-screen" class="screen">
@@ -424,123 +430,195 @@
     </script>
 
     <script>
-        // --- CONFIGURATION & DATA (Updated with 'Fruits' category) ---
+        // --- CONFIGURATION & DATA (Updated with 8 Categories) ---
         const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         const WORD_CATEGORIES = {
             'animals': {
                 name: 'สัตว์ป่า (Animals)',
                 easyWordsPool: [
-                    { word: "CAT", clue: "แมว" },
-                    { word: "DOG", clue: "สุนัข" },
-                    { word: "FOX", clue: "สุนัขจิ้งจอก" },
-                    { word: "LION", clue: "ราชาแห่งป่า" },
-                    { word: "CUB", clue: "ลูกสิงโต/หมี" },
-                    { word: "DEER", clue: "กวาง" },
-                    { word: "WOLF", clue: "หมาป่า" },
-                    { word: "EEL", clue: "ปลาไหล" },
-                    { word: "BAT", clue: "ค้างคาว" },
-                    { word: "PIG", clue: "หมู" },
-                    { word: "RAT", clue: "หนู" },
-                    { word: "COW", clue: "วัว" },
-                    { word: "BULL", clue: "วัวตัวผู้" },
-                    { word: "GOAT", clue: "แพะ" },
-                    { word: "SHEEP", clue: "แกะ" },
-                    { word: "CRAB", clue: "ปู" },
-                    { word: "FISH", clue: "ปลา" },
-                    { word: "FROG", clue: "กบ" },
-                    { word: "DUCK", clue: "เป็ด" },
-                    { word: "OWL", clue: "นกฮูก" },
+                    { word: "CAT", clue: "แมว" }, { word: "DOG", clue: "สุนัข" }, { word: "FOX", clue: "สุนัขจิ้งจอก" },
+                    { word: "LION", clue: "ราชาแห่งป่า" }, { word: "CUB", clue: "ลูกสิงโต/หมี" }, { word: "DEER", clue: "กวาง" },
+                    { word: "WOLF", clue: "หมาป่า" }, { word: "EEL", clue: "ปลาไหล" }, { word: "BAT", clue: "ค้างคาว" },
+                    { word: "PIG", clue: "หมู" }, { word: "RAT", clue: "หนู" }, { word: "COW", clue: "วัว" },
+                    { word: "BULL", clue: "วัวตัวผู้" }, { word: "GOAT", clue: "แพะ" }, { word: "SHEEP", clue: "แกะ" },
+                    { word: "CRAB", clue: "ปู" }, { word: "FISH", clue: "ปลา" }, { word: "FROG", clue: "กบ" },
+                    { word: "DUCK", clue: "เป็ด" }, { word: "OWL", clue: "นกฮูก" },
                 ],
                 hardWordsPool: [
-                    { word: "TIGER", clue: "สัตว์ตระกูลแมวที่มีลายทางสีดำบนขนสีส้ม" },
-                    { word: "ZEBRA", clue: "ม้าลายที่มีลายทางสีดำและขาว" },
-                    { word: "BEAR", clue: "หมี สัตว์ตัวใหญ่ที่ชอบกินน้ำผึ้ง" },
-                    { word: "EAGLE", clue: "นกอินทรี นกล่าเหยื่อขนาดใหญ่" },
-                    { word: "SNAKE", clue: "สัตว์เลื้อยคลานที่ไม่มีขา" },
-                    { word: "DOLPHIN", clue: "โลมา สัตว์เลี้ยงลูกด้วยนมในทะเล" },
-                    { word: "ELEPHANT", clue: "ช้าง สัตว์บกที่ใหญ่ที่สุด" },
-                    { word: "GIRAFFE", clue: "ยีราฟ คอยาว" },
-                    { word: "MONKEY", clue: "ลิง สัตว์เลี้ยงลูกด้วยนมที่ชอบปีนป่าย" },
-                    { word: "RABBIT", clue: "กระต่าย หูยาว ชอบกินแครอท" },
-                    { word: "PENGUIN", clue: "นกเพนกวิน บินไม่ได้ อาศัยในขั้วโลก" },
-                    { word: "PARROT", clue: "นกแก้ว นกพูดได้" },
-                    { word: "CHIMPANZEE", clue: "ลิงชิมแปนซี" },
-                    { word: "RHINOS", clue: "แรด" },
-                    { word: "CAMEL", clue: "อูฐ" },
-                    { word: "TURTLE", clue: "เต่า" },
-                    { word: "CROCODILE", clue: "จระเข้" },
-                    { word: "KANGAROO", clue: "จิงโจ้" },
-                    { word: "OSTRICH", clue: "นกกระจอกเทศ" },
-                    { word: "HIPPO", clue: "ฮิปโป" },
+                    { word: "TIGER", clue: "สัตว์ตระกูลแมวที่มีลายทางสีดำบนขนสีส้ม" }, { word: "ZEBRA", clue: "ม้าลายที่มีลายทางสีดำและขาว" },
+                    { word: "BEAR", clue: "หมี สัตว์ตัวใหญ่ที่ชอบกินน้ำผึ้ง" }, { word: "EAGLE", clue: "นกอินทรี นกล่าเหยื่อขนาดใหญ่" },
+                    { word: "SNAKE", clue: "สัตว์เลื้อยคลานที่ไม่มีขา" }, { word: "DOLPHIN", clue: "โลมา สัตว์เลี้ยงลูกด้วยนมในทะเล" },
+                    { word: "ELEPHANT", clue: "ช้าง สัตว์บกที่ใหญ่ที่สุด" }, { word: "GIRAFFE", clue: "ยีราฟ คอยาว" },
+                    { word: "MONKEY", clue: "ลิง สัตว์เลี้ยงลูกด้วยนมที่ชอบปีนป่าย" }, { word: "RABBIT", clue: "กระต่าย หูยาว ชอบกินแครอท" },
+                    { word: "PENGUIN", clue: "นกเพนกวิน บินไม่ได้ อาศัยในขั้วโลก" }, { word: "PARROT", clue: "นกแก้ว นกพูดได้" },
+                    { word: "CHIMPANZEE", clue: "ลิงชิมแปนซี" }, { word: "RHINOS", clue: "แรด" },
+                    { word: "CAMEL", clue: "อูฐ" }, { word: "TURTLE", clue: "เต่า" }, { word: "CROCODILE", clue: "จระเข้" },
+                    { word: "KANGAROO", clue: "จิงโจ้" }, { word: "OSTRICH", clue: "นกกระจอกเทศ" }, { word: "HIPPO", clue: "ฮิปโป" },
                 ],
-                easy: {
-                    size: 6, 
-                    targetWordCount: 8, 
-                    poolKey: 'easyWordsPool'
-                },
-                hard: {
-                    size: 10,
-                    targetWordCount: 10, 
-                    poolKey: 'hardWordsPool'
-                }
+                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' },
+                hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
             },
-            'fruits': { // NEW CATEGORY
+            'fruits': { 
                 name: 'ผลไม้ (Fruits)',
                 easyWordsPool: [
-                    { word: "APPLE", clue: "แอปเปิ้ล" },
-                    { word: "BANANA", clue: "กล้วย" },
-                    { word: "GRAPE", clue: "องุ่น" },
-                    { word: "PEAR", clue: "ลูกแพร์" },
-                    { word: "KIWI", clue: "กีวี่" },
-                    { word: "LIME", clue: "มะนาว" },
-                    { word: "FIG", clue: "มะเดื่อ" },
-                    { word: "BERRY", clue: "ผลเบอร์รี่" },
-                    { word: "MELON", clue: "แตงโม" },
-                    { word: "DATE", clue: "อินทผลัม" },
-                    { word: "PLUM", clue: "ลูกพลัม" },
-                    { word: "MANGO", clue: "มะม่วง" },
-                    { word: "PEACH", clue: "ลูกพีช" },
-                    { word: "CHERRY", clue: "เชอร์รี่" },
-                    { word: "GUAVA", clue: "ฝรั่ง" },
-                    { word: "SAGO", clue: "สาคู" },
-                    { word: "COCOA", clue: "เมล็ดโกโก้" },
-                    { word: "LEMON", clue: "มะนาวเหลือง" },
-                    { word: "MINT", clue: "สะระแหน่" },
-                    { word: "ORANGE", clue: "ส้ม" },
+                    { word: "APPLE", clue: "แอปเปิ้ล" }, { word: "BANANA", clue: "กล้วย" }, { word: "GRAPE", clue: "องุ่น" },
+                    { word: "PEAR", clue: "ลูกแพร์" }, { word: "KIWI", clue: "กีวี่" }, { word: "LIME", clue: "มะนาว" },
+                    { word: "FIG", clue: "มะเดื่อ" }, { word: "BERRY", clue: "ผลเบอร์รี่" }, { word: "MELON", clue: "แตงโม" },
+                    { word: "DATE", clue: "อินทผลัม" }, { word: "PLUM", clue: "ลูกพลัม" }, { word: "MANGO", clue: "มะม่วง" },
+                    { word: "PEACH", clue: "ลูกพีช" }, { word: "CHERRY", clue: "เชอร์รี่" }, { word: "GUAVA", clue: "ฝรั่ง" },
+                    { word: "SAGO", clue: "สาคู" }, { word: "COCOA", clue: "เมล็ดโกโก้" }, { word: "LEMON", clue: "มะนาวเหลือง" },
+                    { word: "MINT", clue: "สะระแหน่" }, { word: "ORANGE", clue: "ส้ม" },
                 ],
                 hardWordsPool: [
-                    { word: "PINEAPPLE", clue: "สับปะรด" },
-                    { word: "STRAWBERRY", clue: "สตรอว์เบอร์รี" },
-                    { word: "WATERMELON", clue: "แตงโมลูกใหญ่" },
-                    { word: "AVOCADO", clue: "อะโวคาโด" },
-                    { word: "BLUEBERRY", clue: "บลูเบอร์รี" },
-                    { word: "RASPBERRY", clue: "ราสเบอร์รี" },
-                    { word: "GRAPEFRUIT", clue: "ส้มโอฝรั่ง" },
-                    { word: "POMEGRANATE", clue: "ทับทิม" },
-                    { word: "TANGERINE", clue: "ส้มเขียวหวาน" },
-                    { word: "APRICOT", clue: "แอปริคอท" },
-                    { word: "COCONUT", clue: "มะพร้าว" },
-                    { word: "PAPAYA", clue: "มะละกอ" },
-                    { word: "DURIAN", clue: "ทุเรียน" },
-                    { word: "LYCHEE", clue: "ลิ้นจี่" },
-                    { word: "RAMBUTAN", clue: "เงาะ" },
-                    { word: "PASSIONFRUIT", clue: "เสาวรส" },
-                    { word: "CANTALOUPE", clue: "แคนตาลูป" },
-                    { word: "DRAGONFRUIT", clue: "แก้วมังกร" },
-                    { word: "STARFRUIT", clue: "มะเฟือง" },
-                    { word: "POMELO", clue: "ส้มโอ" },
+                    { word: "PINEAPPLE", clue: "สับปะรด" }, { word: "STRAWBERRY", clue: "สตรอว์เบอร์รี" }, { word: "WATERMELON", clue: "แตงโมลูกใหญ่" },
+                    { word: "AVOCADO", clue: "อะโวคาโด" }, { word: "BLUEBERRY", clue: "บลูเบอร์รี" }, { word: "RASPBERRY", clue: "ราสเบอร์รี" },
+                    { word: "GRAPEFRUIT", clue: "ส้มโอฝรั่ง" }, { word: "POMEGRANATE", clue: "ทับทิม" }, { word: "TANGERINE", clue: "ส้มเขียวหวาน" },
+                    { word: "APRICOT", clue: "แอปริคอท" }, { word: "COCONUT", clue: "มะพร้าว" }, { word: "PAPAYA", clue: "มะละกอ" },
+                    { word: "DURIAN", clue: "ทุเรียน" }, { word: "LYCHEE", clue: "ลิ้นจี่" }, { word: "RAMBUTAN", clue: "เงาะ" },
+                    { word: "PASSIONFRUIT", clue: "เสาวรส" }, { word: "CANTALOUPE", clue: "แคนตาลูป" }, { word: "DRAGONFRUIT", clue: "แก้วมังกร" },
+                    { word: "STARFRUIT", clue: "มะเฟือง" }, { word: "POMELO", clue: "ส้มโอ" },
                 ],
-                easy: {
-                    size: 6, 
-                    targetWordCount: 8, 
-                    poolKey: 'easyWordsPool'
-                },
-                hard: {
-                    size: 10,
-                    targetWordCount: 10, 
-                    poolKey: 'hardWordsPool'
-                }
-            }
+                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' },
+                hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
+            },
+            'countries': { 
+                name: 'ประเทศ (Countries)',
+                easyWordsPool: [
+                    { word: "USA", clue: "สหรัฐอเมริกา" }, { word: "UK", clue: "สหราชอาณาจักร" }, { word: "JAPAN", clue: "ญี่ปุ่น" },
+                    { word: "CHINA", clue: "จีน" }, { word: "INDIA", clue: "อินเดีย" }, { word: "THAI", clue: "ไทย" },
+                    { word: "KOREA", clue: "เกาหลี" }, { word: "ITALY", clue: "อิตาลี" }, { word: "SPAIN", clue: "สเปน" },
+                    { word: "PERU", clue: "เปรู" }, { word: "EGYPT", clue: "อียิปต์" }, { word: "CUBA", clue: "คิวบา" },
+                    { word: "BRAZIL", clue: "บราซิล" }, { word: "RUSSIA", clue: "รัสเซีย" }, { word: "CANADA", clue: "แคนาดา" },
+                    { word: "MEXICO", clue: "เม็กซิโก" }, { word: "GREECE", clue: "กรีซ" }, { word: "CHILE", clue: "ชิลี" },
+                    { word: "GERMANY", clue: "เยอรมนี" }, { word: "FRANCE", clue: "ฝรั่งเศส" },
+                ],
+                hardWordsPool: [
+                    { word: "INDONESIA", clue: "อินโดนีเซีย" }, { word: "ARGENTINA", clue: "อาร์เจนตินา" }, { word: "AUSTRALIA", clue: "ออสเตรเลีย" },
+                    { word: "NEWZEALAND", clue: "นิวซีแลนด์" }, { word: "SWITZERLAND", clue: "สวิตเซอร์แลนด์" }, { word: "PORTUGAL", clue: "โปรตุเกส" },
+                    { word: "PHILIPPINES", clue: "ฟิลิปปินส์" }, { word: "VIETNAM", clue: "เวียดนาม" }, { word: "MALAYSIA", clue: "มาเลเซีย" },
+                    { word: "SINGAPORE", clue: "สิงคโปร์" }, { word: "FINLAND", clue: "ฟินแลนด์" }, { word: "NETHERLANDS", clue: "เนเธอร์แลนด์" },
+                    { word: "COLOMBIA", clue: "โคลอมเบีย" }, { word: "SOUTHAFRICA", clue: "แอฟริกาใต้" }, { word: "SAUDIARABIA", clue: "ซาอุดีอาระเบีย" },
+                    { word: "BANGLADESH", clue: "บังกลาเทศ" }, { word: "MYANMAR", clue: "เมียนมา" }, { word: "BELGIUM", clue: "เบลเยียม" },
+                    { word: "PAKISTAN", clue: "ปากีสถาน" }, { word: "KENYA", clue: "เคนยา" },
+                ],
+                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' },
+                hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
+            },
+            'jobs': {
+                name: 'อาชีพ (Jobs)',
+                easyWordsPool: [
+                    { word: "CHEF", clue: "พ่อครัว" }, { word: "DOCTOR", clue: "แพทย์" }, { word: "NURSE", clue: "พยาบาล" },
+                    { word: "JUDGE", clue: "ผู้พิพากษา" }, { word: "LAWYER", clue: "ทนาย" }, { word: "PILOT", clue: "นักบิน" },
+                    { word: "GUARD", clue: "ยาม" }, { word: "SINGER", clue: "นักร้อง" }, { word: "CLERK", clue: "เสมียน" },
+                    { word: "FARMER", clue: "ชาวนา" }, { word: "POLICE", clue: "ตำรวจ" }, { word: "SOLDIER", clue: "ทหาร" },
+                    { word: "ARTIST", clue: "ศิลปิน" }, { word: "WRITER", clue: "นักเขียน" }, { word: "POSTMAN", clue: "บุรุษไปรษณีย์" },
+                    { word: "MONK", clue: "พระสงฆ์" }, { word: "PRIEST", clue: "บาทหลวง" }, { word: "DANCER", clue: "นักเต้น" },
+                    { word: "OWNER", clue: "เจ้าของ" }, { word: "AGENT", clue: "ตัวแทน" },
+                ],
+                hardWordsPool: [
+                    { word: "ENGINEER", clue: "วิศวกร" }, { word: "TEACHER", clue: "ครู/อาจารย์" }, { word: "PROGRAMMER", clue: "โปรแกรมเมอร์" },
+                    { word: "SCIENTIST", clue: "นักวิทยาศาสตร์" }, { word: "ASTRONAUT", clue: "นักบินอวกาศ" }, { word: "ARCHITECT", clue: "สถาปนิก" },
+                    { word: "FIREFIGHTER", clue: "นักดับเพลิง" }, { word: "JOURNALIST", clue: "นักข่าว" }, { word: "ELECTRICIAN", clue: "ช่างไฟฟ้า" },
+                    { word: "PLUMBER", clue: "ช่างประปา" }, { word: "LIBRARIAN", clue: "บรรณารักษ์" }, { word: "THERAPIST", clue: "นักบำบัด" },
+                    { word: "CONSULTANT", clue: "ที่ปรึกษา" }, { word: "ACCOUNTANT", clue: "นักบัญชี" }, { word: "PHOTOGRAPHER", clue: "ช่างภาพ" },
+                    { word: "RECEPTIONIST", clue: "พนักงานต้อนรับ" }, { word: "VETERINARIAN", clue: "สัตวแพทย์" }, { word: "BUSINESSMAN", clue: "นักธุรกิจ" },
+                    { word: "FLIGHTATTENDANT", clue: "พนักงานต้อนรับบนเครื่องบิน" }, { word: "HAIRDRESSER", clue: "ช่างทำผม" },
+                ],
+                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' },
+                hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
+            },
+            'colors': {
+                name: 'สี (Colors)',
+                easyWordsPool: [
+                    { word: "RED", clue: "สีแดง" }, { word: "BLUE", clue: "สีน้ำเงิน" }, { word: "GREEN", clue: "สีเขียว" },
+                    { word: "YELLOW", clue: "สีเหลือง" }, { word: "BLACK", clue: "สีดำ" }, { word: "WHITE", clue: "สีขาว" },
+                    { word: "GRAY", clue: "สีเทา" }, { word: "PINK", clue: "สีชมพู" }, { word: "BROWN", clue: "สีน้ำตาล" },
+                    { word: "GOLD", clue: "สีทอง" }, { word: "SILVER", clue: "สีเงิน" }, { word: "LIME", clue: "สีเขียวมะนาว" },
+                    { word: "TEAL", clue: "สีเขียวน้ำทะเล" }, { word: "AZURE", clue: "สีฟ้าคราม" }, { word: "CYAN", clue: "สีฟ้าอ่อน" },
+                    { word: "BEIGE", clue: "สีเบจ" }, { word: "IVORY", clue: "สีงาช้าง" }, { word: "RUST", clue: "สีสนิม" },
+                    { word: "NAVY", clue: "สีกรมท่า" }, { word: "MAROON", clue: "สีน้ำตาลแดง" },
+                ],
+                hardWordsPool: [
+                    { word: "PURPLE", clue: "สีม่วง" }, { word: "ORANGE", clue: "สีส้ม" }, { word: "MAGENTA", clue: "สีม่วงแดง" },
+                    { word: "VIOLET", clue: "สีม่วงอ่อน" }, { word: "TURQUOISE", clue: "สีเขียวขุ่น" }, { word: "CHARTREUSE", clue: "สีเขียวอ่อน" },
+                    { word: "CRIMSON", clue: "สีแดงเข้ม" }, { word: "INDIGO", clue: "สีคราม" }, { word: "AQUAMARINE", clue: "สีฟ้าอมเขียว" },
+                    { word: "BRONZE", clue: "สีบรอนซ์" }, { word: "OLIVE", clue: "สีเขียวมะกอก" }, { word: "LAVENDER", clue: "สีม่วงลาเวนเดอร์" },
+                    { word: "FUCHSIA", clue: "สีบานเย็น" }, { word: "SALMON", clue: "สีส้มปลาแซลมอน" }, { word: "PERIWINKLE", clue: "สีม่วงอ่อนอมฟ้า" },
+                    { word: "SAPPHIRE", clue: "สีน้ำเงินแซฟไฟร์" }, { word: "CHOCOLATE", clue: "สีช็อกโกแลต" }, { word: "CORNFLOWER", clue: "สีฟ้าอ่อน" },
+                    { word: "MUSTARD", clue: "สีเหลืองมัสตาร์ด" }, { word: "MAHOGANY", clue: "สีมะฮอกกานี" },
+                ],
+                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' },
+                hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
+            },
+            'sports': {
+                name: 'กีฬา (Sports)',
+                easyWordsPool: [
+                    { word: "RUN", clue: "วิ่ง" }, { word: "SWIM", clue: "ว่ายน้ำ" }, { word: "GOLF", clue: "กอล์ฟ" },
+                    { word: "HOCKEY", clue: "ฮอกกี้" }, { word: "BOXING", clue: "มวย" }, { word: "TENNIS", clue: "เทนนิส" },
+                    { word: "SKI", clue: "สกี" }, { word: "YOGA", clue: "โยคะ" }, { word: "RACE", clue: "การแข่งขัน" },
+                    { word: "BALL", clue: "ลูกบอล" }, { word: "GYM", clue: "โรงยิม" }, { word: "JUMP", clue: "กระโดด" },
+                    { word: "WRESTLE", clue: "มวยปล้ำ" }, { word: "FENCE", clue: "ฟันดาบ" }, { word: "SURF", clue: "โต้คลื่น" },
+                    { word: "PITCH", clue: "สนาม" }, { word: "COURT", clue: "สนาม" }, { word: "GOAL", clue: "ประตู" },
+                    { word: "CATCH", clue: "จับ" }, { word: "KICK", clue: "เตะ" },
+                ],
+                hardWordsPool: [
+                    { word: "FOOTBALL", clue: "ฟุตบอล" }, { word: "BASKETBALL", clue: "บาสเกตบอล" }, { word: "BADMINTON", clue: "แบดมินตัน" },
+                    { word: "VOLLEYBALL", clue: "วอลเลย์บอล" }, { word: "BASEBALL", clue: "เบสบอล" }, { word: "ATHLETICS", clue: "กรีฑา" },
+                    { word: "CYCLING", clue: "ปั่นจักรยาน" }, { word: "MARATHON", clue: "วิ่งมาราธอน" }, { word: "TRIATHLON", clue: "ไตรกีฬา" },
+                    { word: "SKATEBOARD", clue: "สเกตบอร์ด" }, { word: "SNOWBOARD", clue: "สโนว์บอร์ด" }, { word: "GYMNASTICS", clue: "ยิมนาสติก" },
+                    { word: "FISHING", clue: "ตกปลา" }, { word: "SAILING", clue: "แล่นเรือ" }, { word: "ARCHERY", clue: "ยิงธนู" },
+                    { word: "KARATE", clue: "คาราเต้" }, { word: "TAEKWONDO", clue: "เทควันโด" }, { word: "HUNTING", clue: "ล่าสัตว์" },
+                    { word: "BOULDERING", clue: "ปีนผา" }, { word: "PADDLEBOARD", clue: "ยืนพาย" },
+                ],
+                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' },
+                hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
+            },
+            'foods': {
+                name: 'อาหาร (Foods)',
+                easyWordsPool: [
+                    { word: "BREAD", clue: "ขนมปัง" }, { word: "RICE", clue: "ข้าว" }, { word: "FISH", clue: "ปลา" },
+                    { word: "MEAT", clue: "เนื้อ" }, { word: "EGG", clue: "ไข่" }, { word: "CAKE", clue: "เค้ก" },
+                    { word: "SOUP", clue: "ซุป" }, { word: "SALT", clue: "เกลือ" }, { word: "SUGAR", clue: "น้ำตาล" },
+                    { word: "CHEESE", clue: "เนยแข็ง" }, { word: "PASTA", clue: "พาสต้า" }, { word: "NOODLE", clue: "ก๋วยเตี๋ยว" },
+                    { word: "WATER", clue: "น้ำ" }, { word: "MILK", clue: "นม" }, { word: "COFFEE", clue: "กาแฟ" },
+                    { word: "TEA", clue: "ชา" }, { word: "PIZZA", clue: "พิซซ่า" }, { word: "BURGER", clue: "เบอร์เกอร์" },
+                    { word: "FRIES", clue: "เฟรนช์ฟรายส์" }, { word: "CANDY", clue: "ลูกอม" },
+                ],
+                hardWordsPool: [
+                    { word: "VEGETABLES", clue: "ผัก" }, { word: "CHOCOLATE", clue: "ช็อกโกแลต" }, { word: "SANDWICH", clue: "แซนด์วิช" },
+                    { word: "PANCAKE", clue: "แพนเค้ก" }, { word: "CORNFLAKES", clue: "คอร์นเฟลก" }, { word: "CROISSANT", clue: "ครัวซองต์" },
+                    { word: "ICE CREAM", clue: "ไอศกรีม" }, { word: "SPAGHETTI", clue: "สปาเก็ตตี้" }, { word: "LASAGNA", clue: "ลาซานญ่า" },
+                    { word: "MAYONNAISE", clue: "มายองเนส" }, { word: "KETCHUP", clue: "ซอสมะเขือเทศ" }, { word: "MUSTARD", clue: "มัสตาร์ด" },
+                    { word: "PEANUT", clue: "ถั่วลิสง" }, { word: "ALMOND", clue: "อัลมอนด์" }, { word: "OATMEAL", clue: "ข้าวโอ๊ต" },
+                    { word: "POPCORN", clue: "ข้าวโพดคั่ว" }, { word: "COCKTAIL", clue: "ค็อกเทล" }, { word: "SMOOTHIE", clue: "สมูทตี้" },
+                    { word: "SAUSAGE", clue: "ไส้กรอก" }, { word: "GRILLED", clue: "ย่าง" },
+                ],
+                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' },
+                hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
+            },
+            'vehicles': {
+                name: 'ยานพาหนะ (Vehicles)',
+                easyWordsPool: [
+                    { word: "CAR", clue: "รถยนต์" }, { word: "BUS", clue: "รถบัส" }, { word: "TAXI", clue: "รถแท็กซี่" },
+                    { word: "TRAIN", clue: "รถไฟ" }, { word: "BIKE", clue: "จักรยาน" }, { word: "BOAT", clue: "เรือ" },
+                    { word: "TRUCK", clue: "รถบรรทุก" }, { word: "VAN", clue: "รถตู้" }, { word: "JEEP", clue: "รถจี๊ป" },
+                    { word: "MOTO", clue: "มอเตอร์ไซค์" }, { word: "SCOOTER", clue: "สกู๊ตเตอร์" }, { word: "SHIP", clue: "เรือใหญ่" },
+                    { word: "YACHT", clue: "เรือยอชท์" }, { word: "PLANE", clue: "เครื่องบิน" }, { word: "JET", clue: "เครื่องบินเจ็ต" },
+                    { word: "WAGON", clue: "รถเกวียน" }, { word: "SLIDE", clue: "เลื่อน" }, { word: "TROLLEY", clue: "รถเข็น" },
+                    { word: "KAYAK", clue: "เรือคายัค" }, { word: "RAFT", clue: "แพ" },
+                ],
+                hardWordsPool: [
+                    { word: "HELICOPTER", clue: "เฮลิคอปเตอร์" }, { word: "SUBMARINE", clue: "เรือดำน้ำ" }, { word: "AEROPLANE", clue: "เครื่องบิน" },
+                    { word: "AMBULANCE", clue: "รถพยาบาล" }, { word: "CRUISE", clue: "เรือสำราญ" }, { word: "SPACESHIP", clue: "ยานอวกาศ" },
+                    { word: "LIMOUSINE", clue: "รถลิมูซีน" }, { word: "TRACTOR", clue: "รถแทรกเตอร์" }, { word: "FORKLIFT", clue: "รถยก" },
+                    { word: "BICYCLE", clue: "จักรยาน" }, { word: "SKATEBOARD", clue: "สเกตบอร์ด" }, { word: "SNOWMOBILE", clue: "รถสโนว์โมบิล" },
+                    { word: "FIRETRUCK", clue: "รถดับเพลิง" }, { word: "CONVERTIBLE", clue: "รถเปิดประทุน" }, { word: "HOTAIRBALLOON", clue: "บอลลูนลมร้อน" },
+                    { word: "DIRIGIBLE", clue: "เรือเหาะ" }, { word: "MONORAIL", clue: "รถไฟรางเดียว" }, { word: "CABLECAR", clue: "กระเช้าไฟฟ้า" },
+                    { word: "MOTORHOME", clue: "รถบ้าน" }, { word: "CRUISESHIP", clue: "เรือเดินสมุทร" },
+                ],
+                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' },
+                hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
+            },
         };
 
         // Pastel colors with 50% opacity (Hex with 80 transparency)
@@ -594,7 +672,7 @@
             isAutoplayMode = !isAutoplayMode;
             if (isAutoplayMode) {
                 gameTitleEl.classList.add('pulsing-title');
-                alert("โหมดเล่นอัตโนมัติ (Autoplay Mode) เปิดใช้งานแล้ว! เริ่มเกมเพื่อดูผล");
+                alert("โหมดเล่นอัตโนมัติ (Autoplay Mode) เปิดใช้งานแล้ว! เริ่มเกมเพื่อดูผล (ดับเบิลคลิกชื่อเกมอีกครั้งเพื่อปิด)");
             } else {
                 gameTitleEl.classList.remove('pulsing-title');
                 alert("โหมดเล่นอัตโนมัติ (Autoplay Mode) ปิดใช้งานแล้ว");
@@ -659,11 +737,11 @@
             // Disable manual interaction if autoplay is on
             if (isAutoplayMode) {
                 gridEl.style.pointerEvents = 'none'; 
-                // MODIFICATION 1: Start autoplay with a 1000ms (1 second) delay
+                // หน่วง 1 วินาที (1000ms) ก่อนเริ่มเฉลยคำแรก
                 autoSolveNextWord(1000); 
             } else {
                 gridEl.style.pointerEvents = 'auto'; 
-                clearTimeout(autoplayTimeout); // Clear any leftover autoplay timeout just in case
+                clearTimeout(autoplayTimeout); 
             }
             
             startTimer();
@@ -931,7 +1009,7 @@
         }
 
 
-        // --- AUTOPLAY CORE FUNCTION (MODIFIED) ---
+        // --- AUTOPLAY CORE FUNCTION (MODIFIED TIMING) ---
         function autoSolveWordAnimation(index) {
             const data = getWordCellsAndPlacement(index);
             if (!data) return;
@@ -946,24 +1024,18 @@
 
             // Step 2: Highlight the last letter, mark as found, and read English (1000ms delay)
             setTimeout(() => {
-                // Highlight the last cell
-                if (first !== last) { 
-                    last.classList.add('selected');
-                }
-                
-                // Highlight all cells
+                // Highlight the last cell and all in between
                 cells.forEach(cell => cell.classList.add('selected'));
 
                 // Mark as 'hintUsed' and 'found'
                 wordDetails.hintUsed = true; 
                 
-                // Use a modified version of markAsFound that skips checkWinCondition for now
-                // Also ensures English speaking happens now
+                // Mark as found (and speak English), avoiding immediate win check
                 markWordFoundForAutoplay(index, cells, wordDetails);
 
             }, 1000);
 
-            // Step 3: Read Thai clue/translation (1500ms delay: 1000ms + 500ms gap)
+            // Step 3: Read Thai clue/translation (2500ms delay)
             setTimeout(() => {
                 // Read the Thai clue
                 speakText(wordDetails.clue, 'th-TH'); 
@@ -974,10 +1046,10 @@
                 // Final check after the whole sequence finishes
                 checkWinCondition();
                 
-            }, 1500); 
-            
-            // Schedule the next word solution exactly 4 seconds after the START of this word's solution
-            autoSolveNextWord(4000);
+            }, 2500); // <-- UPDATED to 2.5s
+
+            // Schedule the next word solution exactly 4.5 seconds after the START of this word's solution
+            autoSolveNextWord(4500); // <-- UPDATED to 4.5s
         }
 
         // Helper for step 2 of Autoplay, avoiding immediate win check
@@ -1015,7 +1087,7 @@
         }
 
 
-        function autoSolveNextWord(delay = 4000) {
+        function autoSolveNextWord(delay = 4500) {
             clearTimeout(autoplayTimeout); // Clear any old pending timeout
             const nextIndex = targetWords.findIndex(w => !w.found);
             
@@ -1195,8 +1267,7 @@
                 // 1. Temporarily disable grid interaction to prevent clicks during pause
                 gridEl.style.pointerEvents = 'none'; 
                 
-                // 2. Set timeout for transition
-                // MODIFICATION 2: Delay summary screen by 1000ms (1 second)
+                // 2. หน่วง 1 วินาที (1000ms) ก่อนเข้าหน้าสรุปผล
                 setTimeout(() => {
                     gridEl.style.pointerEvents = 'auto'; 
                     showSummaryScreen();
