@@ -72,7 +72,21 @@
         header h1 {
             font-size: 1.8rem;
             margin: 0;
+            /* เพิ่ม cursor: pointer เพื่อสื่อสารว่าสามารถคลิกได้ */
+            cursor: pointer; 
         }
+
+        /* --- AUTOPLAY SECRET MODE CSS --- */
+        @keyframes slowPulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.03); opacity: 0.85; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .pulsing-title {
+            animation: slowPulse 2s ease-in-out infinite;
+        }
+        /* --- END AUTOPLAY SECRET MODE CSS --- */
+
 
         /* Status Bar & Timer */
         #status-bar {
@@ -292,7 +306,7 @@
 
     <div class="container">
         <header>
-            <h1>Word Search</h1>
+            <h1 id="game-title">Word Search</h1>
         </header>
 
         <div id="start-screen" class="screen active-screen">
@@ -415,7 +429,7 @@
     </script>
 
     <script>
-        // --- CONFIGURATION & DATA (Updated with 'Fruits' category) ---
+        // --- CONFIGURATION & DATA (Updated with all categories) ---
         const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         const WORD_CATEGORIES = {
             'animals': {
@@ -466,7 +480,7 @@
                 ],
                 easy: {
                     size: 6, 
-                    targetWordCount: 6, // แก้ไข: ลดเหลือ 6 คำ
+                    targetWordCount: 6, 
                     poolKey: 'easyWordsPool'
                 },
                 hard: {
@@ -523,7 +537,7 @@
                 ],
                 easy: {
                     size: 6, 
-                    targetWordCount: 6, // แก้ไข: ลดเหลือ 6 คำ
+                    targetWordCount: 6, 
                     poolKey: 'easyWordsPool'
                 },
                 hard: {
@@ -532,7 +546,6 @@
                     poolKey: 'hardWordsPool'
                 }
             },
-            // --- เพิ่มหมวดหมู่ "สี (Colors)" ใหม่ ---
             'colors': { 
                 name: 'สี (Colors)',
                 easyWordsPool: [
@@ -581,7 +594,7 @@
                 ],
                 easy: {
                     size: 6, 
-                    targetWordCount: 6, // แก้ไข: ลดเหลือ 6 คำ
+                    targetWordCount: 6, 
                     poolKey: 'easyWordsPool'
                 },
                 hard: {
@@ -590,7 +603,6 @@
                     poolKey: 'hardWordsPool'
                 }
             },
-            // --- เพิ่มหมวดหมู่ "อาหาร (Foods)" ใหม่ ---
             'foods': { 
                 name: 'อาหาร (Foods)',
                 easyWordsPool: [
@@ -639,7 +651,7 @@
                 ],
                 easy: {
                     size: 6, 
-                    targetWordCount: 6, // แก้ไข: ลดเหลือ 6 คำ
+                    targetWordCount: 6, 
                     poolKey: 'easyWordsPool'
                 },
                 hard: {
@@ -675,8 +687,10 @@
         let currentConfig = null;
         
         let timerInterval;
+        let autoplayTimeout; // ใช้สำหรับจัดการ setTimeout ของโหมด Autoplay
         let startTime;
         let totalTimeSeconds = 0;
+        let isAutoplayMode = false; // สถานะโหมดเล่นอัตโนมัติ
 
 
         // --- ELEMENTS ---
@@ -691,8 +705,23 @@
         const scoreEl = document.getElementById('score');
         const categoryTitleEl = document.getElementById('category-title');
         const timerDisplayEl = document.getElementById('timer-display');
+        const gameTitleEl = document.getElementById('game-title');
 
 
+        // --- AUTOPLAY TOGGLE LOGIC ---
+        function toggleAutoplayMode() {
+            isAutoplayMode = !isAutoplayMode;
+            if (isAutoplayMode) {
+                gameTitleEl.classList.add('pulsing-title');
+                alert("โหมดเล่นอัตโนมัติ (Autoplay Mode) เปิดใช้งานแล้ว! เริ่มเกมเพื่อดูผล");
+            } else {
+                gameTitleEl.classList.remove('pulsing-title');
+                alert("โหมดเล่นอัตโนมัติ (Autoplay Mode) ปิดใช้งานแล้ว");
+                // Clear any pending autoplay process if toggled off mid-game
+                clearTimeout(autoplayTimeout); 
+            }
+        }
+        
         // --- SCREEN MANAGEMENT ---
         function showScreen(id) {
             Object.values(screens).forEach(screen => {
@@ -743,11 +772,16 @@
             renderGrid();
             renderClues();
 
-            // 4. Setup UI and Start Timer
+            // 4. Setup UI and Start Timer/Autoplay
             categoryTitleEl.textContent = `หมวดหมู่: ${category.name} (${difficulty === 'easy' ? 'ง่าย 6x6' : 'ยาก 10x10'})`;
             
-            // Re-enable pointer events at the start of a new game
-            gridEl.style.pointerEvents = 'auto'; 
+            // Disable manual interaction if autoplay is on
+            if (isAutoplayMode) {
+                gridEl.style.pointerEvents = 'none'; 
+                autoSolveNextWord(100); // Start autoplay with a small delay for grid rendering
+            } else {
+                gridEl.style.pointerEvents = 'auto'; 
+            }
             
             startTimer();
             showScreen('game-screen');
@@ -763,6 +797,7 @@
 
         function stopTimer() {
             clearInterval(timerInterval);
+            clearTimeout(autoplayTimeout); // Clear Autoplay timer
             if (startTime) {
                 totalTimeSeconds = Math.floor((Date.now() - startTime) / 1000);
                 startTime = null; 
@@ -971,7 +1006,7 @@
             
             playSuccessTone();
             
-            // **FIX 1: Pronunciation Fix** - Convert to lowercase before speaking
+            // Speak the word
             speakText(wordDetails.word.toLowerCase(), 'en-US'); 
             
             checkWinCondition();
@@ -982,38 +1017,123 @@
             renderClues();
         }
 
-        // --- HINT/SOLVE SYSTEM ---
-        function solveWord(index) {
+        // Helper function to get word cell and placement data
+        function getWordCellsAndPlacement(index) {
             const wordDetails = targetWords[index];
-            if (wordDetails.found) return;
-
-            // 1. Mark as Hint Used
-            wordDetails.hintUsed = true;
-            
-            // 2. Find placement data for highlighting
             const wordToSolve = wordDetails.word;
             const placement = placedWordsMeta.find(meta => meta.word === wordToSolve);
 
             if (!placement) {
-                alert(`ขออภัย! คำว่า "${wordToSolve}" ไม่ถูกวางลงในตาราง (เกิดข้อผิดพลาดในการสร้างปริศนา)`);
-                return;
+                console.error(`Could not find placement for word: ${wordToSolve}`);
+                return null;
             }
             
-            // 3. Get cells and highlight
             const r1 = placement.start.r;
             const c1 = placement.start.c;
             const r2 = placement.end.r;
             const c2 = placement.end.c;
-            
             const cellsToHighlight = getCellsInLine(r1, c1, r2, c2);
+            
+            // Determine the first and last cells (guaranteed to be 0 and length-1 since getCellsInLine orders them)
+            const firstCell = cellsToHighlight[0];
+            const lastCell = cellsToHighlight[cellsToHighlight.length - 1];
+            
+            return {
+                wordDetails,
+                cells: cellsToHighlight,
+                first: firstCell,
+                last: lastCell
+            };
+        }
 
-            // Use markAsFound to handle coloring, scoring, and speaking
-            markAsFound(index, cellsToHighlight, wordDetails);
+
+        // --- AUTOPLAY CORE FUNCTION ---
+        function autoSolveWordAnimation(index) {
+            const data = getWordCellsAndPlacement(index);
+            if (!data) return;
+
+            const { wordDetails, cells, first, last } = data;
+            
+            // Ensure all cells are cleared from previous attempts or selections
+            cells.forEach(cell => cell.classList.remove('selected', 'wrong-flash'));
+            
+            // Step 1: Highlight the first letter (0ms)
+            first.classList.add('selected');
+
+            // Step 2: Highlight the last letter (1000ms delay)
+            setTimeout(() => {
+                if (first !== last) { // Avoid double-selection if word is 1 letter
+                    last.classList.add('selected');
+                }
+            }, 1000);
+
+            // Step 3: Complete the selection and mark as found (2000ms delay)
+            setTimeout(() => {
+                // Highlight all remaining cells (this makes the word appear selected)
+                cells.forEach(cell => cell.classList.add('selected'));
+
+                // Find the word again, mark as 'hintUsed' and 'found'
+                wordDetails.hintUsed = true; 
+                markAsFound(index, cells, wordDetails);
+                
+                // Clear the 'selected' class, leaving only the 'found' class and color
+                cells.forEach(cell => cell.classList.remove('selected'));
+                
+            }, 2000); // 2 seconds total for animation
+
+            // Schedule the next word solution exactly 4 seconds after the START of this word's solution
+            autoSolveNextWord(4000);
+        }
+
+        function autoSolveNextWord(delay = 4000) {
+            clearTimeout(autoplayTimeout); // Clear any old pending timeout
+            const nextIndex = targetWords.findIndex(w => !w.found);
+            
+            if (nextIndex !== -1) {
+                // Set the next word solution to happen after the specified delay
+                autoplayTimeout = setTimeout(() => {
+                    // Check if mode is still active before running
+                    if (isAutoplayMode) { 
+                        autoSolveWordAnimation(nextIndex);
+                    }
+                }, delay);
+            } else {
+                // All words found, let checkWinCondition handle the final transition
+            }
+        }
+
+
+        // --- HINT/SOLVE SYSTEM (MANUAL) ---
+        function solveWord(index) {
+            const wordDetails = targetWords[index];
+            if (wordDetails.found) return;
+
+            // ป้องกันการใช้ตัวช่วยเมื่ออยู่ในโหมดอัตโนมัติ
+            if (isAutoplayMode) {
+                alert("โหมดเล่นอัตโนมัติทำงานอยู่! กรุณาปิดโหมดอัตโนมัติก่อนใช้ตัวช่วย");
+                return;
+            }
+
+            // Standard single-click hint mechanism
+            wordDetails.hintUsed = true;
+            
+            const data = getWordCellsAndPlacement(index);
+            if (!data) {
+                alert(`ขออภัย! คำว่า "${wordDetails.word}" ไม่ถูกวางลงในตาราง (เกิดข้อผิดพลาดในการสร้างปริศนา)`);
+                return;
+            }
+            
+            // Highlight all cells instantly for manual hint
+            data.cells.forEach(cell => cell.classList.add('selected'));
+            markAsFound(index, data.cells, wordDetails);
+            data.cells.forEach(cell => cell.classList.remove('selected'));
         }
 
 
         // --- CLICK SELECTION HANDLER (START/END) ---
         function onCellClick(e) {
+            if (isAutoplayMode) return; // Ignore clicks in autoplay mode
+
             const cell = e.target;
             
             if (!cell.classList.contains('grid-cell')) return; 
@@ -1139,7 +1259,8 @@
             scoreEl.textContent = `คำศัพท์ที่พบ: ${foundCount}/${targetWords.length}`;
             
             if (foundCount === targetWords.length) {
-                // Game Over - Add 1 second delay
+                // Game Over - Stop Autoplay and Add 1 second delay
+                clearTimeout(autoplayTimeout);
                 
                 // 1. Temporarily disable grid interaction to prevent clicks during pause
                 gridEl.style.pointerEvents = 'none'; 
@@ -1178,6 +1299,7 @@
         // --- INITIALIZATION & EVENT LISTENERS ---
         function init() {
             attachGridListeners(); 
+            gameTitleEl.addEventListener('dblclick', toggleAutoplayMode); // Attach dblclick listener
             showScreen('start-screen');
         }
         
