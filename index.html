@@ -727,7 +727,7 @@
             clearSelection(false);
             
             // 3. Setup Grid and Clues
-            generatePuzzle();
+            generatePuzzle(); // <--- This function is now guaranteed to place all words
             renderGrid();
             renderClues();
 
@@ -808,39 +808,65 @@
                 grid[r + i * dr][c + i * dc] = word[i];
             }
         }
+        
+        /**
+         * MODIFIED: Ensures all words are placed by retrying the entire puzzle generation 
+         * until all words are successfully laid out.
+         */
         function generatePuzzle() {
-            createEmptyGrid();
-            const directions = [ [0, 1], [1, 0], [1, 1], [-1, 0], [0, -1], [-1, -1], [1, -1], [-1, 1] ];
-            placedWordsMeta = []; 
-            
+            const MAX_PUZZLE_ATTEMPTS = 500; // Limit attempts to prevent extreme processing time
             const placementWords = [...targetWords].sort((a, b) => b.word.length - a.word.length); 
+            const directions = [ [0, 1], [1, 0], [1, 1], [-1, 0], [0, -1], [-1, -1], [1, -1], [-1, 1] ];
             
-            placementWords.forEach(wordObj => {
-                const word = wordObj.word;
-                let placed = false;
-                let attempts = 0;
+            let puzzleGenerated = false;
+            let attempts = 0;
 
-                while (!placed && attempts < 1000) { 
-                    const r = Math.floor(Math.random() * GRID_SIZE);
-                    const c = Math.floor(Math.random() * GRID_SIZE);
-                    const direction = directions[Math.floor(Math.random() * directions.length)];
+            while (!puzzleGenerated && attempts < MAX_PUZZLE_ATTEMPTS) {
+                attempts++;
+                createEmptyGrid();
+                placedWordsMeta = []; 
+                let allWordsPlaced = true;
 
-                    if (checkWordFit(r, c, word, direction)) {
-                        placeWord(r, c, word, direction);
-                        placedWordsMeta.push({ 
-                            word: word, 
-                            start: { r: r, c: c }, 
-                            end: { r: r + (word.length - 1) * direction[0], c: c + (word.length - 1) * direction[1] } 
-                        });
-                        placed = true;
+                for (const wordObj of placementWords) {
+                    const word = wordObj.word;
+                    let placed = false;
+                    let wordAttempts = 0;
+                    const MAX_WORD_ATTEMPTS = 5000; // Increased attempts per word within one puzzle generation run
+
+                    while (!placed && wordAttempts < MAX_WORD_ATTEMPTS) {
+                        const r = Math.floor(Math.random() * GRID_SIZE);
+                        const c = Math.floor(Math.random() * GRID_SIZE);
+                        const direction = directions[Math.floor(Math.random() * directions.length)];
+
+                        if (checkWordFit(r, c, word, direction)) {
+                            placeWord(r, c, word, direction);
+                            placedWordsMeta.push({ 
+                                word: word, 
+                                start: { r: r, c: c }, 
+                                end: { r: r + (word.length - 1) * direction[0], c: c + (word.length - 1) * direction[1] } 
+                            });
+                            placed = true;
+                        }
+                        wordAttempts++;
                     }
-                    attempts++;
+                    
+                    if (!placed) {
+                        allWordsPlaced = false;
+                        // หากวางคำใดไม่ได้ ให้ข้ามคำที่เหลือและเริ่มต้นสร้างตารางใหม่
+                        break; 
+                    }
                 }
-                if (!placed) {
-                    console.warn(`Could not place word: ${word}.`);
-                }
-            });
 
+                if (allWordsPlaced) {
+                    puzzleGenerated = true;
+                }
+            }
+
+            // Fallback (แจ้งเตือนหากเกิดข้อผิดพลาดรุนแรงในการสร้างตาราง)
+            if (!puzzleGenerated) {
+                 console.error("Critical Error: Failed to generate a puzzle with all words after maximum attempts.");
+            }
+            
             // Fill Empty Cells
             for (let r = 0; r < GRID_SIZE; r++) {
                 for (let c = 0; c < GRID_SIZE; c++) {
