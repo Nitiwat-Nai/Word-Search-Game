@@ -430,7 +430,7 @@
     </script>
 
     <script>
-        // --- CONFIGURATION & DATA (Updated with 8 Categories) ---
+        // --- CONFIGURATION & DATA (Updated with 8 Categories - NO WORD DATA MODIFICATION) ---
         const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         const WORD_CATEGORIES = {
             'animals': {
@@ -758,7 +758,7 @@
 
         function stopTimer() {
             clearInterval(timerInterval);
-            clearTimeout(autoplayTimeout); 
+            // Don't clear autoplayTimeout here, it needs to run its course for the last word
             if (startTime) {
                 totalTimeSeconds = Math.floor((Date.now() - startTime) / 1000);
                 startTime = null; 
@@ -1000,6 +1000,7 @@
             // Speak the English word for manual marking
             speakText(wordDetails.word.toLowerCase(), 'en-US'); 
             
+            // ONLY check win condition after manual mark
             checkWinCondition();
             
             selectedCells = [];
@@ -1019,37 +1020,34 @@
             // Ensure all cells are cleared from previous attempts or selections
             cells.forEach(cell => cell.classList.remove('selected', 'wrong-flash'));
             
-            // Step 1: Highlight the first letter (0ms)
+            // 0.0s: Step 1: Highlight the first letter
             first.classList.add('selected');
 
-            // Step 2: Highlight the last letter, mark as found, and read English (1000ms delay)
+            // 1.0s: Step 2: Highlight the word, mark as found, and read English
             setTimeout(() => {
-                // Highlight the last cell and all in between
+                // Highlight the whole word
                 cells.forEach(cell => cell.classList.add('selected'));
 
                 // Mark as 'hintUsed' and 'found'
                 wordDetails.hintUsed = true; 
                 
-                // Mark as found (and speak English), avoiding immediate win check
+                // Mark as found (and speak English), AVOIDING IMMEDIATE WIN CHECK HERE
                 markWordFoundForAutoplay(index, cells, wordDetails);
 
-            }, 1000);
+            }, 1000); // <-- 1.0s Mark
 
-            // Step 3: Read Thai clue/translation (2500ms delay)
+            // 2.5s: Step 3: Read Thai clue/translation and clear selection
             setTimeout(() => {
                 // Read the Thai clue
                 speakText(wordDetails.clue, 'th-TH'); 
 
-                // Clear the 'selected' class after the sequence is complete
+                // Clear the 'selected' class after the visual part of the sequence is complete
                 cells.forEach(cell => cell.classList.remove('selected'));
-                
-                // Final check after the whole sequence finishes
-                checkWinCondition();
-                
-            }, 2500); // <-- UPDATED to 2.5s
 
-            // Schedule the next word solution exactly 4.5 seconds after the START of this word's solution
-            autoSolveNextWord(4500); // <-- UPDATED to 4.5s
+            }, 2500); // <-- 2.5s Mark
+
+            // Schedule the next action (Next Word or Win Check) exactly 4.5 seconds after the START of this word's solution
+            autoSolveNextWord(4500); // <-- 4.5s Mark
         }
 
         // Helper for step 2 of Autoplay, avoiding immediate win check
@@ -1100,7 +1098,15 @@
                     }
                 }, delay);
             } else {
-                // All words found, let checkWinCondition handle the final transition
+                // All words found (this is triggered 4.5s after the last word started)
+                
+                // Now, trigger the end-game check, which will handle the final 1s delay
+                // The grid is still disabled from startGame()
+                autoplayTimeout = setTimeout(() => {
+                     // Re-enable grid interaction temporarily for the final 1s delay logic in checkWinCondition
+                     gridEl.style.pointerEvents = 'auto'; 
+                     checkWinCondition(); // This will trigger the final 1000ms delay before summary
+                }, delay);
             }
         }
 
@@ -1253,21 +1259,28 @@
                     li.addEventListener('click', () => solveWord(index));
                 }
             });
-            checkWinCondition(); 
+            // Update score display on every render
+            const foundCount = targetWords.filter(w => w.found).length;
+            scoreEl.textContent = `คำศัพท์ที่พบ: ${foundCount}/${targetWords.length}`;
+            
+            // In manual mode, check win condition here, but Autoplay handles it in autoSolveNextWord
+            if (!isAutoplayMode) {
+                 checkWinCondition();
+            }
         }
         
         function checkWinCondition() {
             const foundCount = targetWords.filter(w => w.found).length;
-            scoreEl.textContent = `คำศัพท์ที่พบ: ${foundCount}/${targetWords.length}`;
             
             if (foundCount === targetWords.length) {
-                // Game Over - Stop Autoplay
-                clearTimeout(autoplayTimeout);
+                // Game Over - Stop Timer and Autoplay
+                stopTimer();
+                clearTimeout(autoplayTimeout); 
                 
-                // 1. Temporarily disable grid interaction to prevent clicks during pause
+                // 1. Temporarily disable grid interaction
                 gridEl.style.pointerEvents = 'none'; 
                 
-                // 2. หน่วง 1 วินาที (1000ms) ก่อนเข้าหน้าสรุปผล
+                // 2. หน่วง 1 วินาที (1000ms) ก่อนเข้าหน้าสรุปผล (ตามคำขอ)
                 setTimeout(() => {
                     gridEl.style.pointerEvents = 'auto'; 
                     showSummaryScreen();
@@ -1276,7 +1289,7 @@
         }
         
         function showSummaryScreen() {
-            stopTimer(); 
+            // Timer already stopped by checkWinCondition
             showScreen('summary-screen');
 
             const timeString = formatTime(totalTimeSeconds);
