@@ -59,6 +59,7 @@
             flex-direction: column;
             justify-content: flex-start;
             padding: 0;
+            position: relative; /* สำหรับ Notification */
         }
 
         /* Header */
@@ -72,7 +73,6 @@
         header h1 {
             font-size: 1.8rem;
             margin: 0;
-            /* เพิ่ม cursor: pointer เพื่อรองรับ dblclick */
             cursor: pointer; 
         }
 
@@ -86,6 +86,31 @@
             animation: slowPulse 2s ease-in-out infinite;
         }
         /* --- END AUTOPLAY SECRET MODE CSS --- */
+        
+        /* --- Notification Bar Style --- */
+        #autoplay-notification {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            background-color: #FFEB3B; /* Yellowish background */
+            color: var(--color-text-dark);
+            font-weight: bold;
+            padding: 8px 10px;
+            box-sizing: border-box;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s, transform 0.3s;
+            transform: translateY(-100%);
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        #autoplay-notification.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        /* --- End Notification Style --- */
 
 
         /* Status Bar & Timer */
@@ -307,8 +332,11 @@
 <body>
 
     <div class="container">
+        <div id="autoplay-notification"></div>
+
         <header>
-            <h1 id="game-title">Word Search</h1> </header>
+            <h1 id="game-title">Word Search</h1>
+        </header>
 
         <div id="start-screen" class="screen active-screen">
             <h2 style="color: var(--color-primary); margin-bottom: 0;">ยินดีต้อนรับสู่เกม Word Search! 🔍</h2>
@@ -330,12 +358,10 @@
         <div id="difficulty-screen" class="screen">
             <h2 id="difficulty-category-title">หมวดหมู่: สัตว์ป่า</h2>
             <h3>เลือกระดับความยาก</h3>
-            <button class="main-btn difficulty-btn" data-difficulty="easy">
-                ง่าย (6x6, 8 คำ, สุ่มจาก 20 คำ)
-            </button>
-            <button class="main-btn difficulty-btn" data-difficulty="hard">
-                ยาก (10x10, 10 คำ, สุ่มจาก 20 คำ)
-            </button>
+            <button class="main-btn difficulty-btn" data-difficulty="easy" id="diff-easy">
+                </button>
+            <button class="main-btn difficulty-btn" data-difficulty="hard" id="diff-hard">
+                </button>
         </div>
 
         <div id="game-screen" class="screen">
@@ -393,7 +419,6 @@
             }
         }
         function getVoice(lang) {
-             // Search for voice matching the requested language
              return voices.find(v => v.lang.startsWith(lang)) || voices.find(v => v.lang.startsWith(lang.substring(0, 2))) || null;
         }
         function speakText(text, lang) {
@@ -401,10 +426,8 @@
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = lang;
-            // Use a slightly slower rate for better English word recognition
             utterance.rate = (lang === 'en-US') ? 0.75 : 0.9; 
             utterance.volume = 1;
-            // FIX: Search for voice matching the requested language
             const targetVoice = getVoice(lang); 
             if (targetVoice) utterance.voice = targetVoice;
             window.speechSynthesis.speak(utterance);
@@ -430,7 +453,8 @@
     </script>
 
     <script>
-        // --- CONFIGURATION & DATA (Updated with 8 Categories - NO WORD DATA MODIFICATION) ---
+        // --- CONFIGURATION & DATA (8 Categories) ---
+        // KEEPING THIS DATA AS IT WAS CORRECTLY PROVIDED IN THE LAST FULL RESPONSE
         const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         const WORD_CATEGORIES = {
             'animals': {
@@ -623,16 +647,8 @@
 
         // Pastel colors with 50% opacity (Hex with 80 transparency)
         const PASTEL_COLORS = [
-            '#FFC0CB80', // Pink
-            '#ADD8E680', // Light Blue
-            '#90EE9080', // Light Green
-            '#F0808080', // Light Coral
-            '#DDA0DD80', // Plum
-            '#B0E0E680', // Powder Blue
-            '#F5DEB380', // Wheat
-            '#AFEEEE80', // Pale Turquoise
-            '#E6E6FA80', // Lavender
-            '#FFE4B580'  // Moccasin
+            '#FFC0CB80', '#ADD8E680', '#90EE9080', '#F0808080', '#DDA0DD80', 
+            '#B0E0E680', '#F5DEB380', '#AFEEEE80', '#E6E6FA80', '#FFE4B580'
         ];
 
 
@@ -640,7 +656,7 @@
         let GRID_SIZE = 10;
         let targetWords = [];
         let grid = [];
-        let placedWordsMeta = []; // Stores start/end coordinates of placed words
+        let placedWordsMeta = [];
         let startCell = null; 
         let selectedCells = []; 
         let currentConfig = null;
@@ -650,6 +666,10 @@
         let startTime;
         let totalTimeSeconds = 0;
         let isAutoplayMode = false; 
+        
+        // ADDED: For stable double tap detection on mobile
+        let lastTap = 0;
+        const DBL_TAP_THRESHOLD = 300; // 300ms is standard for double tap
 
 
         // --- ELEMENTS ---
@@ -664,7 +684,47 @@
         const scoreEl = document.getElementById('score');
         const categoryTitleEl = document.getElementById('category-title');
         const timerDisplayEl = document.getElementById('timer-display');
-        const gameTitleEl = document.getElementById('game-title'); 
+        const gameTitleEl = document.getElementById('game-title');
+        const diffEasyBtn = document.getElementById('diff-easy');
+        const diffHardBtn = document.getElementById('diff-hard');
+        const notifEl = document.getElementById('autoplay-notification');
+
+
+        // --- UTILITY FUNCTIONS ---
+
+        // ADDED: Show temporary notification instead of alert
+        function showNotification(message) {
+            notifEl.textContent = message;
+            notifEl.classList.add('show');
+            setTimeout(() => {
+                notifEl.classList.remove('show');
+            }, 3000); // Hide after 3 seconds
+        }
+
+        // ADDED: Custom tap handler for mobile double-tap detection
+        function handleTitleTap() {
+            const now = Date.now();
+            if (now - lastTap < DBL_TAP_THRESHOLD) {
+                // Double tap detected
+                toggleAutoplayMode();
+                lastTap = 0; // Reset
+            } else {
+                lastTap = now;
+            }
+        }
+
+        // ADDED: Dynamic difficulty button text rendering
+        function updateDifficultyButtons(categoryId) {
+            const category = WORD_CATEGORIES[categoryId];
+            
+            const easyConfig = category.easy;
+            diffEasyBtn.textContent = `ง่าย (${easyConfig.size}x${easyConfig.size}, ${easyConfig.targetWordCount} คำ, สุ่มจาก ${category[easyConfig.poolKey].length} คำ)`;
+            diffEasyBtn.dataset.categoryId = categoryId;
+
+            const hardConfig = category.hard;
+            diffHardBtn.textContent = `ยาก (${hardConfig.size}x${hardConfig.size}, ${hardConfig.targetWordCount} คำ, สุ่มจาก ${category[hardConfig.poolKey].length} คำ)`;
+            diffHardBtn.dataset.categoryId = categoryId;
+        }
 
 
         // --- AUTOPLAY TOGGLE LOGIC ---
@@ -672,11 +732,10 @@
             isAutoplayMode = !isAutoplayMode;
             if (isAutoplayMode) {
                 gameTitleEl.classList.add('pulsing-title');
-                alert("โหมดเล่นอัตโนมัติ (Autoplay Mode) เปิดใช้งานแล้ว! เริ่มเกมเพื่อดูผล (ดับเบิลคลิกชื่อเกมอีกครั้งเพื่อปิด)");
+                showNotification("โหมดเล่นอัตโนมัติ (Autoplay Mode) เปิดใช้งานแล้ว! (ดับเบิลแท็บชื่อเกมเพื่อปิด)");
             } else {
                 gameTitleEl.classList.remove('pulsing-title');
-                alert("โหมดเล่นอัตโนมัติ (Autoplay Mode) ปิดใช้งานแล้ว");
-                // Clear any pending autoplay process if toggled off mid-game
+                showNotification("โหมดเล่นอัตโนมัติ (Autoplay Mode) ปิดใช้งานแล้ว");
                 clearTimeout(autoplayTimeout); 
             }
         }
@@ -698,9 +757,7 @@
         function selectCategory(categoryId) {
             const category = WORD_CATEGORIES[categoryId];
             document.getElementById('difficulty-category-title').textContent = `หมวดหมู่: ${category.name}`;
-            document.querySelectorAll('#difficulty-screen .difficulty-btn').forEach(btn => {
-                btn.dataset.categoryId = categoryId;
-            });
+            updateDifficultyButtons(categoryId); // NEW
             showScreen('difficulty-screen');
         }
 
@@ -727,17 +784,15 @@
             clearSelection(false);
             
             // 3. Setup Grid and Clues
-            generatePuzzle(); // <--- This function is now guaranteed to place all words
+            generatePuzzle(); 
             renderGrid();
             renderClues();
 
             // 4. Setup UI and Start Timer/Autoplay
             categoryTitleEl.textContent = `หมวดหมู่: ${category.name} (${difficulty === 'easy' ? 'ง่าย 6x6' : 'ยาก 10x10'})`;
             
-            // Disable manual interaction if autoplay is on
             if (isAutoplayMode) {
                 gridEl.style.pointerEvents = 'none'; 
-                // หน่วง 1 วินาที (1000ms) ก่อนเริ่มเฉลยคำแรก
                 autoSolveNextWord(1000); 
             } else {
                 gridEl.style.pointerEvents = 'auto'; 
@@ -758,7 +813,6 @@
 
         function stopTimer() {
             clearInterval(timerInterval);
-            // Don't clear autoplayTimeout here, it needs to run its course for the last word
             if (startTime) {
                 totalTimeSeconds = Math.floor((Date.now() - startTime) / 1000);
                 startTime = null; 
@@ -809,12 +863,9 @@
             }
         }
         
-        /**
-         * MODIFIED: Ensures all words are placed by retrying the entire puzzle generation 
-         * until all words are successfully laid out.
-         */
+        // MODIFIED: Guaranteed Placement
         function generatePuzzle() {
-            const MAX_PUZZLE_ATTEMPTS = 500; // Limit attempts to prevent extreme processing time
+            const MAX_PUZZLE_ATTEMPTS = 500; 
             const placementWords = [...targetWords].sort((a, b) => b.word.length - a.word.length); 
             const directions = [ [0, 1], [1, 0], [1, 1], [-1, 0], [0, -1], [-1, -1], [1, -1], [-1, 1] ];
             
@@ -831,7 +882,7 @@
                     const word = wordObj.word;
                     let placed = false;
                     let wordAttempts = 0;
-                    const MAX_WORD_ATTEMPTS = 5000; // Increased attempts per word within one puzzle generation run
+                    const MAX_WORD_ATTEMPTS = 5000; 
 
                     while (!placed && wordAttempts < MAX_WORD_ATTEMPTS) {
                         const r = Math.floor(Math.random() * GRID_SIZE);
@@ -852,7 +903,6 @@
                     
                     if (!placed) {
                         allWordsPlaced = false;
-                        // หากวางคำใดไม่ได้ ให้ข้ามคำที่เหลือและเริ่มต้นสร้างตารางใหม่
                         break; 
                     }
                 }
@@ -862,7 +912,6 @@
                 }
             }
 
-            // Fallback (แจ้งเตือนหากเกิดข้อผิดพลาดรุนแรงในการสร้างตาราง)
             if (!puzzleGenerated) {
                  console.error("Critical Error: Failed to generate a puzzle with all words after maximum attempts.");
             }
@@ -911,7 +960,6 @@
             return cells;
         }
 
-        // Helper function to get word cell and placement data
         function getWordCellsAndPlacement(index) {
             const wordDetails = targetWords[index];
             const wordToSolve = wordDetails.word;
@@ -928,9 +976,8 @@
             const c2 = placement.end.c;
             const cellsToHighlight = getCellsInLine(r1, c1, r2, c2);
             
-            // Determine the first cell and the last cell
             const firstCell = cellsToHighlight[0];
-            const lastCell = cellsToHighlight[cellsToHighlight.length - 1]; // Guaranteed last cell
+            const lastCell = cellsToHighlight[cellsToHighlight.length - 1]; 
             
             return {
                 wordDetails,
@@ -1023,10 +1070,8 @@
             
             playSuccessTone();
             
-            // Speak the English word for manual marking
             speakText(wordDetails.word.toLowerCase(), 'en-US'); 
             
-            // ONLY check win condition after manual mark
             checkWinCondition();
             
             selectedCells = [];
@@ -1036,14 +1081,13 @@
         }
 
 
-        // --- AUTOPLAY CORE FUNCTION (MODIFIED TIMING) ---
+        // --- AUTOPLAY CORE FUNCTION ---
         function autoSolveWordAnimation(index) {
             const data = getWordCellsAndPlacement(index);
             if (!data) return;
 
             const { wordDetails, cells, first, last } = data;
             
-            // Ensure all cells are cleared from previous attempts or selections
             cells.forEach(cell => cell.classList.remove('selected', 'wrong-flash'));
             
             // 0.0s: Step 1: Highlight the first letter
@@ -1051,32 +1095,22 @@
 
             // 1.0s: Step 2: Highlight the word, mark as found, and read English
             setTimeout(() => {
-                // Highlight the whole word
                 cells.forEach(cell => cell.classList.add('selected'));
-
-                // Mark as 'hintUsed' and 'found'
                 wordDetails.hintUsed = true; 
-                
-                // Mark as found (and speak English), AVOIDING IMMEDIATE WIN CHECK HERE
                 markWordFoundForAutoplay(index, cells, wordDetails);
 
-            }, 1000); // <-- 1.0s Mark
+            }, 1000);
 
             // 2.5s: Step 3: Read Thai clue/translation and clear selection
             setTimeout(() => {
-                // Read the Thai clue
                 speakText(wordDetails.clue, 'th-TH'); 
-
-                // Clear the 'selected' class after the visual part of the sequence is complete
                 cells.forEach(cell => cell.classList.remove('selected'));
-
-            }, 2500); // <-- 2.5s Mark
+            }, 2500); 
 
             // Schedule the next action (Next Word or Win Check) exactly 4.5 seconds after the START of this word's solution
-            autoSolveNextWord(4500); // <-- 4.5s Mark
+            autoSolveNextWord(4500); 
         }
 
-        // Helper for step 2 of Autoplay, avoiding immediate win check
         function markWordFoundForAutoplay(index, cells, wordDetails) {
             const foundWordsCountBefore = targetWords.filter(w => w.found).length;
             
@@ -1104,34 +1138,27 @@
             }
             playSuccessTone();
             
-            // Speak the English word now (1.0s mark)
             speakText(wordDetails.word.toLowerCase(), 'en-US'); 
             
-            renderClues(); // Update clue list UI
+            renderClues(); 
         }
 
 
         function autoSolveNextWord(delay = 4500) {
-            clearTimeout(autoplayTimeout); // Clear any old pending timeout
+            clearTimeout(autoplayTimeout); 
             const nextIndex = targetWords.findIndex(w => !w.found);
             
             if (nextIndex !== -1) {
-                // Set the next word solution to happen after the specified delay
                 autoplayTimeout = setTimeout(() => {
-                    // Check if mode is still active before running
                     if (isAutoplayMode) { 
                         autoSolveWordAnimation(nextIndex);
                     }
                 }, delay);
             } else {
-                // All words found (this is triggered 4.5s after the last word started)
-                
-                // Now, trigger the end-game check, which will handle the final 1s delay
-                // The grid is still disabled from startGame()
+                // All words found (runs 4.5s after the last word started)
                 autoplayTimeout = setTimeout(() => {
-                     // Re-enable grid interaction temporarily for the final 1s delay logic in checkWinCondition
                      gridEl.style.pointerEvents = 'auto'; 
-                     checkWinCondition(); // This will trigger the final 1000ms delay before summary
+                     checkWinCondition(); 
                 }, delay);
             }
         }
@@ -1142,22 +1169,19 @@
             const wordDetails = targetWords[index];
             if (wordDetails.found) return;
             
-            // Block manual hint if autoplay is on
             if (isAutoplayMode) {
-                alert("โหมดเล่นอัตโนมัติทำงานอยู่! กรุณาปิดโหมดอัตโนมัติก่อนใช้ตัวช่วย");
+                showNotification("โหมดอัตโนมัติทำงานอยู่! กรุณาปิดก่อนใช้ตัวช่วย");
                 return;
             }
 
-            // Standard single-click hint mechanism
             wordDetails.hintUsed = true;
             
             const data = getWordCellsAndPlacement(index);
             if (!data) {
-                alert(`ขออภัย! คำว่า "${wordDetails.word}" ไม่ถูกวางลงในตาราง (เกิดข้อผิดพลาดในการสร้างปริศนา)`);
+                showNotification(`ขออภัย! คำว่า "${wordDetails.word}" ไม่อยู่ในตาราง`);
                 return;
             }
             
-            // Highlight all cells instantly for manual hint
             data.cells.forEach(cell => cell.classList.add('selected'));
             markAsFound(index, data.cells, wordDetails);
             data.cells.forEach(cell => cell.classList.remove('selected'));
@@ -1166,20 +1190,18 @@
 
         // --- CLICK SELECTION HANDLER (START/END) ---
         function onCellClick(e) {
-            if (isAutoplayMode) return; // Ignore clicks in autoplay mode
+            if (isAutoplayMode) return; 
 
             const cell = e.target;
             
             if (!cell.classList.contains('grid-cell')) return; 
 
             if (startCell === null) {
-                // First click: Set Start Cell
                 clearSelection(false); 
                 startCell = cell;
                 startCell.classList.add('selected');
                 selectedCells = [startCell];
             } else {
-                // Second click: Set End Cell, Check Line, and Auto-Check Word
                 const endCell = cell; 
                 
                 if (startCell === endCell) {
@@ -1197,15 +1219,12 @@
                 const isDiagonal = Math.abs(r1 - r2) === Math.abs(c1 - c2);
 
                 if (isHorizontal || isVertical || isDiagonal) {
-                    // Valid Line: Highlight the full path
                     selectedCells.forEach(c => c.classList.remove('selected'));
                     selectedCells = getCellsInLine(r1, c1, r2, c2);
                     selectedCells.forEach(c => c.classList.add('selected'));
                     
-                    // Auto-check the word
                     handleWordCheck();
                 } else {
-                    // Invalid Line: Flash the start and end cell, then clear
                     selectedCells.forEach(c => c.classList.remove('selected'));
                     startCell.classList.add('selected');
                     endCell.classList.add('selected');
@@ -1218,7 +1237,6 @@
         }
         
         function attachGridListeners() {
-            // Attach listener only once globally
             if (!gridEl.dataset.listenersAttached) {
                 gridEl.addEventListener('click', onCellClick);
                 gridEl.dataset.listenersAttached = 'true';
@@ -1241,7 +1259,6 @@
                 }
             }
             
-            // Re-apply found state for persistence
             targetWords.filter(w => w.found).forEach(wordObj => {
                 const wordMeta = placedWordsMeta.find(meta => meta.word === wordObj.word);
                 if (wordMeta) {
@@ -1281,15 +1298,13 @@
                          li.classList.add('hint-used');
                      }
                 } else {
-                    // Attach listener only if not found
                     li.addEventListener('click', () => solveWord(index));
                 }
             });
-            // Update score display on every render
+
             const foundCount = targetWords.filter(w => w.found).length;
             scoreEl.textContent = `คำศัพท์ที่พบ: ${foundCount}/${targetWords.length}`;
             
-            // In manual mode, check win condition here, but Autoplay handles it in autoSolveNextWord
             if (!isAutoplayMode) {
                  checkWinCondition();
             }
@@ -1299,14 +1314,12 @@
             const foundCount = targetWords.filter(w => w.found).length;
             
             if (foundCount === targetWords.length) {
-                // Game Over - Stop Timer and Autoplay
                 stopTimer();
                 clearTimeout(autoplayTimeout); 
                 
-                // 1. Temporarily disable grid interaction
                 gridEl.style.pointerEvents = 'none'; 
                 
-                // 2. หน่วง 1 วินาที (1000ms) ก่อนเข้าหน้าสรุปผล (ตามคำขอ)
+                // 1.0s delay before summary screen
                 setTimeout(() => {
                     gridEl.style.pointerEvents = 'auto'; 
                     showSummaryScreen();
@@ -1315,7 +1328,6 @@
         }
         
         function showSummaryScreen() {
-            // Timer already stopped by checkWinCondition
             showScreen('summary-screen');
 
             const timeString = formatTime(totalTimeSeconds);
@@ -1340,7 +1352,8 @@
         // --- INITIALIZATION & EVENT LISTENERS ---
         function init() {
             attachGridListeners(); 
-            gameTitleEl.addEventListener('dblclick', toggleAutoplayMode); 
+            // NEW: Use custom tap handler for stable double-tap activation
+            gameTitleEl.addEventListener('click', handleTitleTap);
             showScreen('start-screen');
         }
         
@@ -1352,6 +1365,9 @@
                     audioContext.resume();
                 }
             }, { once: true });
+            
+            // Set up default difficulty buttons on load
+            updateDifficultyButtons('animals'); 
             
             init(); 
         });
