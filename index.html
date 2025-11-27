@@ -8,20 +8,19 @@
     <style>
         /* --- THEME & GLOBAL STYLES --- */
         :root {
-            --color-primary: #29B6F6; /* Brighter Blue */
-            --color-secondary-select: #42A5F5; /* Blue - For single selection */
-            --color-wrong: #EF5350; /* Red - For Incorrect Flash */
-            --color-bg: #80DEEA; /* Light Cyan/Aqua Background */
-            --color-card: #FFFFFF; /* White Card/Container */
-            --color-text-dark: #2C3E50; /* Dark Text */
+            --color-primary: #29B6F6;
+            --color-secondary-select: #42A5F5;
+            --color-wrong: #EF5350;
+            --color-bg: #80DEEA;
+            --color-card: #FFFFFF;
+            --color-text-dark: #2C3E50;
             --color-text-light: #FFFFFF;
             --color-header: var(--color-primary); 
-            --color-grid-line: #BBDEFB; /* Light Blue Grid Separator */
-            --color-category-btn: #FFD54F; /* Amber for category buttons */
-            --color-difficulty-btn: #66BB6A; /* Light Green for difficulty */
+            --color-grid-line: #BBDEFB;
+            --color-category-btn: #FFD54F;
+            --color-difficulty-btn: #66BB6A;
         }
 
-        /* Screen Management */
         .screen {
             padding: 0 1rem 1rem;
             display: none;
@@ -34,7 +33,6 @@
             display: flex;
         }
 
-        /* Responsive Container */
         body {
             font-family: 'Sarabun', sans-serif;
             background-color: var(--color-bg);
@@ -59,10 +57,9 @@
             flex-direction: column;
             justify-content: flex-start;
             padding: 0;
-            position: relative; /* สำหรับ Notification */
+            position: relative;
         }
 
-        /* Header */
         header {
             background-color: var(--color-header); 
             color: var(--color-text-light);
@@ -76,7 +73,7 @@
             cursor: pointer; 
         }
 
-        /* --- AUTOPLAY SECRET MODE CSS --- */
+        /* Animation for Autoplay Mode */
         @keyframes slowPulse {
             0% { transform: scale(1); opacity: 1; }
             50% { transform: scale(1.03); opacity: 0.85; }
@@ -85,14 +82,13 @@
         .pulsing-title {
             animation: slowPulse 2s ease-in-out infinite;
         }
-        /* --- END AUTOPLAY SECRET MODE CSS --- */
         
-        /* --- Notification Bar Style --- */
+        /* Notification Bar */
         #autoplay-notification {
             position: absolute;
             top: 0;
             width: 100%;
-            background-color: #FFEB3B; /* Yellowish background */
+            background-color: #FFEB3B;
             color: var(--color-text-dark);
             font-weight: bold;
             padding: 8px 10px;
@@ -110,10 +106,7 @@
             visibility: visible;
             transform: translateY(0);
         }
-        /* --- End Notification Style --- */
 
-
-        /* Status Bar & Timer */
         #status-bar {
             display: flex;
             justify-content: space-between;
@@ -130,9 +123,6 @@
             font-size: 1.1rem;
         }
 
-        /* --- GAME SPECIFIC STYLES --- */
-        
-        /* --- Grid (The Search Area) --- */
         #word-search-grid {
             display: grid;
             width: 100%;
@@ -162,7 +152,6 @@
             background-color: transparent; 
         }
 
-        /* Selection States */
         .grid-cell.selected {
             background-color: var(--color-secondary-select);
             color: var(--color-text-light);
@@ -171,14 +160,11 @@
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
         }
         
-        /* Found State: Applied via inline style for dynamic color/opacity */
         .grid-cell.found {
             color: var(--color-text-dark); 
             font-weight: 900;
-            /* background-color applied via JS with 50% opacity */
         }
         
-        /* Wrong Guess Flash (Red) */
         .grid-cell.wrong-flash {
             background-color: var(--color-wrong) !important; 
             color: var(--color-text-light) !important;
@@ -191,7 +177,6 @@
             100% { background-color: inherit; color: inherit; } 
         }
 
-        /* --- Clues Area (The List) --- */
         #clue-panel {
             text-align: left;
             background-color: #F0F4C3; 
@@ -226,7 +211,6 @@
             cursor: pointer; 
         }
         
-        /* Styles when a word is solved/found */
         .clue-item.found {
             opacity: 1;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
@@ -234,7 +218,6 @@
             cursor: default;
         }
 
-        /* Hint/Solve Specific Style */
         .clue-item.hint-used {
             background-color: #FFCDD2FF !important; 
             border: 2px dashed #EF5350;
@@ -264,7 +247,6 @@
             color: var(--color-text-dark); 
         }
 
-        /* Summary Screen Styles */
         #summary-screen h2 {
             font-size: 2rem;
             color: var(--color-primary);
@@ -280,13 +262,12 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        /* --- BUTTON STYLES --- */
         .main-btn {
             color: var(--color-text-light);
             border: none;
             padding: 1rem;
             border-radius: 12px;
-            font-size: 1.1rem; /* Adjusted for 8 buttons */
+            font-size: 1.1rem;
             font-weight: bold;
             cursor: pointer;
             transition: transform 0.1s, box-shadow 0.1s;
@@ -325,8 +306,6 @@
         #summary-btn:active, #restart-btn:active {
             box-shadow: 0 2px 0 #3188d6;
         }
-
-
     </style>
 </head>
 <body>
@@ -358,10 +337,8 @@
         <div id="difficulty-screen" class="screen">
             <h2 id="difficulty-category-title">หมวดหมู่: สัตว์ป่า</h2>
             <h3>เลือกระดับความยาก</h3>
-            <button class="main-btn difficulty-btn" data-difficulty="easy" id="diff-easy">
-                </button>
-            <button class="main-btn difficulty-btn" data-difficulty="hard" id="diff-hard">
-                </button>
+            <button class="main-btn difficulty-btn" data-difficulty="easy" id="diff-easy"></button>
+            <button class="main-btn difficulty-btn" data-difficulty="hard" id="diff-hard"></button>
         </div>
 
         <div id="game-screen" class="screen">
@@ -371,19 +348,15 @@
                 <span id="timer-display">เวลา: 00:00</span>
             </div>
 
-            <div id="word-search-grid">
-                </div>
+            <div id="word-search-grid"></div>
 
             <div id="clue-panel">
                 <h3>คำใบ้ (Clues)</h3>
                 <p style="font-size: 0.9rem; color: #5D4037;">*คลิกที่คำใบ้เพื่อเฉลย (- คะแนน)*</p>
-                <ul id="clue-list">
-                    </ul>
+                <ul id="clue-list"></ul>
             </div>
             
-            <button id="restart-btn" class="main-btn">
-                กลับหน้าหลัก
-            </button>
+            <button id="restart-btn" class="main-btn">กลับหน้าหลัก</button>
         </div>
         
         <div id="summary-screen" class="screen">
@@ -394,15 +367,12 @@
             <div class="summary-stat">
                 <p id="summary-time"></p>
             </div>
-            
-            <button id="summary-btn" class="main-btn">
-                กลับหน้าหลัก
-            </button>
+            <button id="summary-btn" class="main-btn">กลับหน้าหลัก</button>
         </div>
     </div>
 
     <script>
-        // --- AUDIO/SPEECH LOGIC ---
+        // --- AUDIO/SPEECH LOGIC (PROMISE BASED) ---
         let audioContext;
         let voices = [];
         
@@ -411,6 +381,7 @@
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
         }
+        
         function setupSpeech() {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.onvoiceschanged = () => {
@@ -418,20 +389,42 @@
                 };
             }
         }
+        
         function getVoice(lang) {
              return voices.find(v => v.lang.startsWith(lang)) || voices.find(v => v.lang.startsWith(lang.substring(0, 2))) || null;
         }
+
+        // Modified: Returns a Promise that resolves when speech ends
         function speakText(text, lang) {
-            if (!('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = lang;
-            utterance.rate = (lang === 'en-US') ? 0.75 : 0.9; 
-            utterance.volume = 1;
-            const targetVoice = getVoice(lang); 
-            if (targetVoice) utterance.voice = targetVoice;
-            window.speechSynthesis.speak(utterance);
+            return new Promise((resolve) => {
+                if (!('speechSynthesis' in window)) {
+                    resolve(); // Not supported, resolve immediately
+                    return;
+                }
+                
+                window.speechSynthesis.cancel(); // Cancel any current speech
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = lang;
+                utterance.rate = (lang === 'en-US') ? 0.75 : 0.9; 
+                utterance.volume = 1;
+                
+                const targetVoice = getVoice(lang); 
+                if (targetVoice) utterance.voice = targetVoice;
+
+                // Resolve promise when reading ends
+                utterance.onend = () => {
+                    resolve();
+                };
+                
+                // Resolve on error to prevent hanging
+                utterance.onerror = () => {
+                    resolve(); 
+                };
+
+                window.speechSynthesis.speak(utterance);
+            });
         }
+
         function createTone(frequency, duration, type, volume = 0.5) {
             initAudioContext();
             if (!audioContext || audioContext.state === 'suspended') return;
@@ -448,209 +441,66 @@
         }
         function playSuccessTone() { createTone(660, 0.15, 'sine', 0.8); }
         function playFailTone() { createTone(150, 0.4, 'triangle', 0.7); }
-        // --- END AUDIO/SPEECH LOGIC ---
-
     </script>
 
     <script>
-        // --- CONFIGURATION & DATA (8 Categories) ---
-        // KEEPING THIS DATA AS IT WAS CORRECTLY PROVIDED IN THE LAST FULL RESPONSE
+        // --- CONFIGURATION & DATA ---
         const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         const WORD_CATEGORIES = {
             'animals': {
                 name: 'สัตว์ป่า (Animals)',
-                easyWordsPool: [
-                    { word: "CAT", clue: "แมว" }, { word: "DOG", clue: "สุนัข" }, { word: "FOX", clue: "สุนัขจิ้งจอก" },
-                    { word: "LION", clue: "ราชาแห่งป่า" }, { word: "CUB", clue: "ลูกสิงโต/หมี" }, { word: "DEER", clue: "กวาง" },
-                    { word: "WOLF", clue: "หมาป่า" }, { word: "EEL", clue: "ปลาไหล" }, { word: "BAT", clue: "ค้างคาว" },
-                    { word: "PIG", clue: "หมู" }, { word: "RAT", clue: "หนู" }, { word: "COW", clue: "วัว" },
-                    { word: "BULL", clue: "วัวตัวผู้" }, { word: "GOAT", clue: "แพะ" }, { word: "SHEEP", clue: "แกะ" },
-                    { word: "CRAB", clue: "ปู" }, { word: "FISH", clue: "ปลา" }, { word: "FROG", clue: "กบ" },
-                    { word: "DUCK", clue: "เป็ด" }, { word: "OWL", clue: "นกฮูก" },
-                ],
-                hardWordsPool: [
-                    { word: "TIGER", clue: "สัตว์ตระกูลแมวที่มีลายทางสีดำบนขนสีส้ม" }, { word: "ZEBRA", clue: "ม้าลายที่มีลายทางสีดำและขาว" },
-                    { word: "BEAR", clue: "หมี สัตว์ตัวใหญ่ที่ชอบกินน้ำผึ้ง" }, { word: "EAGLE", clue: "นกอินทรี นกล่าเหยื่อขนาดใหญ่" },
-                    { word: "SNAKE", clue: "สัตว์เลื้อยคลานที่ไม่มีขา" }, { word: "DOLPHIN", clue: "โลมา สัตว์เลี้ยงลูกด้วยนมในทะเล" },
-                    { word: "ELEPHANT", clue: "ช้าง สัตว์บกที่ใหญ่ที่สุด" }, { word: "GIRAFFE", clue: "ยีราฟ คอยาว" },
-                    { word: "MONKEY", clue: "ลิง สัตว์เลี้ยงลูกด้วยนมที่ชอบปีนป่าย" }, { word: "RABBIT", clue: "กระต่าย หูยาว ชอบกินแครอท" },
-                    { word: "PENGUIN", clue: "นกเพนกวิน บินไม่ได้ อาศัยในขั้วโลก" }, { word: "PARROT", clue: "นกแก้ว นกพูดได้" },
-                    { word: "CHIMPANZEE", clue: "ลิงชิมแปนซี" }, { word: "RHINOS", clue: "แรด" },
-                    { word: "CAMEL", clue: "อูฐ" }, { word: "TURTLE", clue: "เต่า" }, { word: "CROCODILE", clue: "จระเข้" },
-                    { word: "KANGAROO", clue: "จิงโจ้" }, { word: "OSTRICH", clue: "นกกระจอกเทศ" }, { word: "HIPPO", clue: "ฮิปโป" },
-                ],
-                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' },
-                hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
+                easyWordsPool: [{ word: "CAT", clue: "แมว" }, { word: "DOG", clue: "สุนัข" }, { word: "FOX", clue: "สุนัขจิ้งจอก" }, { word: "LION", clue: "ราชาแห่งป่า" }, { word: "CUB", clue: "ลูกสิงโต/หมี" }, { word: "DEER", clue: "กวาง" }, { word: "WOLF", clue: "หมาป่า" }, { word: "EEL", clue: "ปลาไหล" }, { word: "BAT", clue: "ค้างคาว" }, { word: "PIG", clue: "หมู" }, { word: "RAT", clue: "หนู" }, { word: "COW", clue: "วัว" }, { word: "BULL", clue: "วัวตัวผู้" }, { word: "GOAT", clue: "แพะ" }, { word: "SHEEP", clue: "แกะ" }, { word: "CRAB", clue: "ปู" }, { word: "FISH", clue: "ปลา" }, { word: "FROG", clue: "กบ" }, { word: "DUCK", clue: "เป็ด" }, { word: "OWL", clue: "นกฮูก" }],
+                hardWordsPool: [{ word: "TIGER", clue: "สัตว์ตระกูลแมวที่มีลายทางสีดำบนขนสีส้ม" }, { word: "ZEBRA", clue: "ม้าลายที่มีลายทางสีดำและขาว" }, { word: "BEAR", clue: "หมี สัตว์ตัวใหญ่ที่ชอบกินน้ำผึ้ง" }, { word: "EAGLE", clue: "นกอินทรี นกล่าเหยื่อขนาดใหญ่" }, { word: "SNAKE", clue: "สัตว์เลื้อยคลานที่ไม่มีขา" }, { word: "DOLPHIN", clue: "โลมา สัตว์เลี้ยงลูกด้วยนมในทะเล" }, { word: "ELEPHANT", clue: "ช้าง สัตว์บกที่ใหญ่ที่สุด" }, { word: "GIRAFFE", clue: "ยีราฟ คอยาว" }, { word: "MONKEY", clue: "ลิง สัตว์เลี้ยงลูกด้วยนมที่ชอบปีนป่าย" }, { word: "RABBIT", clue: "กระต่าย หูยาว ชอบกินแครอท" }, { word: "PENGUIN", clue: "นกเพนกวิน บินไม่ได้ อาศัยในขั้วโลก" }, { word: "PARROT", clue: "นกแก้ว นกพูดได้" }, { word: "CHIMPANZEE", clue: "ลิงชิมแปนซี" }, { word: "RHINOS", clue: "แรด" }, { word: "CAMEL", clue: "อูฐ" }, { word: "TURTLE", clue: "เต่า" }, { word: "CROCODILE", clue: "จระเข้" }, { word: "KANGAROO", clue: "จิงโจ้" }, { word: "OSTRICH", clue: "นกกระจอกเทศ" }, { word: "HIPPO", clue: "ฮิปโป" }],
+                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' }, hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
             },
             'fruits': { 
                 name: 'ผลไม้ (Fruits)',
-                easyWordsPool: [
-                    { word: "APPLE", clue: "แอปเปิ้ล" }, { word: "BANANA", clue: "กล้วย" }, { word: "GRAPE", clue: "องุ่น" },
-                    { word: "PEAR", clue: "ลูกแพร์" }, { word: "KIWI", clue: "กีวี่" }, { word: "LIME", clue: "มะนาว" },
-                    { word: "FIG", clue: "มะเดื่อ" }, { word: "BERRY", clue: "ผลเบอร์รี่" }, { word: "MELON", clue: "แตงโม" },
-                    { word: "DATE", clue: "อินทผลัม" }, { word: "PLUM", clue: "ลูกพลัม" }, { word: "MANGO", clue: "มะม่วง" },
-                    { word: "PEACH", clue: "ลูกพีช" }, { word: "CHERRY", clue: "เชอร์รี่" }, { word: "GUAVA", clue: "ฝรั่ง" },
-                    { word: "SAGO", clue: "สาคู" }, { word: "COCOA", clue: "เมล็ดโกโก้" }, { word: "LEMON", clue: "มะนาวเหลือง" },
-                    { word: "MINT", clue: "สะระแหน่" }, { word: "ORANGE", clue: "ส้ม" },
-                ],
-                hardWordsPool: [
-                    { word: "PINEAPPLE", clue: "สับปะรด" }, { word: "STRAWBERRY", clue: "สตรอว์เบอร์รี" }, { word: "WATERMELON", clue: "แตงโมลูกใหญ่" },
-                    { word: "AVOCADO", clue: "อะโวคาโด" }, { word: "BLUEBERRY", clue: "บลูเบอร์รี" }, { word: "RASPBERRY", clue: "ราสเบอร์รี" },
-                    { word: "GRAPEFRUIT", clue: "ส้มโอฝรั่ง" }, { word: "POMEGRANATE", clue: "ทับทิม" }, { word: "TANGERINE", clue: "ส้มเขียวหวาน" },
-                    { word: "APRICOT", clue: "แอปริคอท" }, { word: "COCONUT", clue: "มะพร้าว" }, { word: "PAPAYA", clue: "มะละกอ" },
-                    { word: "DURIAN", clue: "ทุเรียน" }, { word: "LYCHEE", clue: "ลิ้นจี่" }, { word: "RAMBUTAN", clue: "เงาะ" },
-                    { word: "PASSIONFRUIT", clue: "เสาวรส" }, { word: "CANTALOUPE", clue: "แคนตาลูป" }, { word: "DRAGONFRUIT", clue: "แก้วมังกร" },
-                    { word: "STARFRUIT", clue: "มะเฟือง" }, { word: "POMELO", clue: "ส้มโอ" },
-                ],
-                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' },
-                hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
+                easyWordsPool: [{ word: "APPLE", clue: "แอปเปิ้ล" }, { word: "BANANA", clue: "กล้วย" }, { word: "GRAPE", clue: "องุ่น" }, { word: "PEAR", clue: "ลูกแพร์" }, { word: "KIWI", clue: "กีวี่" }, { word: "LIME", clue: "มะนาว" }, { word: "FIG", clue: "มะเดื่อ" }, { word: "BERRY", clue: "ผลเบอร์รี่" }, { word: "MELON", clue: "แตงโม" }, { word: "DATE", clue: "อินทผลัม" }, { word: "PLUM", clue: "ลูกพลัม" }, { word: "MANGO", clue: "มะม่วง" }, { word: "PEACH", clue: "ลูกพีช" }, { word: "CHERRY", clue: "เชอร์รี่" }, { word: "GUAVA", clue: "ฝรั่ง" }, { word: "SAGO", clue: "สาคู" }, { word: "COCOA", clue: "เมล็ดโกโก้" }, { word: "LEMON", clue: "มะนาวเหลือง" }, { word: "MINT", clue: "สะระแหน่" }, { word: "ORANGE", clue: "ส้ม" }],
+                hardWordsPool: [{ word: "PINEAPPLE", clue: "สับปะรด" }, { word: "STRAWBERRY", clue: "สตรอว์เบอร์รี" }, { word: "WATERMELON", clue: "แตงโมลูกใหญ่" }, { word: "AVOCADO", clue: "อะโวคาโด" }, { word: "BLUEBERRY", clue: "บลูเบอร์รี" }, { word: "RASPBERRY", clue: "ราสเบอร์รี" }, { word: "GRAPEFRUIT", clue: "ส้มโอฝรั่ง" }, { word: "POMEGRANATE", clue: "ทับทิม" }, { word: "TANGERINE", clue: "ส้มเขียวหวาน" }, { word: "APRICOT", clue: "แอปริคอท" }, { word: "COCONUT", clue: "มะพร้าว" }, { word: "PAPAYA", clue: "มะละกอ" }, { word: "DURIAN", clue: "ทุเรียน" }, { word: "LYCHEE", clue: "ลิ้นจี่" }, { word: "RAMBUTAN", clue: "เงาะ" }, { word: "PASSIONFRUIT", clue: "เสาวรส" }, { word: "CANTALOUPE", clue: "แคนตาลูป" }, { word: "DRAGONFRUIT", clue: "แก้วมังกร" }, { word: "STARFRUIT", clue: "มะเฟือง" }, { word: "POMELO", clue: "ส้มโอ" }],
+                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' }, hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
             },
             'countries': { 
                 name: 'ประเทศ (Countries)',
-                easyWordsPool: [
-                    { word: "USA", clue: "สหรัฐอเมริกา" }, { word: "UK", clue: "สหราชอาณาจักร" }, { word: "JAPAN", clue: "ญี่ปุ่น" },
-                    { word: "CHINA", clue: "จีน" }, { word: "INDIA", clue: "อินเดีย" }, { word: "THAI", clue: "ไทย" },
-                    { word: "KOREA", clue: "เกาหลี" }, { word: "ITALY", clue: "อิตาลี" }, { word: "SPAIN", clue: "สเปน" },
-                    { word: "PERU", clue: "เปรู" }, { word: "EGYPT", clue: "อียิปต์" }, { word: "CUBA", clue: "คิวบา" },
-                    { word: "BRAZIL", clue: "บราซิล" }, { word: "RUSSIA", clue: "รัสเซีย" }, { word: "CANADA", clue: "แคนาดา" },
-                    { word: "MEXICO", clue: "เม็กซิโก" }, { word: "GREECE", clue: "กรีซ" }, { word: "CHILE", clue: "ชิลี" },
-                    { word: "GERMANY", clue: "เยอรมนี" }, { word: "FRANCE", clue: "ฝรั่งเศส" },
-                ],
-                hardWordsPool: [
-                    { word: "INDONESIA", clue: "อินโดนีเซีย" }, { word: "ARGENTINA", clue: "อาร์เจนตินา" }, { word: "AUSTRALIA", clue: "ออสเตรเลีย" },
-                    { word: "NEWZEALAND", clue: "นิวซีแลนด์" }, { word: "SWITZERLAND", clue: "สวิตเซอร์แลนด์" }, { word: "PORTUGAL", clue: "โปรตุเกส" },
-                    { word: "PHILIPPINES", clue: "ฟิลิปปินส์" }, { word: "VIETNAM", clue: "เวียดนาม" }, { word: "MALAYSIA", clue: "มาเลเซีย" },
-                    { word: "SINGAPORE", clue: "สิงคโปร์" }, { word: "FINLAND", clue: "ฟินแลนด์" }, { word: "NETHERLANDS", clue: "เนเธอร์แลนด์" },
-                    { word: "COLOMBIA", clue: "โคลอมเบีย" }, { word: "SOUTHAFRICA", clue: "แอฟริกาใต้" }, { word: "SAUDIARABIA", clue: "ซาอุดีอาระเบีย" },
-                    { word: "BANGLADESH", clue: "บังกลาเทศ" }, { word: "MYANMAR", clue: "เมียนมา" }, { word: "BELGIUM", clue: "เบลเยียม" },
-                    { word: "PAKISTAN", clue: "ปากีสถาน" }, { word: "KENYA", clue: "เคนยา" },
-                ],
-                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' },
-                hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
+                easyWordsPool: [{ word: "USA", clue: "สหรัฐอเมริกา" }, { word: "UK", clue: "สหราชอาณาจักร" }, { word: "JAPAN", clue: "ญี่ปุ่น" }, { word: "CHINA", clue: "จีน" }, { word: "INDIA", clue: "อินเดีย" }, { word: "THAI", clue: "ไทย" }, { word: "KOREA", clue: "เกาหลี" }, { word: "ITALY", clue: "อิตาลี" }, { word: "SPAIN", clue: "สเปน" }, { word: "PERU", clue: "เปรู" }, { word: "EGYPT", clue: "อียิปต์" }, { word: "CUBA", clue: "คิวบา" }, { word: "BRAZIL", clue: "บราซิล" }, { word: "RUSSIA", clue: "รัสเซีย" }, { word: "CANADA", clue: "แคนาดา" }, { word: "MEXICO", clue: "เม็กซิโก" }, { word: "GREECE", clue: "กรีซ" }, { word: "CHILE", clue: "ชิลี" }, { word: "GERMANY", clue: "เยอรมนี" }, { word: "FRANCE", clue: "ฝรั่งเศส" }],
+                hardWordsPool: [{ word: "INDONESIA", clue: "อินโดนีเซีย" }, { word: "ARGENTINA", clue: "อาร์เจนตินา" }, { word: "AUSTRALIA", clue: "ออสเตรเลีย" }, { word: "NEWZEALAND", clue: "นิวซีแลนด์" }, { word: "SWITZERLAND", clue: "สวิตเซอร์แลนด์" }, { word: "PORTUGAL", clue: "โปรตุเกส" }, { word: "PHILIPPINES", clue: "ฟิลิปปินส์" }, { word: "VIETNAM", clue: "เวียดนาม" }, { word: "MALAYSIA", clue: "มาเลเซีย" }, { word: "SINGAPORE", clue: "สิงคโปร์" }, { word: "FINLAND", clue: "ฟินแลนด์" }, { word: "NETHERLANDS", clue: "เนเธอร์แลนด์" }, { word: "COLOMBIA", clue: "โคลอมเบีย" }, { word: "SOUTHAFRICA", clue: "แอฟริกาใต้" }, { word: "SAUDIARABIA", clue: "ซาอุดีอาระเบีย" }, { word: "BANGLADESH", clue: "บังกลาเทศ" }, { word: "MYANMAR", clue: "เมียนมา" }, { word: "BELGIUM", clue: "เบลเยียม" }, { word: "PAKISTAN", clue: "ปากีสถาน" }, { word: "KENYA", clue: "เคนยา" }],
+                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' }, hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
             },
             'jobs': {
                 name: 'อาชีพ (Jobs)',
-                easyWordsPool: [
-                    { word: "CHEF", clue: "พ่อครัว" }, { word: "DOCTOR", clue: "แพทย์" }, { word: "NURSE", clue: "พยาบาล" },
-                    { word: "JUDGE", clue: "ผู้พิพากษา" }, { word: "LAWYER", clue: "ทนาย" }, { word: "PILOT", clue: "นักบิน" },
-                    { word: "GUARD", clue: "ยาม" }, { word: "SINGER", clue: "นักร้อง" }, { word: "CLERK", clue: "เสมียน" },
-                    { word: "FARMER", clue: "ชาวนา" }, { word: "POLICE", clue: "ตำรวจ" }, { word: "SOLDIER", clue: "ทหาร" },
-                    { word: "ARTIST", clue: "ศิลปิน" }, { word: "WRITER", clue: "นักเขียน" }, { word: "POSTMAN", clue: "บุรุษไปรษณีย์" },
-                    { word: "MONK", clue: "พระสงฆ์" }, { word: "PRIEST", clue: "บาทหลวง" }, { word: "DANCER", clue: "นักเต้น" },
-                    { word: "OWNER", clue: "เจ้าของ" }, { word: "AGENT", clue: "ตัวแทน" },
-                ],
-                hardWordsPool: [
-                    { word: "ENGINEER", clue: "วิศวกร" }, { word: "TEACHER", clue: "ครู/อาจารย์" }, { word: "PROGRAMMER", clue: "โปรแกรมเมอร์" },
-                    { word: "SCIENTIST", clue: "นักวิทยาศาสตร์" }, { word: "ASTRONAUT", clue: "นักบินอวกาศ" }, { word: "ARCHITECT", clue: "สถาปนิก" },
-                    { word: "FIREFIGHTER", clue: "นักดับเพลิง" }, { word: "JOURNALIST", clue: "นักข่าว" }, { word: "ELECTRICIAN", clue: "ช่างไฟฟ้า" },
-                    { word: "PLUMBER", clue: "ช่างประปา" }, { word: "LIBRARIAN", clue: "บรรณารักษ์" }, { word: "THERAPIST", clue: "นักบำบัด" },
-                    { word: "CONSULTANT", clue: "ที่ปรึกษา" }, { word: "ACCOUNTANT", clue: "นักบัญชี" }, { word: "PHOTOGRAPHER", clue: "ช่างภาพ" },
-                    { word: "RECEPTIONIST", clue: "พนักงานต้อนรับ" }, { word: "VETERINARIAN", clue: "สัตวแพทย์" }, { word: "BUSINESSMAN", clue: "นักธุรกิจ" },
-                    { word: "FLIGHTATTENDANT", clue: "พนักงานต้อนรับบนเครื่องบิน" }, { word: "HAIRDRESSER", clue: "ช่างทำผม" },
-                ],
-                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' },
-                hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
+                easyWordsPool: [{ word: "CHEF", clue: "พ่อครัว" }, { word: "DOCTOR", clue: "แพทย์" }, { word: "NURSE", clue: "พยาบาล" }, { word: "JUDGE", clue: "ผู้พิพากษา" }, { word: "LAWYER", clue: "ทนาย" }, { word: "PILOT", clue: "นักบิน" }, { word: "GUARD", clue: "ยาม" }, { word: "SINGER", clue: "นักร้อง" }, { word: "CLERK", clue: "เสมียน" }, { word: "FARMER", clue: "ชาวนา" }, { word: "POLICE", clue: "ตำรวจ" }, { word: "SOLDIER", clue: "ทหาร" }, { word: "ARTIST", clue: "ศิลปิน" }, { word: "WRITER", clue: "นักเขียน" }, { word: "POSTMAN", clue: "บุรุษไปรษณีย์" }, { word: "MONK", clue: "พระสงฆ์" }, { word: "PRIEST", clue: "บาทหลวง" }, { word: "DANCER", clue: "นักเต้น" }, { word: "OWNER", clue: "เจ้าของ" }, { word: "AGENT", clue: "ตัวแทน" }],
+                hardWordsPool: [{ word: "ENGINEER", clue: "วิศวกร" }, { word: "TEACHER", clue: "ครู/อาจารย์" }, { word: "PROGRAMMER", clue: "โปรแกรมเมอร์" }, { word: "SCIENTIST", clue: "นักวิทยาศาสตร์" }, { word: "ASTRONAUT", clue: "นักบินอวกาศ" }, { word: "ARCHITECT", clue: "สถาปนิก" }, { word: "FIREFIGHTER", clue: "นักดับเพลิง" }, { word: "JOURNALIST", clue: "นักข่าว" }, { word: "ELECTRICIAN", clue: "ช่างไฟฟ้า" }, { word: "PLUMBER", clue: "ช่างประปา" }, { word: "LIBRARIAN", clue: "บรรณารักษ์" }, { word: "THERAPIST", clue: "นักบำบัด" }, { word: "CONSULTANT", clue: "ที่ปรึกษา" }, { word: "ACCOUNTANT", clue: "นักบัญชี" }, { word: "PHOTOGRAPHER", clue: "ช่างภาพ" }, { word: "RECEPTIONIST", clue: "พนักงานต้อนรับ" }, { word: "VETERINARIAN", clue: "สัตวแพทย์" }, { word: "BUSINESSMAN", clue: "นักธุรกิจ" }, { word: "FLIGHTATTENDANT", clue: "พนักงานต้อนรับบนเครื่องบิน" }, { word: "HAIRDRESSER", clue: "ช่างทำผม" }],
+                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' }, hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
             },
             'colors': {
                 name: 'สี (Colors)',
-                easyWordsPool: [
-                    { word: "RED", clue: "สีแดง" }, { word: "BLUE", clue: "สีน้ำเงิน" }, { word: "GREEN", clue: "สีเขียว" },
-                    { word: "YELLOW", clue: "สีเหลือง" }, { word: "BLACK", clue: "สีดำ" }, { word: "WHITE", clue: "สีขาว" },
-                    { word: "GRAY", clue: "สีเทา" }, { word: "PINK", clue: "สีชมพู" }, { word: "BROWN", clue: "สีน้ำตาล" },
-                    { word: "GOLD", clue: "สีทอง" }, { word: "SILVER", clue: "สีเงิน" }, { word: "LIME", clue: "สีเขียวมะนาว" },
-                    { word: "TEAL", clue: "สีเขียวน้ำทะเล" }, { word: "AZURE", clue: "สีฟ้าคราม" }, { word: "CYAN", clue: "สีฟ้าอ่อน" },
-                    { word: "BEIGE", clue: "สีเบจ" }, { word: "IVORY", clue: "สีงาช้าง" }, { word: "RUST", clue: "สีสนิม" },
-                    { word: "NAVY", clue: "สีกรมท่า" }, { word: "MAROON", clue: "สีน้ำตาลแดง" },
-                ],
-                hardWordsPool: [
-                    { word: "PURPLE", clue: "สีม่วง" }, { word: "ORANGE", clue: "สีส้ม" }, { word: "MAGENTA", clue: "สีม่วงแดง" },
-                    { word: "VIOLET", clue: "สีม่วงอ่อน" }, { word: "TURQUOISE", clue: "สีเขียวขุ่น" }, { word: "CHARTREUSE", clue: "สีเขียวอ่อน" },
-                    { word: "CRIMSON", clue: "สีแดงเข้ม" }, { word: "INDIGO", clue: "สีคราม" }, { word: "AQUAMARINE", clue: "สีฟ้าอมเขียว" },
-                    { word: "BRONZE", clue: "สีบรอนซ์" }, { word: "OLIVE", clue: "สีเขียวมะกอก" }, { word: "LAVENDER", clue: "สีม่วงลาเวนเดอร์" },
-                    { word: "FUCHSIA", clue: "สีบานเย็น" }, { word: "SALMON", clue: "สีส้มปลาแซลมอน" }, { word: "PERIWINKLE", clue: "สีม่วงอ่อนอมฟ้า" },
-                    { word: "SAPPHIRE", clue: "สีน้ำเงินแซฟไฟร์" }, { word: "CHOCOLATE", clue: "สีช็อกโกแลต" }, { word: "CORNFLOWER", clue: "สีฟ้าอ่อน" },
-                    { word: "MUSTARD", clue: "สีเหลืองมัสตาร์ด" }, { word: "MAHOGANY", clue: "สีมะฮอกกานี" },
-                ],
-                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' },
-                hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
+                easyWordsPool: [{ word: "RED", clue: "สีแดง" }, { word: "BLUE", clue: "สีน้ำเงิน" }, { word: "GREEN", clue: "สีเขียว" }, { word: "YELLOW", clue: "สีเหลือง" }, { word: "BLACK", clue: "สีดำ" }, { word: "WHITE", clue: "สีขาว" }, { word: "GRAY", clue: "สีเทา" }, { word: "PINK", clue: "สีชมพู" }, { word: "BROWN", clue: "สีน้ำตาล" }, { word: "GOLD", clue: "สีทอง" }, { word: "SILVER", clue: "สีเงิน" }, { word: "LIME", clue: "สีเขียวมะนาว" }, { word: "TEAL", clue: "สีเขียวน้ำทะเล" }, { word: "AZURE", clue: "สีฟ้าคราม" }, { word: "CYAN", clue: "สีฟ้าอ่อน" }, { word: "BEIGE", clue: "สีเบจ" }, { word: "IVORY", clue: "สีงาช้าง" }, { word: "RUST", clue: "สีสนิม" }, { word: "NAVY", clue: "สีกรมท่า" }, { word: "MAROON", clue: "สีน้ำตาลแดง" }],
+                hardWordsPool: [{ word: "PURPLE", clue: "สีม่วง" }, { word: "ORANGE", clue: "สีส้ม" }, { word: "MAGENTA", clue: "สีม่วงแดง" }, { word: "VIOLET", clue: "สีม่วงอ่อน" }, { word: "TURQUOISE", clue: "สีเขียวขุ่น" }, { word: "CHARTREUSE", clue: "สีเขียวอ่อน" }, { word: "CRIMSON", clue: "สีแดงเข้ม" }, { word: "INDIGO", clue: "สีคราม" }, { word: "AQUAMARINE", clue: "สีฟ้าอมเขียว" }, { word: "BRONZE", clue: "สีบรอนซ์" }, { word: "OLIVE", clue: "สีเขียวมะกอก" }, { word: "LAVENDER", clue: "สีม่วงลาเวนเดอร์" }, { word: "FUCHSIA", clue: "สีบานเย็น" }, { word: "SALMON", clue: "สีส้มปลาแซลมอน" }, { word: "PERIWINKLE", clue: "สีม่วงอ่อนอมฟ้า" }, { word: "SAPPHIRE", clue: "สีน้ำเงินแซฟไฟร์" }, { word: "CHOCOLATE", clue: "สีช็อกโกแลต" }, { word: "CORNFLOWER", clue: "สีฟ้าอ่อน" }, { word: "MUSTARD", clue: "สีเหลืองมัสตาร์ด" }, { word: "MAHOGANY", clue: "สีมะฮอกกานี" }],
+                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' }, hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
             },
             'sports': {
                 name: 'กีฬา (Sports)',
-                easyWordsPool: [
-                    { word: "RUN", clue: "วิ่ง" }, { word: "SWIM", clue: "ว่ายน้ำ" }, { word: "GOLF", clue: "กอล์ฟ" },
-                    { word: "HOCKEY", clue: "ฮอกกี้" }, { word: "BOXING", clue: "มวย" }, { word: "TENNIS", clue: "เทนนิส" },
-                    { word: "SKI", clue: "สกี" }, { word: "YOGA", clue: "โยคะ" }, { word: "RACE", clue: "การแข่งขัน" },
-                    { word: "BALL", clue: "ลูกบอล" }, { word: "GYM", clue: "โรงยิม" }, { word: "JUMP", clue: "กระโดด" },
-                    { word: "WRESTLE", clue: "มวยปล้ำ" }, { word: "FENCE", clue: "ฟันดาบ" }, { word: "SURF", clue: "โต้คลื่น" },
-                    { word: "PITCH", clue: "สนาม" }, { word: "COURT", clue: "สนาม" }, { word: "GOAL", clue: "ประตู" },
-                    { word: "CATCH", clue: "จับ" }, { word: "KICK", clue: "เตะ" },
-                ],
-                hardWordsPool: [
-                    { word: "FOOTBALL", clue: "ฟุตบอล" }, { word: "BASKETBALL", clue: "บาสเกตบอล" }, { word: "BADMINTON", clue: "แบดมินตัน" },
-                    { word: "VOLLEYBALL", clue: "วอลเลย์บอล" }, { word: "BASEBALL", clue: "เบสบอล" }, { word: "ATHLETICS", clue: "กรีฑา" },
-                    { word: "CYCLING", clue: "ปั่นจักรยาน" }, { word: "MARATHON", clue: "วิ่งมาราธอน" }, { word: "TRIATHLON", clue: "ไตรกีฬา" },
-                    { word: "SKATEBOARD", clue: "สเกตบอร์ด" }, { word: "SNOWBOARD", clue: "สโนว์บอร์ด" }, { word: "GYMNASTICS", clue: "ยิมนาสติก" },
-                    { word: "FISHING", clue: "ตกปลา" }, { word: "SAILING", clue: "แล่นเรือ" }, { word: "ARCHERY", clue: "ยิงธนู" },
-                    { word: "KARATE", clue: "คาราเต้" }, { word: "TAEKWONDO", clue: "เทควันโด" }, { word: "HUNTING", clue: "ล่าสัตว์" },
-                    { word: "BOULDERING", clue: "ปีนผา" }, { word: "PADDLEBOARD", clue: "ยืนพาย" },
-                ],
-                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' },
-                hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
+                easyWordsPool: [{ word: "RUN", clue: "วิ่ง" }, { word: "SWIM", clue: "ว่ายน้ำ" }, { word: "GOLF", clue: "กอล์ฟ" }, { word: "HOCKEY", clue: "ฮอกกี้" }, { word: "BOXING", clue: "มวย" }, { word: "TENNIS", clue: "เทนนิส" }, { word: "SKI", clue: "สกี" }, { word: "YOGA", clue: "โยคะ" }, { word: "RACE", clue: "การแข่งขัน" }, { word: "BALL", clue: "ลูกบอล" }, { word: "GYM", clue: "โรงยิม" }, { word: "JUMP", clue: "กระโดด" }, { word: "WRESTLE", clue: "มวยปล้ำ" }, { word: "FENCE", clue: "ฟันดาบ" }, { word: "SURF", clue: "โต้คลื่น" }, { word: "PITCH", clue: "สนาม" }, { word: "COURT", clue: "สนาม" }, { word: "GOAL", clue: "ประตู" }, { word: "CATCH", clue: "จับ" }, { word: "KICK", clue: "เตะ" }],
+                hardWordsPool: [{ word: "FOOTBALL", clue: "ฟุตบอล" }, { word: "BASKETBALL", clue: "บาสเกตบอล" }, { word: "BADMINTON", clue: "แบดมินตัน" }, { word: "VOLLEYBALL", clue: "วอลเลย์บอล" }, { word: "BASEBALL", clue: "เบสบอล" }, { word: "ATHLETICS", clue: "กรีฑา" }, { word: "CYCLING", clue: "ปั่นจักรยาน" }, { word: "MARATHON", clue: "วิ่งมาราธอน" }, { word: "TRIATHLON", clue: "ไตรกีฬา" }, { word: "SKATEBOARD", clue: "สเกตบอร์ด" }, { word: "SNOWBOARD", clue: "สโนว์บอร์ด" }, { word: "GYMNASTICS", clue: "ยิมนาสติก" }, { word: "FISHING", clue: "ตกปลา" }, { word: "SAILING", clue: "แล่นเรือ" }, { word: "ARCHERY", clue: "ยิงธนู" }, { word: "KARATE", clue: "คาราเต้" }, { word: "TAEKWONDO", clue: "เทควันโด" }, { word: "HUNTING", clue: "ล่าสัตว์" }, { word: "BOULDERING", clue: "ปีนผา" }, { word: "PADDLEBOARD", clue: "ยืนพาย" }],
+                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' }, hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
             },
             'foods': {
                 name: 'อาหาร (Foods)',
-                easyWordsPool: [
-                    { word: "BREAD", clue: "ขนมปัง" }, { word: "RICE", clue: "ข้าว" }, { word: "FISH", clue: "ปลา" },
-                    { word: "MEAT", clue: "เนื้อ" }, { word: "EGG", clue: "ไข่" }, { word: "CAKE", clue: "เค้ก" },
-                    { word: "SOUP", clue: "ซุป" }, { word: "SALT", clue: "เกลือ" }, { word: "SUGAR", clue: "น้ำตาล" },
-                    { word: "CHEESE", clue: "เนยแข็ง" }, { word: "PASTA", clue: "พาสต้า" }, { word: "NOODLE", clue: "ก๋วยเตี๋ยว" },
-                    { word: "WATER", clue: "น้ำ" }, { word: "MILK", clue: "นม" }, { word: "COFFEE", clue: "กาแฟ" },
-                    { word: "TEA", clue: "ชา" }, { word: "PIZZA", clue: "พิซซ่า" }, { word: "BURGER", clue: "เบอร์เกอร์" },
-                    { word: "FRIES", clue: "เฟรนช์ฟรายส์" }, { word: "CANDY", clue: "ลูกอม" },
-                ],
-                hardWordsPool: [
-                    { word: "VEGETABLES", clue: "ผัก" }, { word: "CHOCOLATE", clue: "ช็อกโกแลต" }, { word: "SANDWICH", clue: "แซนด์วิช" },
-                    { word: "PANCAKE", clue: "แพนเค้ก" }, { word: "CORNFLAKES", clue: "คอร์นเฟลก" }, { word: "CROISSANT", clue: "ครัวซองต์" },
-                    { word: "ICE CREAM", clue: "ไอศกรีม" }, { word: "SPAGHETTI", clue: "สปาเก็ตตี้" }, { word: "LASAGNA", clue: "ลาซานญ่า" },
-                    { word: "MAYONNAISE", clue: "มายองเนส" }, { word: "KETCHUP", clue: "ซอสมะเขือเทศ" }, { word: "MUSTARD", clue: "มัสตาร์ด" },
-                    { word: "PEANUT", clue: "ถั่วลิสง" }, { word: "ALMOND", clue: "อัลมอนด์" }, { word: "OATMEAL", clue: "ข้าวโอ๊ต" },
-                    { word: "POPCORN", clue: "ข้าวโพดคั่ว" }, { word: "COCKTAIL", clue: "ค็อกเทล" }, { word: "SMOOTHIE", clue: "สมูทตี้" },
-                    { word: "SAUSAGE", clue: "ไส้กรอก" }, { word: "GRILLED", clue: "ย่าง" },
-                ],
-                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' },
-                hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
+                easyWordsPool: [{ word: "BREAD", clue: "ขนมปัง" }, { word: "RICE", clue: "ข้าว" }, { word: "FISH", clue: "ปลา" }, { word: "MEAT", clue: "เนื้อ" }, { word: "EGG", clue: "ไข่" }, { word: "CAKE", clue: "เค้ก" }, { word: "SOUP", clue: "ซุป" }, { word: "SALT", clue: "เกลือ" }, { word: "SUGAR", clue: "น้ำตาล" }, { word: "CHEESE", clue: "เนยแข็ง" }, { word: "PASTA", clue: "พาสต้า" }, { word: "NOODLE", clue: "ก๋วยเตี๋ยว" }, { word: "WATER", clue: "น้ำ" }, { word: "MILK", clue: "นม" }, { word: "COFFEE", clue: "กาแฟ" }, { word: "TEA", clue: "ชา" }, { word: "PIZZA", clue: "พิซซ่า" }, { word: "BURGER", clue: "เบอร์เกอร์" }, { word: "FRIES", clue: "เฟรนช์ฟรายส์" }, { word: "CANDY", clue: "ลูกอม" }],
+                hardWordsPool: [{ word: "VEGETABLES", clue: "ผัก" }, { word: "CHOCOLATE", clue: "ช็อกโกแลต" }, { word: "SANDWICH", clue: "แซนด์วิช" }, { word: "PANCAKE", clue: "แพนเค้ก" }, { word: "CORNFLAKES", clue: "คอร์นเฟลก" }, { word: "CROISSANT", clue: "ครัวซองต์" }, { word: "ICE CREAM", clue: "ไอศกรีม" }, { word: "SPAGHETTI", clue: "สปาเก็ตตี้" }, { word: "LASAGNA", clue: "ลาซานญ่า" }, { word: "MAYONNAISE", clue: "มายองเนส" }, { word: "KETCHUP", clue: "ซอสมะเขือเทศ" }, { word: "MUSTARD", clue: "มัสตาร์ด" }, { word: "PEANUT", clue: "ถั่วลิสง" }, { word: "ALMOND", clue: "อัลมอนด์" }, { word: "OATMEAL", clue: "ข้าวโอ๊ต" }, { word: "POPCORN", clue: "ข้าวโพดคั่ว" }, { word: "COCKTAIL", clue: "ค็อกเทล" }, { word: "SMOOTHIE", clue: "สมูทตี้" }, { word: "SAUSAGE", clue: "ไส้กรอก" }, { word: "GRILLED", clue: "ย่าง" }],
+                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' }, hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
             },
             'vehicles': {
                 name: 'ยานพาหนะ (Vehicles)',
-                easyWordsPool: [
-                    { word: "CAR", clue: "รถยนต์" }, { word: "BUS", clue: "รถบัส" }, { word: "TAXI", clue: "รถแท็กซี่" },
-                    { word: "TRAIN", clue: "รถไฟ" }, { word: "BIKE", clue: "จักรยาน" }, { word: "BOAT", clue: "เรือ" },
-                    { word: "TRUCK", clue: "รถบรรทุก" }, { word: "VAN", clue: "รถตู้" }, { word: "JEEP", clue: "รถจี๊ป" },
-                    { word: "MOTO", clue: "มอเตอร์ไซค์" }, { word: "SCOOTER", clue: "สกู๊ตเตอร์" }, { word: "SHIP", clue: "เรือใหญ่" },
-                    { word: "YACHT", clue: "เรือยอชท์" }, { word: "PLANE", clue: "เครื่องบิน" }, { word: "JET", clue: "เครื่องบินเจ็ต" },
-                    { word: "WAGON", clue: "รถเกวียน" }, { word: "SLIDE", clue: "เลื่อน" }, { word: "TROLLEY", clue: "รถเข็น" },
-                    { word: "KAYAK", clue: "เรือคายัค" }, { word: "RAFT", clue: "แพ" },
-                ],
-                hardWordsPool: [
-                    { word: "HELICOPTER", clue: "เฮลิคอปเตอร์" }, { word: "SUBMARINE", clue: "เรือดำน้ำ" }, { word: "AEROPLANE", clue: "เครื่องบิน" },
-                    { word: "AMBULANCE", clue: "รถพยาบาล" }, { word: "CRUISE", clue: "เรือสำราญ" }, { word: "SPACESHIP", clue: "ยานอวกาศ" },
-                    { word: "LIMOUSINE", clue: "รถลิมูซีน" }, { word: "TRACTOR", clue: "รถแทรกเตอร์" }, { word: "FORKLIFT", clue: "รถยก" },
-                    { word: "BICYCLE", clue: "จักรยาน" }, { word: "SKATEBOARD", clue: "สเกตบอร์ด" }, { word: "SNOWMOBILE", clue: "รถสโนว์โมบิล" },
-                    { word: "FIRETRUCK", clue: "รถดับเพลิง" }, { word: "CONVERTIBLE", clue: "รถเปิดประทุน" }, { word: "HOTAIRBALLOON", clue: "บอลลูนลมร้อน" },
-                    { word: "DIRIGIBLE", clue: "เรือเหาะ" }, { word: "MONORAIL", clue: "รถไฟรางเดียว" }, { word: "CABLECAR", clue: "กระเช้าไฟฟ้า" },
-                    { word: "MOTORHOME", clue: "รถบ้าน" }, { word: "CRUISESHIP", clue: "เรือเดินสมุทร" },
-                ],
-                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' },
-                hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
-            },
+                easyWordsPool: [{ word: "CAR", clue: "รถยนต์" }, { word: "BUS", clue: "รถบัส" }, { word: "TAXI", clue: "รถแท็กซี่" }, { word: "TRAIN", clue: "รถไฟ" }, { word: "BIKE", clue: "จักรยาน" }, { word: "BOAT", clue: "เรือ" }, { word: "TRUCK", clue: "รถบรรทุก" }, { word: "VAN", clue: "รถตู้" }, { word: "JEEP", clue: "รถจี๊ป" }, { word: "MOTO", clue: "มอเตอร์ไซค์" }, { word: "SCOOTER", clue: "สกู๊ตเตอร์" }, { word: "SHIP", clue: "เรือใหญ่" }, { word: "YACHT", clue: "เรือยอชท์" }, { word: "PLANE", clue: "เครื่องบิน" }, { word: "JET", clue: "เครื่องบินเจ็ต" }, { word: "WAGON", clue: "รถเกวียน" }, { word: "SLIDE", clue: "เลื่อน" }, { word: "TROLLEY", clue: "รถเข็น" }, { word: "KAYAK", clue: "เรือคายัค" }, { word: "RAFT", clue: "แพ" }],
+                hardWordsPool: [{ word: "HELICOPTER", clue: "เฮลิคอปเตอร์" }, { word: "SUBMARINE", clue: "เรือดำน้ำ" }, { word: "AEROPLANE", clue: "เครื่องบิน" }, { word: "AMBULANCE", clue: "รถพยาบาล" }, { word: "CRUISE", clue: "เรือสำราญ" }, { word: "SPACESHIP", clue: "ยานอวกาศ" }, { word: "LIMOUSINE", clue: "รถลิมูซีน" }, { word: "TRACTOR", clue: "รถแทรกเตอร์" }, { word: "FORKLIFT", clue: "รถยก" }, { word: "BICYCLE", clue: "จักรยาน" }, { word: "SKATEBOARD", clue: "สเกตบอร์ด" }, { word: "SNOWMOBILE", clue: "รถสโนว์โมบิล" }, { word: "FIRETRUCK", clue: "รถดับเพลิง" }, { word: "CONVERTIBLE", clue: "รถเปิดประทุน" }, { word: "HOTAIRBALLOON", clue: "บอลลูนลมร้อน" }, { word: "DIRIGIBLE", clue: "เรือเหาะ" }, { word: "MONORAIL", clue: "รถไฟรางเดียว" }, { word: "CABLECAR", clue: "กระเช้าไฟฟ้า" }, { word: "MOTORHOME", clue: "รถบ้าน" }, { word: "CRUISESHIP", clue: "เรือเดินสมุทร" }],
+                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' }, hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
+            }
         };
 
-        // Pastel colors with 50% opacity (Hex with 80 transparency)
         const PASTEL_COLORS = [
             '#FFC0CB80', '#ADD8E680', '#90EE9080', '#F0808080', '#DDA0DD80', 
             '#B0E0E680', '#F5DEB380', '#AFEEEE80', '#E6E6FA80', '#FFE4B580'
         ];
-
 
         // --- GAME STATE ---
         let GRID_SIZE = 10;
@@ -666,11 +516,8 @@
         let startTime;
         let totalTimeSeconds = 0;
         let isAutoplayMode = false; 
-        
-        // ADDED: For stable double tap detection on mobile
         let lastTap = 0;
-        const DBL_TAP_THRESHOLD = 300; // 300ms is standard for double tap
-
+        const DBL_TAP_THRESHOLD = 300; 
 
         // --- ELEMENTS ---
         const screens = {
@@ -689,31 +536,25 @@
         const diffHardBtn = document.getElementById('diff-hard');
         const notifEl = document.getElementById('autoplay-notification');
 
-
         // --- UTILITY FUNCTIONS ---
-
-        // ADDED: Show temporary notification instead of alert
         function showNotification(message) {
             notifEl.textContent = message;
             notifEl.classList.add('show');
             setTimeout(() => {
                 notifEl.classList.remove('show');
-            }, 3000); // Hide after 3 seconds
+            }, 3000); 
         }
 
-        // ADDED: Custom tap handler for mobile double-tap detection
         function handleTitleTap() {
             const now = Date.now();
             if (now - lastTap < DBL_TAP_THRESHOLD) {
-                // Double tap detected
                 toggleAutoplayMode();
-                lastTap = 0; // Reset
+                lastTap = 0;
             } else {
                 lastTap = now;
             }
         }
 
-        // ADDED: Dynamic difficulty button text rendering
         function updateDifficultyButtons(categoryId) {
             const category = WORD_CATEGORIES[categoryId];
             
@@ -726,8 +567,6 @@
             diffHardBtn.dataset.categoryId = categoryId;
         }
 
-
-        // --- AUTOPLAY TOGGLE LOGIC ---
         function toggleAutoplayMode() {
             isAutoplayMode = !isAutoplayMode;
             if (isAutoplayMode) {
@@ -737,10 +576,10 @@
                 gameTitleEl.classList.remove('pulsing-title');
                 showNotification("โหมดเล่นอัตโนมัติ (Autoplay Mode) ปิดใช้งานแล้ว");
                 clearTimeout(autoplayTimeout); 
+                window.speechSynthesis.cancel(); // Cancel speech if toggled off
             }
         }
         
-        // --- SCREEN MANAGEMENT ---
         function showScreen(id) {
             Object.values(screens).forEach(screen => {
                 screen.classList.remove('active-screen');
@@ -757,7 +596,7 @@
         function selectCategory(categoryId) {
             const category = WORD_CATEGORIES[categoryId];
             document.getElementById('difficulty-category-title').textContent = `หมวดหมู่: ${category.name}`;
-            updateDifficultyButtons(categoryId); // NEW
+            updateDifficultyButtons(categoryId); 
             showScreen('difficulty-screen');
         }
 
@@ -766,7 +605,6 @@
             currentConfig = category[difficulty];
             currentConfig.categoryId = categoryId; 
             
-            // 1. Select Random Words
             const pool = category[currentConfig.poolKey];
             const filteredPool = pool.filter(w => w.word.length <= currentConfig.size);
             const shuffledPool = [...filteredPool].sort(() => 0.5 - Math.random());
@@ -779,21 +617,21 @@
                 hintUsed: false 
             }));
 
-            // 2. Set Dynamic Config & State
             GRID_SIZE = currentConfig.size;
             clearSelection(false);
             
-            // 3. Setup Grid and Clues
             generatePuzzle(); 
             renderGrid();
             renderClues();
 
-            // 4. Setup UI and Start Timer/Autoplay
             categoryTitleEl.textContent = `หมวดหมู่: ${category.name} (${difficulty === 'easy' ? 'ง่าย 6x6' : 'ยาก 10x10'})`;
             
             if (isAutoplayMode) {
                 gridEl.style.pointerEvents = 'none'; 
-                autoSolveNextWord(1000); 
+                // Wait 1 second before starting the sequence
+                setTimeout(() => {
+                    if (isAutoplayMode) runAutoplaySequence();
+                }, 1000);
             } else {
                 gridEl.style.pointerEvents = 'auto'; 
                 clearTimeout(autoplayTimeout); 
@@ -803,8 +641,6 @@
             showScreen('game-screen');
         }
 
-
-        // --- TIMER LOGIC ---
         function startTimer() {
             startTime = Date.now();
             updateTimerDisplay();
@@ -830,9 +666,6 @@
             const elapsed = Math.floor((Date.now() - startTime) / 1000);
             timerDisplayEl.textContent = `เวลา: ${formatTime(elapsed)}`;
         }
-        
-
-        // --- CORE GAME LOGIC (Puzzle Generation, Selection, Check) ---
         
         function createEmptyGrid() { grid = Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill('')); }
         function getRandomLetter() { return ALPHABET[Math.floor(Math.random() * ALPHABET.length)]; }
@@ -863,7 +696,6 @@
             }
         }
         
-        // MODIFIED: Guaranteed Placement
         function generatePuzzle() {
             const MAX_PUZZLE_ATTEMPTS = 500; 
             const placementWords = [...targetWords].sort((a, b) => b.word.length - a.word.length); 
@@ -916,7 +748,6 @@
                  console.error("Critical Error: Failed to generate a puzzle with all words after maximum attempts.");
             }
             
-            // Fill Empty Cells
             for (let r = 0; r < GRID_SIZE; r++) {
                 for (let c = 0; c < GRID_SIZE; c++) {
                     if (grid[r][c] === '') {
@@ -965,10 +796,7 @@
             const wordToSolve = wordDetails.word;
             const placement = placedWordsMeta.find(meta => meta.word === wordToSolve);
 
-            if (!placement) {
-                console.error(`Could not find placement for word: ${wordToSolve}`);
-                return null;
-            }
+            if (!placement) return null;
             
             const r1 = placement.start.r;
             const c1 = placement.start.c;
@@ -976,34 +804,23 @@
             const c2 = placement.end.c;
             const cellsToHighlight = getCellsInLine(r1, c1, r2, c2);
             
-            const firstCell = cellsToHighlight[0];
-            const lastCell = cellsToHighlight[cellsToHighlight.length - 1]; 
-            
             return {
                 wordDetails,
-                cells: cellsToHighlight,
-                first: firstCell,
-                last: lastCell
+                cells: cellsToHighlight
             };
         }
 
-
-        // --- Selection & Check Handlers ---
         function clearSelection(flash = false) {
             selectedCells.forEach(cell => {
                 cell.classList.remove('selected'); 
                 if (!cell.classList.contains('found')) { 
                     cell.style.transform = 'scale(1)'; 
                 }
-                
                 if (flash) {
                     cell.classList.add('wrong-flash');
-                    setTimeout(() => {
-                        cell.classList.remove('wrong-flash');
-                    }, 1000);
+                    setTimeout(() => { cell.classList.remove('wrong-flash'); }, 1000);
                 } 
             });
-            
             selectedCells = [];
             startCell = null;
         }
@@ -1019,24 +836,24 @@
 
             targetWords.forEach((wordObj, index) => {
                 if (wordObj.found) return;
-
                 const target = wordObj.word;
                 const reversedTarget = target.split('').reverse().join('');
-
                 if (selectedWord === target || selectedWord === reversedTarget) {
                     foundIndex = index;
                 }
             });
 
             if (foundIndex !== -1) {
-                markAsFound(foundIndex, selectedCells, targetWords[foundIndex]);
+                // Manual mark: speak = true
+                markAsFound(foundIndex, selectedCells, targetWords[foundIndex], true);
             } else {
                 playFailTone();
                 clearSelection(true); 
             }
         }
 
-        function markAsFound(index, cells, wordDetails) {
+        // Modified to accept a 'speak' flag to control audio manually in Autoplay
+        function markAsFound(index, cells, wordDetails, shouldSpeak = true) {
             const foundWordsCountBefore = targetWords.filter(w => w.found).length;
             
             if (wordDetails.colorIndex === -1) {
@@ -1045,24 +862,19 @@
             }
             
             const uniqueColor = PASTEL_COLORS[wordDetails.colorIndex];
-            
             wordDetails.found = true;
-            
 
             cells.forEach(cell => {
                 cell.classList.remove('selected', 'wrong-flash');
                 cell.classList.add('found');
                 cell.style.transform = 'scale(1)'; 
-                
                 cell.style.backgroundColor = uniqueColor;
             });
 
             const clueEl = clueListEl.querySelector(`[data-index="${index}"]`);
             if (clueEl) {
                 clueEl.classList.add('found');
-                
                 clueEl.style.backgroundColor = uniqueColor.substring(0, 7) + 'FF';
-                
                 if (wordDetails.hintUsed) {
                     clueEl.classList.add('hint-used');
                 }
@@ -1070,99 +882,76 @@
             
             playSuccessTone();
             
-            speakText(wordDetails.word.toLowerCase(), 'en-US'); 
-            
-            checkWinCondition();
+            if (shouldSpeak) {
+                speakText(wordDetails.word.toLowerCase(), 'en-US'); 
+                checkWinCondition();
+            }
             
             selectedCells = [];
             startCell = null;
-            
             renderClues();
         }
 
-
-        // --- AUTOPLAY CORE FUNCTION ---
-        function autoSolveWordAnimation(index) {
-            const data = getWordCellsAndPlacement(index);
-            if (!data) return;
-
-            const { wordDetails, cells, first, last } = data;
-            
-            cells.forEach(cell => cell.classList.remove('selected', 'wrong-flash'));
-            
-            // 0.0s: Step 1: Highlight the first letter
-            first.classList.add('selected');
-
-            // 1.0s: Step 2: Highlight the word, mark as found, and read English
-            setTimeout(() => {
-                cells.forEach(cell => cell.classList.add('selected'));
-                wordDetails.hintUsed = true; 
-                markWordFoundForAutoplay(index, cells, wordDetails);
-
-            }, 1000);
-
-            // 2.5s: Step 3: Read Thai clue/translation and clear selection
-            setTimeout(() => {
-                speakText(wordDetails.clue, 'th-TH'); 
-                cells.forEach(cell => cell.classList.remove('selected'));
-            }, 2500); 
-
-            // Schedule the next action (Next Word or Win Check) exactly 4.5 seconds after the START of this word's solution
-            autoSolveNextWord(4500); 
-        }
-
-        function markWordFoundForAutoplay(index, cells, wordDetails) {
-            const foundWordsCountBefore = targetWords.filter(w => w.found).length;
-            
-            if (wordDetails.colorIndex === -1) {
-                const colorIndex = foundWordsCountBefore % PASTEL_COLORS.length;
-                wordDetails.colorIndex = colorIndex; 
-            }
-            const uniqueColor = PASTEL_COLORS[wordDetails.colorIndex];
-            wordDetails.found = true;
-            
-            cells.forEach(cell => {
-                cell.classList.remove('wrong-flash');
-                cell.classList.add('found');
-                cell.style.transform = 'scale(1)'; 
-                cell.style.backgroundColor = uniqueColor;
-            });
-            
-            const clueEl = clueListEl.querySelector(`[data-index="${index}"]`);
-            if (clueEl) {
-                clueEl.classList.add('found');
-                clueEl.style.backgroundColor = uniqueColor.substring(0, 7) + 'FF';
-                if (wordDetails.hintUsed) {
-                    clueEl.classList.add('hint-used');
-                }
-            }
-            playSuccessTone();
-            
-            speakText(wordDetails.word.toLowerCase(), 'en-US'); 
-            
-            renderClues(); 
-        }
-
-
-        function autoSolveNextWord(delay = 4500) {
-            clearTimeout(autoplayTimeout); 
+        // --- MAIN AUTOPLAY LOOP (ASYNC) ---
+        async function runAutoplaySequence() {
             const nextIndex = targetWords.findIndex(w => !w.found);
             
-            if (nextIndex !== -1) {
-                autoplayTimeout = setTimeout(() => {
-                    if (isAutoplayMode) { 
-                        autoSolveWordAnimation(nextIndex);
-                    }
-                }, delay);
+            if (nextIndex === -1) {
+                // No more words (Win condition check)
+                return; 
+            }
+
+            if (!isAutoplayMode) return;
+
+            const data = getWordCellsAndPlacement(nextIndex);
+            if (!data) { 
+                // Skip broken word (shouldn't happen with guaranteed placement)
+                setTimeout(runAutoplaySequence, 100);
+                return;
+            }
+
+            const { wordDetails, cells } = data;
+
+            // 1. ONE-SHOT HIGHLIGHT: Immediately highlight the word cells
+            // (No more partial highlighting steps)
+            cells.forEach(cell => cell.classList.add('selected'));
+            
+            // Mark logic (Updates visual Found state + Tone) but NO SPEAKING YET
+            wordDetails.hintUsed = true;
+            markAsFound(nextIndex, cells, wordDetails, false); // false = don't speak yet
+
+            // 2. Speak English -> WAIT for completion
+            await speakText(wordDetails.word.toLowerCase(), 'en-US');
+            
+            // Check cancel
+            if (!isAutoplayMode) return;
+
+            // 3. Small Gap
+            await new Promise(r => setTimeout(r, 500)); 
+            if (!isAutoplayMode) return;
+
+            // 4. Speak Thai -> WAIT for completion
+            await speakText(wordDetails.clue, 'th-TH');
+            
+            if (!isAutoplayMode) return;
+
+            // 5. Clear temporary 'selected' styling (leave 'found' style)
+            cells.forEach(cell => cell.classList.remove('selected'));
+
+            // 6. Check if this was the last word
+            const foundCount = targetWords.filter(w => w.found).length;
+            if (foundCount === targetWords.length) {
+                // Last word finished reading.
+                // Wait 1s then show summary
+                stopTimer();
+                await new Promise(r => setTimeout(r, 1000));
+                showSummaryScreen();
             } else {
-                // All words found (runs 4.5s after the last word started)
-                autoplayTimeout = setTimeout(() => {
-                     gridEl.style.pointerEvents = 'auto'; 
-                     checkWinCondition(); 
-                }, delay);
+                // Not last word, wait 1s then next
+                await new Promise(r => setTimeout(r, 1000));
+                if (isAutoplayMode) runAutoplaySequence();
             }
         }
-
 
         // --- HINT/SOLVE SYSTEM (MANUAL) ---
         function solveWord(index) {
@@ -1175,7 +964,6 @@
             }
 
             wordDetails.hintUsed = true;
-            
             const data = getWordCellsAndPlacement(index);
             if (!data) {
                 showNotification(`ขออภัย! คำว่า "${wordDetails.word}" ไม่อยู่ในตาราง`);
@@ -1183,17 +971,15 @@
             }
             
             data.cells.forEach(cell => cell.classList.add('selected'));
-            markAsFound(index, data.cells, wordDetails);
+            markAsFound(index, data.cells, wordDetails, true); // Manual hint speaks
             data.cells.forEach(cell => cell.classList.remove('selected'));
         }
 
-
-        // --- CLICK SELECTION HANDLER (START/END) ---
+        // --- CLICK SELECTION HANDLER ---
         function onCellClick(e) {
             if (isAutoplayMode) return; 
 
             const cell = e.target;
-            
             if (!cell.classList.contains('grid-cell')) return; 
 
             if (startCell === null) {
@@ -1203,7 +989,6 @@
                 selectedCells = [startCell];
             } else {
                 const endCell = cell; 
-                
                 if (startCell === endCell) {
                     clearSelection(false);
                     return;
@@ -1222,14 +1007,12 @@
                     selectedCells.forEach(c => c.classList.remove('selected'));
                     selectedCells = getCellsInLine(r1, c1, r2, c2);
                     selectedCells.forEach(c => c.classList.add('selected'));
-                    
                     handleWordCheck();
                 } else {
                     selectedCells.forEach(c => c.classList.remove('selected'));
                     startCell.classList.add('selected');
                     endCell.classList.add('selected');
                     selectedCells = [startCell, endCell]; 
-                    
                     playFailTone();
                     clearSelection(true); 
                 }
@@ -1243,7 +1026,6 @@
             }
         }
         
-        // --- RENDERING & UI UPDATES ---
         function renderGrid() {
             gridEl.innerHTML = '';
             gridEl.style.gridTemplateColumns = `repeat(${GRID_SIZE}, 1fr)`;
@@ -1304,34 +1086,24 @@
 
             const foundCount = targetWords.filter(w => w.found).length;
             scoreEl.textContent = `คำศัพท์ที่พบ: ${foundCount}/${targetWords.length}`;
-            
-            if (!isAutoplayMode) {
-                 checkWinCondition();
-            }
         }
         
         function checkWinCondition() {
             const foundCount = targetWords.filter(w => w.found).length;
-            
             if (foundCount === targetWords.length) {
-                stopTimer();
-                clearTimeout(autoplayTimeout); 
-                
-                gridEl.style.pointerEvents = 'none'; 
-                
-                // 1.0s delay before summary screen
-                setTimeout(() => {
-                    gridEl.style.pointerEvents = 'auto'; 
-                    showSummaryScreen();
-                }, 1000); 
+                // For Manual play, end here. 
+                // For Autoplay, logic is handled in runAutoplaySequence to wait for audio.
+                if (!isAutoplayMode) {
+                    stopTimer();
+                    gridEl.style.pointerEvents = 'none'; 
+                    setTimeout(showSummaryScreen, 1000); 
+                }
             }
         }
         
         function showSummaryScreen() {
             showScreen('summary-screen');
-
             const timeString = formatTime(totalTimeSeconds);
-
             const totalFound = targetWords.length;
             const hintsUsed = targetWords.filter(w => w.hintUsed).length;
             const finalScore = Math.max(0, totalFound - hintsUsed); 
@@ -1348,11 +1120,9 @@
             document.getElementById('summary-time').textContent = `เวลาที่ใช้: ${timeString}`;
         }
 
-
-        // --- INITIALIZATION & EVENT LISTENERS ---
+        // --- INITIALIZATION ---
         function init() {
             attachGridListeners(); 
-            // NEW: Use custom tap handler for stable double-tap activation
             gameTitleEl.addEventListener('click', handleTitleTap);
             showScreen('start-screen');
         }
@@ -1365,14 +1135,10 @@
                     audioContext.resume();
                 }
             }, { once: true });
-            
-            // Set up default difficulty buttons on load
             updateDifficultyButtons('animals'); 
-            
             init(); 
         });
 
-        // Event listeners for screen transitions
         document.getElementById('start-screen').addEventListener('click', (e) => {
             if (e.target.classList.contains('category-btn')) {
                 selectCategory(e.target.dataset.category);
@@ -1398,7 +1164,6 @@
                  showScreen('start-screen');
              }
         });
-        
     </script>
 </body>
 </html>
