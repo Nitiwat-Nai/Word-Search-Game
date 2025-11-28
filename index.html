@@ -35,7 +35,7 @@
 
         .container {
             width: 100%;
-            max-width: 600px; /* Wider for better tablet view */
+            max-width: 600px;
             background-color: var(--card-bg);
             box-shadow: var(--shadow-md);
             min-height: 100vh;
@@ -171,7 +171,7 @@
             margin: 0 auto;
             max-width: 100%;
             user-select: none;
-            touch-action: none; /* Important for drag on mobile */
+            touch-action: none; 
         }
 
         .grid-cell {
@@ -179,7 +179,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.1rem; /* Bigger font */
+            font-size: 1.1rem;
             font-weight: 700;
             background: white;
             cursor: pointer;
@@ -188,7 +188,7 @@
         }
 
         .grid-cell.selected {
-            background-color: #ffd700; /* Gold for selection */
+            background-color: #ffd700; 
             color: #333;
             transform: scale(0.95);
             border-radius: 4px;
@@ -196,8 +196,14 @@
 
         .grid-cell.found {
             color: white;
-            /* Background set dynamically via JS */
         }
+
+        .grid-cell.wrong-flash {
+            background-color: var(--danger-color) !important;
+            color: white !important;
+            animation: wrongFlash 0.5s;
+        }
+        @keyframes wrongFlash { 0%, 100% { background-color: var(--danger-color); } 50% { opacity: 0.5; } }
 
         /* --- CLUE LIST --- */
         #clue-panel {
@@ -260,7 +266,6 @@
         .summary-item span:first-child { font-weight: bold; color: #667eea; }
         .summary-item span:last-child { color: #555; }
 
-        /* Autoplay Pulse Animation */
         .pulsing-title { animation: slowPulse 2s infinite; color: #FFD54F; }
         @keyframes slowPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 
@@ -331,8 +336,7 @@
             
             <div class="summary-content">
                 <h3 style="margin:0; border-bottom: 2px solid #eee; padding-bottom: 10px;">สรุปคำศัพท์ที่เรียนรู้</h3>
-                <ul id="summary-list" class="summary-list">
-                    </ul>
+                <ul id="summary-list" class="summary-list"></ul>
             </div>
 
             <button id="summary-btn" class="main-btn">เล่นใหม่อีกครั้ง</button>
@@ -340,123 +344,28 @@
     </div>
 
     <script>
-        // --- DATA: WORD CATEGORIES (12 Total) ---
+        // --- DATA: WORD CATEGORIES ---
         const WORD_CATEGORIES = {
-            'animals': {
-                name: 'สัตว์ป่า',
-                pool: [
-                    { w: "CAT", t: "แมว" }, { w: "DOG", t: "สุนัข" }, { w: "LION", t: "สิงโต" }, { w: "TIGER", t: "เสือ" }, { w: "BEAR", t: "หมี" }, 
-                    { w: "ZEBRA", t: "ม้าลาย" }, { w: "PIG", t: "หมู" }, { w: "COW", t: "วัว" }, { w: "DUCK", t: "เป็ด" }, { w: "FISH", t: "ปลา" },
-                    { w: "BIRD", t: "นก" }, { w: "FROG", t: "กบ" }, { w: "MONKEY", t: "ลิง" }, { w: "SNAKE", t: "งู" }, { w: "RABBIT", t: "กระต่าย" },
-                    { w: "SHEEP", t: "แกะ" }, { w: "HORSE", t: "ม้า" }, { w: "ELEPHANT", t: "ช้าง" }, { w: "GIRAFFE", t: "ยีราฟ" }, { w: "PANDA", t: "แพนด้า" }
-                ]
-            },
-            'fruits': {
-                name: 'ผลไม้',
-                pool: [
-                    { w: "APPLE", t: "แอปเปิ้ล" }, { w: "BANANA", t: "กล้วย" }, { w: "ORANGE", t: "ส้ม" }, { w: "GRAPE", t: "องุ่น" }, { w: "MANGO", t: "มะม่วง" },
-                    { w: "PAPAYA", t: "มะละกอ" }, { w: "COCONUT", t: "มะพร้าว" }, { w: "BERRY", t: "เบอร์รี่" }, { w: "MELON", t: "เมล่อน" }, { w: "LEMON", t: "เลมอน" },
-                    { w: "PEACH", t: "ลูกพีช" }, { w: "CHERRY", t: "เชอร์รี่" }, { w: "KIWI", t: "กีวี่" }, { w: "PEAR", t: "ลูกแพร์" }, { w: "LIME", t: "มะนาว" },
-                    { w: "PLUM", t: "ลูกพลัม" }, { w: "DURIAN", t: "ทุเรียน" }, { w: "GUAVA", t: "ฝรั่ง" }, { w: "LYCHEE", t: "ลิ้นจี่" }, { w: "DATE", t: "อินทผลัม" }
-                ]
-            },
-            'foods': {
-                name: 'อาหาร',
-                pool: [
-                    { w: "RICE", t: "ข้าว" }, { w: "SOUP", t: "ซุป" }, { w: "EGG", t: "ไข่" }, { w: "MEAT", t: "เนื้อ" }, { w: "FISH", t: "ปลา" },
-                    { w: "BREAD", t: "ขนมปัง" }, { w: "CAKE", t: "เค้ก" }, { w: "PIZZA", t: "พิซซ่า" }, { w: "BURGER", t: "เบอร์เกอร์" }, { w: "SALAD", t: "สลัด" },
-                    { w: "NOODLE", t: "ก๋วยเตี๋ยว" }, { w: "PASTA", t: "พาสต้า" }, { w: "STEAK", t: "สเต็ก" }, { w: "SUSHI", t: "ซูชิ" }, { w: "DONUT", t: "โดนัท" },
-                    { w: "MILK", t: "นม" }, { w: "TEA", t: "ชา" }, { w: "COFFEE", t: "กาแฟ" }, { w: "JUICE", t: "น้ำผลไม้" }, { w: "WATER", t: "น้ำ" }
-                ]
-            },
-            'sports': {
-                name: 'กีฬา',
-                pool: [
-                    { w: "RUN", t: "วิ่ง" }, { w: "JUMP", t: "กระโดด" }, { w: "SWIM", t: "ว่ายน้ำ" }, { w: "GOLF", t: "กอล์ฟ" }, { w: "BOXING", t: "มวย" },
-                    { w: "TENNIS", t: "เทนนิส" }, { w: "JUDO", t: "ยูโด" }, { w: "RUGBY", t: "รักบี้" }, { w: "YOGA", t: "โยคะ" }, { w: "HOCKEY", t: "ฮอกกี้" },
-                    { w: "SOCCER", t: "ฟุตบอล" }, { w: "KARATE", t: "คาราเต้" }, { w: "SURF", t: "โต้คลื่น" }, { w: "SKI", t: "สกี" }, { w: "SKATE", t: "สเก็ต" },
-                    { w: "CYCLING", t: "ปั่นจักรยาน" }, { w: "RACING", t: "แข่งรถ" }, { w: "DIVING", t: "ดำน้ำ" }, { w: "ARCHERY", t: "ยิงธนู" }, { w: "SUMO", t: "ซูโม่" }
-                ]
-            },
-            'colors': {
-                name: 'สี',
-                pool: [
-                    { w: "RED", t: "สีแดง" }, { w: "BLUE", t: "สีน้ำเงิน" }, { w: "GREEN", t: "สีเขียว" }, { w: "PINK", t: "สีชมพู" }, { w: "BLACK", t: "สีดำ" },
-                    { w: "WHITE", t: "สีขาว" }, { w: "GREY", t: "สีเทา" }, { w: "GOLD", t: "สีทอง" }, { w: "SILVER", t: "สีเงิน" }, { w: "BROWN", t: "สีน้ำตาล" },
-                    { w: "YELLOW", t: "สีเหลือง" }, { w: "PURPLE", t: "สีม่วง" }, { w: "ORANGE", t: "สีส้ม" }, { w: "VIOLET", t: "สีม่วงคราม" }, { w: "INDIGO", t: "สีคราม" },
-                    { w: "CREAM", t: "สีครีม" }, { w: "NAVY", t: "สีกรมท่า" }, { w: "CYAN", t: "สีฟ้า" }, { w: "LIME", t: "สีเขียวมะนาว" }, { w: "TEAL", t: "สีน้ำเงินอมเขียว" }
-                ]
-            },
-            'jobs': {
-                name: 'อาชีพ',
-                pool: [
-                    { w: "DOCTOR", t: "หมอ" }, { w: "NURSE", t: "พยาบาล" }, { w: "TEACHER", t: "ครู" }, { w: "POLICE", t: "ตำรวจ" }, { w: "SOLDIER", t: "ทหาร" },
-                    { w: "CHEF", t: "พ่อครัว" }, { w: "PILOT", t: "นักบิน" }, { w: "JUDGE", t: "ผู้พิพากษา" }, { w: "ARTIST", t: "ศิลปิน" }, { w: "SINGER", t: "นักร้อง" },
-                    { w: "ACTOR", t: "นักแสดง" }, { w: "DRIVER", t: "คนขับรถ" }, { w: "FARMER", t: "ชาวนา" }, { w: "VET", t: "สัตวแพทย์" }, { w: "BAKER", t: "คนอบขนม" },
-                    { w: "MONK", t: "พระสงฆ์" }, { w: "GUIDE", t: "ไกด์" }, { w: "MAID", t: "แม่บ้าน" }, { w: "GUARD", t: "ยาม" }, { w: "CLERK", t: "เสมียน" }
-                ]
-            },
-            'vehicles': {
-                name: 'ยานพาหนะ',
-                pool: [
-                    { w: "CAR", t: "รถยนต์" }, { w: "BUS", t: "รถบัส" }, { w: "VAN", t: "รถตู้" }, { w: "TAXI", t: "แท็กซี่" }, { w: "BIKE", t: "จักรยาน" },
-                    { w: "TRAIN", t: "รถไฟ" }, { w: "BOAT", t: "เรือ" }, { w: "SHIP", t: "เรือใหญ่" }, { w: "PLANE", t: "เครื่องบิน" }, { w: "JET", t: "เครื่องบินเจ็ท" },
-                    { w: "TRUCK", t: "รถบรรทุก" }, { w: "JEEP", t: "รถจี๊ป" }, { w: "MOTO", t: "มอเตอร์ไซค์" }, { w: "YACHT", t: "เรือยอชท์" }, { w: "FERRY", t: "เรือข้ามฟาก" },
-                    { w: "SUBWAY", t: "รถไฟใต้ดิน" }, { w: "TUKTUK", t: "ตุ๊กตุ๊ก" }, { w: "CANOE", t: "เรือแคนู" }, { w: "ROCKET", t: "จรวด" }, { w: "TANK", t: "รถถัง" }
-                ]
-            },
-            'countries': {
-                name: 'ประเทศ',
-                pool: [
-                    { w: "THAI", t: "ไทย" }, { w: "CHINA", t: "จีน" }, { w: "JAPAN", t: "ญี่ปุ่น" }, { w: "KOREA", t: "เกาหลี" }, { w: "INDIA", t: "อินเดีย" },
-                    { w: "USA", t: "อเมริกา" }, { w: "UK", t: "อังกฤษ" }, { w: "FRANCE", t: "ฝรั่งเศส" }, { w: "ITALY", t: "อิตาลี" }, { w: "SPAIN", t: "สเปน" },
-                    { w: "BRAZIL", t: "บราซิล" }, { w: "CHILE", t: "ชิลี" }, { w: "PERU", t: "เปรู" }, { w: "EGYPT", t: "อียิปต์" }, { w: "IRAN", t: "อิหร่าน" },
-                    { w: "IRAQ", t: "อิรัก" }, { w: "LAOS", t: "ลาว" }, { w: "BURMA", t: "พม่า" }, { w: "RUSSIA", t: "รัสเซีย" }, { w: "CANADA", t: "แคนาดา" }
-                ]
-            },
-            // --- 4 NEW CATEGORIES ---
-            'technology': {
-                name: 'เทคโนโลยี',
-                pool: [
-                    { w: "MOUSE", t: "เมาส์" }, { w: "CODE", t: "รหัส" }, { w: "DATA", t: "ข้อมูล" }, { w: "WIFI", t: "ไวไฟ" }, { w: "APP", t: "แอปพลิเคชัน" },
-                    { w: "WEB", t: "เว็บ" }, { w: "LINK", t: "ลิงก์" }, { w: "FILE", t: "ไฟล์" }, { w: "JAVA", t: "จาวา" }, { w: "ROBOT", t: "หุ่นยนต์" },
-                    { w: "PHONE", t: "โทรศัพท์" }, { w: "EMAIL", t: "อีเมล" }, { w: "CLICK", t: "คลิก" }, { w: "TYPE", t: "พิมพ์" }, { w: "SAVE", t: "บันทึก" },
-                    { w: "COPY", t: "คัดลอก" }, { w: "PASTE", t: "วาง" }, { w: "LOGIN", t: "เข้าสู่ระบบ" }, { w: "CHAT", t: "แชท" }, { w: "ZOOM", t: "ซูม" }
-                ]
-            },
-            'clothes': {
-                name: 'เสื้อผ้า',
-                pool: [
-                    { w: "SHIRT", t: "เสื้อเชิ้ต" }, { w: "DRESS", t: "ชุดเดรส" }, { w: "SKIRT", t: "กระโปรง" }, { w: "JEANS", t: "ยีนส์" }, { w: "COAT", t: "เสื้อโค้ท" },
-                    { w: "HAT", t: "หมวก" }, { w: "CAP", t: "หมวกแก๊ป" }, { w: "SHOE", t: "รองเท้า" }, { w: "SOCK", t: "ถุงเท้า" }, { w: "BELT", t: "เข็มขัด" },
-                    { w: "BOOT", t: "รองเท้าบูท" }, { w: "RING", t: "แหวน" }, { w: "WATCH", t: "นาฬิกา" }, { w: "VEST", t: "เสื้อกั๊ก" }, { w: "TIE", t: "เนคไท" },
-                    { w: "SUIT", t: "ชุดสูท" }, { w: "BAG", t: "กระเป๋า" }, { w: "PANTS", t: "กางเกง" }, { w: "SCARF", t: "ผ้าพันคอ" }, { w: "MASK", t: "หน้ากาก" }
-                ]
-            },
-            'weather': {
-                name: 'สภาพอากาศ',
-                pool: [
-                    { w: "SUN", t: "ดวงอาทิตย์" }, { w: "RAIN", t: "ฝน" }, { w: "SNOW", t: "หิมะ" }, { w: "WIND", t: "ลม" }, { w: "HOT", t: "ร้อน" },
-                    { w: "COLD", t: "หนาว" }, { w: "STORM", t: "พายุ" }, { w: "CLOUD", t: "เมฆ" }, { w: "FOG", t: "หมอก" }, { w: "DRY", t: "แห้ง" },
-                    { w: "WET", t: "เปียก" }, { w: "ICE", t: "น้ำแข็ง" }, { w: "HEAT", t: "ความร้อน" }, { w: "HAIL", t: "ลูกเห็บ" }, { w: "WARM", t: "อบอุ่น" },
-                    { w: "COOL", t: "เย็นสบาย" }, { w: "DARK", t: "มืด" }, { w: "CLEAR", t: "แจ่มใส" }, { w: "MIST", t: "หมอกบาง" }, { w: "DEW", t: "น้ำค้าง" }
-                ]
-            },
-            'music': {
-                name: 'ดนตรี',
-                pool: [
-                    { w: "SONG", t: "เพลง" }, { w: "BAND", t: "วงดนตรี" }, { w: "ROCK", t: "ร็อค" }, { w: "POP", t: "ป๊อป" }, { w: "JAZZ", t: "แจ๊ส" },
-                    { w: "DRUM", t: "กลอง" }, { w: "BASS", t: "เบส" }, { w: "PIANO", t: "เปียโน" }, { w: "NOTE", t: "โน้ต" }, { w: "SING", t: "ร้องเพลง" },
-                    { w: "PLAY", t: "เล่น" }, { w: "LOUD", t: "ดัง" }, { w: "SOFT", t: "เบา" }, { w: "TUNE", t: "ท่วงทำนอง" }, { w: "BEAT", t: "จังหวะ" },
-                    { w: "RAP", t: "แร็ป" }, { w: "SHOW", t: "การแสดง" }, { w: "DANCE", t: "เต้น" }, { w: "DJ", t: "ดีเจ" }, { w: "CD", t: "ซีดี" }
-                ]
-            }
+            'animals': { name: 'สัตว์ป่า', pool: [{ w: "CAT", t: "แมว" }, { w: "DOG", t: "สุนัข" }, { w: "LION", t: "สิงโต" }, { w: "TIGER", t: "เสือ" }, { w: "BEAR", t: "หมี" }, { w: "ZEBRA", t: "ม้าลาย" }, { w: "PIG", t: "หมู" }, { w: "COW", t: "วัว" }, { w: "DUCK", t: "เป็ด" }, { w: "FISH", t: "ปลา" }, { w: "BIRD", t: "นก" }, { w: "FROG", t: "กบ" }, { w: "MONKEY", t: "ลิง" }, { w: "SNAKE", t: "งู" }, { w: "RABBIT", t: "กระต่าย" }, { w: "SHEEP", t: "แกะ" }, { w: "HORSE", t: "ม้า" }, { w: "ELEPHANT", t: "ช้าง" }, { w: "GIRAFFE", t: "ยีราฟ" }, { w: "PANDA", t: "แพนด้า" }] },
+            'fruits': { name: 'ผลไม้', pool: [{ w: "APPLE", t: "แอปเปิ้ล" }, { w: "BANANA", t: "กล้วย" }, { w: "ORANGE", t: "ส้ม" }, { w: "GRAPE", t: "องุ่น" }, { w: "MANGO", t: "มะม่วง" }, { w: "PAPAYA", t: "มะละกอ" }, { w: "COCONUT", t: "มะพร้าว" }, { w: "BERRY", t: "เบอร์รี่" }, { w: "MELON", t: "เมล่อน" }, { w: "LEMON", t: "เลมอน" }, { w: "PEACH", t: "ลูกพีช" }, { w: "CHERRY", t: "เชอร์รี่" }, { w: "KIWI", t: "กีวี่" }, { w: "PEAR", t: "ลูกแพร์" }, { w: "LIME", t: "มะนาว" }, { w: "PLUM", t: "ลูกพลัม" }, { w: "DURIAN", t: "ทุเรียน" }, { w: "GUAVA", t: "ฝรั่ง" }, { w: "LYCHEE", t: "ลิ้นจี่" }, { w: "DATE", t: "อินทผลัม" }] },
+            'foods': { name: 'อาหาร', pool: [{ w: "RICE", t: "ข้าว" }, { w: "SOUP", t: "ซุป" }, { w: "EGG", t: "ไข่" }, { w: "MEAT", t: "เนื้อ" }, { w: "FISH", t: "ปลา" }, { w: "BREAD", t: "ขนมปัง" }, { w: "CAKE", t: "เค้ก" }, { w: "PIZZA", t: "พิซซ่า" }, { w: "BURGER", t: "เบอร์เกอร์" }, { w: "SALAD", t: "สลัด" }, { w: "NOODLE", t: "ก๋วยเตี๋ยว" }, { w: "PASTA", t: "พาสต้า" }, { w: "STEAK", t: "สเต็ก" }, { w: "SUSHI", t: "ซูชิ" }, { w: "DONUT", t: "โดนัท" }, { w: "MILK", t: "นม" }, { w: "TEA", t: "ชา" }, { w: "COFFEE", t: "กาแฟ" }, { w: "JUICE", t: "น้ำผลไม้" }, { w: "WATER", t: "น้ำ" }] },
+            'sports': { name: 'กีฬา', pool: [{ w: "RUN", t: "วิ่ง" }, { w: "JUMP", t: "กระโดด" }, { w: "SWIM", t: "ว่ายน้ำ" }, { w: "GOLF", t: "กอล์ฟ" }, { w: "BOXING", t: "มวย" }, { w: "TENNIS", t: "เทนนิส" }, { w: "JUDO", t: "ยูโด" }, { w: "RUGBY", t: "รักบี้" }, { w: "YOGA", t: "โยคะ" }, { w: "HOCKEY", t: "ฮอกกี้" }, { w: "SOCCER", t: "ฟุตบอล" }, { w: "KARATE", t: "คาราเต้" }, { w: "SURF", t: "โต้คลื่น" }, { w: "SKI", t: "สกี" }, { w: "SKATE", t: "สเก็ต" }, { w: "CYCLING", t: "ปั่นจักรยาน" }, { w: "RACING", t: "แข่งรถ" }, { w: "DIVING", t: "ดำน้ำ" }, { w: "ARCHERY", t: "ยิงธนู" }, { w: "SUMO", t: "ซูโม่" }] },
+            'colors': { name: 'สี', pool: [{ w: "RED", t: "สีแดง" }, { w: "BLUE", t: "สีน้ำเงิน" }, { w: "GREEN", t: "สีเขียว" }, { w: "PINK", t: "สีชมพู" }, { w: "BLACK", t: "สีดำ" }, { w: "WHITE", t: "สีขาว" }, { w: "GREY", t: "สีเทา" }, { w: "GOLD", t: "สีทอง" }, { w: "SILVER", t: "สีเงิน" }, { w: "BROWN", t: "สีน้ำตาล" }, { w: "YELLOW", t: "สีเหลือง" }, { w: "PURPLE", t: "สีม่วง" }, { w: "ORANGE", t: "สีส้ม" }, { w: "VIOLET", t: "สีม่วงคราม" }, { w: "INDIGO", t: "สีคราม" }, { w: "CREAM", t: "สีครีม" }, { w: "NAVY", t: "สีกรมท่า" }, { w: "CYAN", t: "สีฟ้า" }, { w: "LIME", t: "สีเขียวมะนาว" }, { w: "TEAL", t: "สีน้ำเงินอมเขียว" }] },
+            'jobs': { name: 'อาชีพ', pool: [{ w: "DOCTOR", t: "หมอ" }, { w: "NURSE", t: "พยาบาล" }, { w: "TEACHER", t: "ครู" }, { w: "POLICE", t: "ตำรวจ" }, { w: "SOLDIER", t: "ทหาร" }, { w: "CHEF", t: "พ่อครัว" }, { w: "PILOT", t: "นักบิน" }, { w: "JUDGE", t: "ผู้พิพากษา" }, { w: "ARTIST", t: "ศิลปิน" }, { w: "SINGER", t: "นักร้อง" }, { w: "ACTOR", t: "นักแสดง" }, { w: "DRIVER", t: "คนขับรถ" }, { w: "FARMER", t: "ชาวนา" }, { w: "VET", t: "สัตวแพทย์" }, { w: "BAKER", t: "คนอบขนม" }, { w: "MONK", t: "พระสงฆ์" }, { w: "GUIDE", t: "ไกด์" }, { w: "MAID", t: "แม่บ้าน" }, { w: "GUARD", t: "ยาม" }, { w: "CLERK", t: "เสมียน" }] },
+            'vehicles': { name: 'ยานพาหนะ', pool: [{ w: "CAR", t: "รถยนต์" }, { w: "BUS", t: "รถบัส" }, { w: "VAN", t: "รถตู้" }, { w: "TAXI", t: "แท็กซี่" }, { w: "BIKE", t: "จักรยาน" }, { w: "TRAIN", t: "รถไฟ" }, { w: "BOAT", t: "เรือ" }, { w: "SHIP", t: "เรือใหญ่" }, { w: "PLANE", t: "เครื่องบิน" }, { w: "JET", t: "เครื่องบินเจ็ท" }, { w: "TRUCK", t: "รถบรรทุก" }, { w: "JEEP", t: "รถจี๊ป" }, { w: "MOTO", t: "มอเตอร์ไซค์" }, { w: "YACHT", t: "เรือยอชท์" }, { w: "FERRY", t: "เรือข้ามฟาก" }, { w: "SUBWAY", t: "รถไฟใต้ดิน" }, { w: "TUKTUK", t: "ตุ๊กตุ๊ก" }, { w: "CANOE", t: "เรือแคนู" }, { w: "ROCKET", t: "จรวด" }, { w: "TANK", t: "รถถัง" }] },
+            'countries': { name: 'ประเทศ', pool: [{ w: "THAI", t: "ไทย" }, { w: "CHINA", t: "จีน" }, { w: "JAPAN", t: "ญี่ปุ่น" }, { w: "KOREA", t: "เกาหลี" }, { w: "INDIA", t: "อินเดีย" }, { w: "USA", t: "อเมริกา" }, { w: "UK", t: "อังกฤษ" }, { w: "FRANCE", t: "ฝรั่งเศส" }, { w: "ITALY", t: "อิตาลี" }, { w: "SPAIN", t: "สเปน" }, { w: "BRAZIL", t: "บราซิล" }, { w: "CHILE", t: "ชิลี" }, { w: "PERU", t: "เปรู" }, { w: "EGYPT", t: "อียิปต์" }, { w: "IRAN", t: "อิหร่าน" }, { w: "IRAQ", t: "อิรัก" }, { w: "LAOS", t: "ลาว" }, { w: "BURMA", t: "พม่า" }, { w: "RUSSIA", t: "รัสเซีย" }, { w: "CANADA", t: "แคนาดา" }] },
+            'technology': { name: 'เทคโนโลยี', pool: [{ w: "MOUSE", t: "เมาส์" }, { w: "CODE", t: "รหัส" }, { w: "DATA", t: "ข้อมูล" }, { w: "WIFI", t: "ไวไฟ" }, { w: "APP", t: "แอปพลิเคชัน" }, { w: "WEB", t: "เว็บ" }, { w: "LINK", t: "ลิงก์" }, { w: "FILE", t: "ไฟล์" }, { w: "JAVA", t: "จาวา" }, { w: "ROBOT", t: "หุ่นยนต์" }, { w: "PHONE", t: "โทรศัพท์" }, { w: "EMAIL", t: "อีเมล" }, { w: "CLICK", t: "คลิก" }, { w: "TYPE", t: "พิมพ์" }, { w: "SAVE", t: "บันทึก" }, { w: "COPY", t: "คัดลอก" }, { w: "PASTE", t: "วาง" }, { w: "LOGIN", t: "เข้าสู่ระบบ" }, { w: "CHAT", t: "แชท" }, { w: "ZOOM", t: "ซูม" }] },
+            'clothes': { name: 'เสื้อผ้า', pool: [{ w: "SHIRT", t: "เสื้อเชิ้ต" }, { w: "DRESS", t: "ชุดเดรส" }, { w: "SKIRT", t: "กระโปรง" }, { w: "JEANS", t: "ยีนส์" }, { w: "COAT", t: "เสื้อโค้ท" }, { w: "HAT", t: "หมวก" }, { w: "CAP", t: "หมวกแก๊ป" }, { w: "SHOE", t: "รองเท้า" }, { w: "SOCK", t: "ถุงเท้า" }, { w: "BELT", t: "เข็มขัด" }, { w: "BOOT", t: "รองเท้าบูท" }, { w: "RING", t: "แหวน" }, { w: "WATCH", t: "นาฬิกา" }, { w: "VEST", t: "เสื้อกั๊ก" }, { w: "TIE", t: "เนคไท" }, { w: "SUIT", t: "ชุดสูท" }, { w: "BAG", t: "กระเป๋า" }, { w: "PANTS", t: "กางเกง" }, { w: "SCARF", t: "ผ้าพันคอ" }, { w: "MASK", t: "หน้ากาก" }] },
+            'weather': { name: 'สภาพอากาศ', pool: [{ w: "SUN", t: "ดวงอาทิตย์" }, { w: "RAIN", t: "ฝน" }, { w: "SNOW", t: "หิมะ" }, { w: "WIND", t: "ลม" }, { w: "HOT", t: "ร้อน" }, { w: "COLD", t: "หนาว" }, { w: "STORM", t: "พายุ" }, { w: "CLOUD", t: "เมฆ" }, { w: "FOG", t: "หมอก" }, { w: "DRY", t: "แห้ง" }, { w: "WET", t: "เปียก" }, { w: "ICE", t: "น้ำแข็ง" }, { w: "HEAT", t: "ความร้อน" }, { w: "HAIL", t: "ลูกเห็บ" }, { w: "WARM", t: "อบอุ่น" }, { w: "COOL", t: "เย็นสบาย" }, { w: "DARK", t: "มืด" }, { w: "CLEAR", t: "แจ่มใส" }, { w: "MIST", t: "หมอกบาง" }, { w: "DEW", t: "น้ำค้าง" }] },
+            'music': { name: 'ดนตรี', pool: [{ w: "SONG", t: "เพลง" }, { w: "BAND", t: "วงดนตรี" }, { w: "ROCK", t: "ร็อค" }, { w: "POP", t: "ป๊อป" }, { w: "JAZZ", t: "แจ๊ส" }, { w: "DRUM", t: "กลอง" }, { w: "BASS", t: "เบส" }, { w: "PIANO", t: "เปียโน" }, { w: "NOTE", t: "โน้ต" }, { w: "SING", t: "ร้องเพลง" }, { w: "PLAY", t: "เล่น" }, { w: "LOUD", t: "ดัง" }, { w: "SOFT", t: "เบา" }, { w: "TUNE", t: "ท่วงทำนอง" }, { w: "BEAT", t: "จังหวะ" }, { w: "RAP", t: "แร็ป" }, { w: "SHOW", t: "การแสดง" }, { w: "DANCE", t: "เต้น" }, { w: "DJ", t: "ดีเจ" }, { w: "CD", t: "ซีดี" }] }
         };
 
         const PASTEL_COLORS = [
             '#FFC0CB', '#87CEFA', '#90EE90', '#F08080', '#DDA0DD', 
             '#B0E0E6', '#F0E68C', '#AFEEEE', '#E6E6FA', '#FFDAB9'
         ];
+
+        const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
         // --- GAME STATE ---
         let GRID_SIZE = 8;
@@ -471,11 +380,9 @@
         let isAutoplayMode = false;
         let isGameRunning = false;
         
-        // Double tap detection
         let lastTap = 0;
         const DBL_TAP_THRESHOLD = 300;
 
-        // Elements
         const gridEl = document.getElementById('word-search-grid');
         const clueListEl = document.getElementById('clue-list');
         const notifEl = document.getElementById('autoplay-notification');
@@ -514,7 +421,6 @@
             } else {
                 title.classList.remove('pulsing-title');
                 showNotification("ปิดโหมดอัตโนมัติ");
-                // Reset state handled in game loop check
             }
         }
 
@@ -538,7 +444,6 @@
             const cat = WORD_CATEGORIES[catKey];
             document.getElementById('difficulty-category-title').textContent = `หมวดหมู่: ${cat.name}`;
             
-            // Set data for difficulty buttons
             const btnEasy = document.getElementById('diff-easy');
             btnEasy.textContent = `ง่าย (6x6, 6 คำ)`;
             btnEasy.onclick = () => startGame(catKey, 6, 6);
@@ -552,14 +457,16 @@
 
         async function startGame(catKey, size, count) {
             isGameRunning = true;
-            GRID_SIZE = size;
+            
             const cat = WORD_CATEGORIES[catKey];
-            
-            // Randomly select words
             const shuffled = [...cat.pool].sort(() => 0.5 - Math.random());
-            const selected = shuffled.slice(0, count);
+            let selected = shuffled.slice(0, count);
             
-            // Prepare Target Words
+            // Check word length vs grid size
+            const maxLen = Math.max(...selected.map(x => x.w.length));
+            // Auto resize if words are too long
+            GRID_SIZE = Math.max(size, maxLen);
+
             targetWords = selected.map(obj => ({
                 word: obj.w,
                 clue: obj.t,
@@ -578,10 +485,10 @@
             startTimer();
             showScreen('game-screen');
 
-            // Autoplay Start Logic
+            // Autoplay Logic
             if (isAutoplayMode) {
-                gridEl.style.pointerEvents = 'none'; // Lock grid
-                await new Promise(r => setTimeout(r, 1500)); // Wait 1.5s start
+                gridEl.style.pointerEvents = 'none'; 
+                await new Promise(r => setTimeout(r, 1500)); // Initial Delay
                 if(isGameRunning) runAutoplayLoop();
             } else {
                 gridEl.style.pointerEvents = 'auto';
@@ -590,15 +497,13 @@
 
         function generatePuzzleGuaranteed() {
             let attempts = 0;
-            const maxAttempts = 100;
+            const maxAttempts = 500;
             
             while(attempts < maxAttempts) {
-                // Init Grid
                 grid = Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill(''));
                 placedWordsMeta = [];
                 let placedCount = 0;
 
-                // Sort Longest First
                 const wordsToPlace = [...targetWords].sort((a,b) => b.word.length - a.word.length);
 
                 for (let wObj of wordsToPlace) {
@@ -681,7 +586,6 @@
                 li.className = 'clue-item';
                 li.innerHTML = `<span>${item.clue}</span><span class="clue-word-text" style="display:none; font-weight:bold; display:block; color:#333;">${item.word}</span>`;
                 li.id = `clue-${idx}`;
-                // Manual hint
                 li.onclick = () => { if(!isAutoplayMode) giveHint(idx); };
                 clueListEl.appendChild(li);
             });
@@ -693,7 +597,7 @@
             document.getElementById('score').textContent = `คำศัพท์: ${found}/${targetWords.length}`;
         }
 
-        // --- INTERACTION ---
+        // --- INTERACTION HANDLERS ---
         let isSelecting = false;
 
         function getCell(r, c) { return document.querySelector(`.grid-cell[data-r='${r}'][data-c='${c}']`); }
@@ -710,13 +614,10 @@
 
         function handleMove(e) {
             if(!isSelecting || !startCell) return;
-            e.preventDefault(); // Prevent scroll
-            
-            // Get element at touch position
+            e.preventDefault(); 
             const touch = e.touches ? e.touches[0] : e;
             const target = document.elementFromPoint(touch.clientX, touch.clientY);
             const cell = target?.closest('.grid-cell');
-            
             if(cell) checkLine(startCell, cell);
         }
 
@@ -748,10 +649,8 @@
             const dr = Math.sign(r2 - r1);
             const dc = Math.sign(c2 - c1);
 
-            // Check if valid diagonal/straight line
             if((r1===r2 && c1===c2) || (r1===r2) || (c1===c2) || (Math.abs(r1-r2) === Math.abs(c1-c2))) {
                 let r = r1, c = c1;
-                // Only loop if movement
                 if (r1===r2 && c1===c2) {
                     selectCell(start);
                 } else {
@@ -769,13 +668,11 @@
         function checkWordMatch() {
             const wordStr = selectedCells.map(c => c.textContent).join('');
             const wordStrRev = wordStr.split('').reverse().join('');
-            
             const matchIdx = targetWords.findIndex(t => !t.found && (t.word === wordStr || t.word === wordStrRev));
             
             if (matchIdx !== -1) {
                 foundWord(matchIdx, selectedCells);
             } else {
-                // Wrong
                 selectedCells.forEach(c => c.classList.add('wrong-flash'));
                 setTimeout(clearSelection, 500);
             }
@@ -784,8 +681,6 @@
         function foundWord(idx, cells, isAuto = false) {
             const wordObj = targetWords[idx];
             wordObj.found = true;
-            
-            // Assign Color
             const color = PASTEL_COLORS[idx % PASTEL_COLORS.length];
             wordObj.color = color;
 
@@ -795,20 +690,16 @@
                 c.style.backgroundColor = color;
             });
 
-            // Update Clue List
             const li = document.getElementById(`clue-${idx}`);
             li.classList.add('found');
             li.style.backgroundColor = color;
 
-            // Sound
             if(!isAuto) {
-                // Manual play: speak only English
                 speakText(wordObj.word, 'en-US');
             }
 
             updateStatus();
             
-            // Check Win (Only for manual, Auto handles its own finish)
             if(!isAuto && targetWords.every(t => t.found)) {
                 setTimeout(finishGame, 1500);
             }
@@ -817,15 +708,10 @@
         function giveHint(idx) {
             const w = targetWords[idx];
             if(w.found) return;
-            
-            // Mark hint used style
             document.getElementById(`clue-${idx}`).classList.add('hint-used');
-            
-            // Find coords
             const meta = placedWordsMeta.find(m => m.word === w.word);
-            // Simulate selection
             const cells = getCellsFromMeta(meta);
-            foundWord(idx, cells); // Treat as found
+            foundWord(idx, cells);
         }
 
         function getCellsFromMeta(meta) {
@@ -843,7 +729,7 @@
             return cells;
         }
 
-        // --- AUTOPLAY LOGIC (The Core Fixes) ---
+        // --- AUTOPLAY LOGIC ---
         async function runAutoplayLoop() {
             for (let i = 0; i < targetWords.length; i++) {
                 if (!isGameRunning || !isAutoplayMode) break;
@@ -853,18 +739,14 @@
                 const meta = placedWordsMeta.find(m => m.word === wordObj.word);
                 const cells = getCellsFromMeta(meta);
 
-                // 1. One-Shot Highlight (Immediately mark as found)
-                foundWord(i, cells, true); // true = suppress default audio logic
+                foundWord(i, cells, true); 
 
-                // 2. Speak English -> Wait
                 await speakText(wordObj.word, 'en-US');
                 if (!isGameRunning || !isAutoplayMode) break;
 
-                // 3. Speak Thai -> Wait
                 await speakText(wordObj.clue, 'th-TH');
                 if (!isGameRunning || !isAutoplayMode) break;
 
-                // 4. Delay 1.5s BEFORE next word
                 await new Promise(r => setTimeout(r, 1500));
             }
 
@@ -894,7 +776,6 @@
             isGameRunning = false;
             stopTimer();
             
-            // Populate Summary List (Visual Only)
             summaryListEl.innerHTML = '';
             targetWords.forEach(w => {
                 const li = document.createElement('li');
@@ -934,7 +815,6 @@
         
         document.getElementById('summary-btn').onclick = () => showScreen('start-screen');
 
-        // Init Speech
         if('speechSynthesis' in window) window.speechSynthesis.getVoices();
 
     </script>
