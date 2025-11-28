@@ -6,25 +6,27 @@
     <title>Word Search Learning</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700;800&display=swap" rel="stylesheet">
     <style>
-        /* --- MODERN THEME & VARIABLES --- */
+        /* --- THEME & VARIABLES (CREAM/BROWN THEME) --- */
         :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --primary-color: #8D6E63; /* Brownish */
             --accent-color: #FFD54F;
-            --success-color: #48c6ef;
-            --danger-color: #ff6b6b;
-            --bg-color: #f0f4f8;
-            --card-bg: #ffffff;
-            --text-dark: #2d3436;
+            --success-color: #66BB6A;
+            --danger-color: #EF5350;
+            
+            /* Theme Colors Updated */
+            --bg-color: #D7CCC8; /* Light Brown background for body */
+            --card-bg: #FFF8E1; /* Cream background for container */
+            
+            --text-dark: #3E2723; /* Dark Brown text */
             --text-light: #ffffff;
-            --shadow-sm: 0 4px 6px rgba(0,0,0,0.05);
-            --shadow-md: 0 10px 15px rgba(0,0,0,0.1);
-            --grid-line: #e2e8f0;
-            --border-radius: 16px;
+            --grid-line: #BCAAA4; /* Grid border color */
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-md: 0 8px 16px rgba(0,0,0,0.15);
         }
 
         body {
             font-family: 'Sarabun', sans-serif;
-            background: var(--bg-color);
+            background-color: var(--bg-color);
             color: var(--text-dark);
             margin: 0;
             padding: 0;
@@ -35,7 +37,7 @@
 
         .container {
             width: 100%;
-            max-width: 600px;
+            max-width: 600px; 
             background-color: var(--card-bg);
             box-shadow: var(--shadow-md);
             min-height: 100vh;
@@ -45,14 +47,12 @@
             overflow-x: hidden;
         }
 
-        /* --- HEADER & TITLE --- */
+        /* --- HEADER --- */
         header {
-            background: var(--primary-gradient);
+            background-color: var(--primary-color);
             color: var(--text-light);
-            padding: 1.5rem 1rem;
+            padding: 1rem;
             text-align: center;
-            border-bottom-left-radius: 20px;
-            border-bottom-right-radius: 20px;
             box-shadow: var(--shadow-sm);
             margin-bottom: 1rem;
             position: relative;
@@ -60,31 +60,31 @@
         }
 
         header h1 {
-            font-size: 2rem;
+            font-size: 1.8rem;
             margin: 0;
             font-weight: 800;
             letter-spacing: 1px;
             cursor: pointer;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
-        /* --- NOTIFICATION TOAST --- */
+        /* --- NOTIFICATION --- */
         #autoplay-notification {
             position: fixed;
-            top: 20px;
+            top: 60px; /* Below header slightly */
             left: 50%;
-            transform: translateX(-50%) translateY(-100px);
-            background-color: #333;
-            color: #fff;
-            padding: 12px 24px;
+            transform: translateX(-50%) translateY(-150%);
+            background-color: #3E2723;
+            color: #FFD54F;
+            padding: 10px 20px;
             border-radius: 30px;
             font-weight: bold;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             z-index: 1000;
-            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            transition: transform 0.4s ease;
             width: 90%;
             max-width: 400px;
             text-align: center;
+            font-size: 0.9rem;
         }
         #autoplay-notification.show {
             transform: translateX(-50%) translateY(0);
@@ -97,81 +97,85 @@
             flex-direction: column;
             gap: 1rem;
             animation: fadeIn 0.3s ease-out;
+            flex: 1; /* Fill remaining space */
         }
         .active-screen { display: flex; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* --- BUTTONS & CATEGORIES --- */
+        /* --- BUTTONS --- */
         .grid-buttons {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
+            gap: 10px;
         }
 
         .main-btn {
             border: none;
-            padding: 1rem;
-            border-radius: 12px;
-            font-size: 1.1rem;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1rem;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s;
-            color: white;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.1s;
+            color: var(--text-dark);
+            box-shadow: 0 3px 0 rgba(0,0,0,0.1);
             position: relative;
-            overflow: hidden;
         }
-        
-        .main-btn:active { transform: scale(0.98); }
+        .main-btn:active { transform: translateY(2px); box-shadow: none; }
 
         .category-btn {
-            background: white;
-            color: #555;
-            border: 2px solid #eee;
+            background: #FFFFFF;
+            border: 2px solid #D7CCC8;
         }
         .category-btn:hover {
-            border-color: #667eea;
-            color: #667eea;
-            background: #f8f9fa;
+            background: #EFEBE9;
+            border-color: #8D6E63;
         }
 
         .difficulty-btn {
-            background: var(--success-color);
-            background-image: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            background: #8D6E63;
+            color: white;
             width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
             margin-top: 10px;
         }
 
         #restart-btn, #summary-btn {
-            background: var(--text-dark);
-            margin-top: 1rem;
+            background: #5D4037;
+            color: white;
+            margin-top: auto; /* Push to bottom if flex */
+            margin-bottom: 20px;
         }
 
-        /* --- GAME BOARD --- */
+        /* --- GAME BOARD (FULL WIDTH FIX) --- */
+        #game-screen {
+            padding: 0.5rem; /* Reduced padding for full width feel */
+        }
+
         #status-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: white;
-            padding: 10px 15px;
-            border-radius: 12px;
-            box-shadow: var(--shadow-sm);
+            background: rgba(255,255,255,0.6);
+            padding: 8px 12px;
+            border-radius: 8px;
             font-weight: bold;
-            color: #555;
+            color: var(--text-dark);
+            margin-bottom: 10px;
         }
 
         #word-search-grid {
             display: grid;
-            gap: 2px;
-            background: var(--grid-line);
-            padding: 2px;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+            /* Grid will be set via JS */
+            width: 100%;
             margin: 0 auto;
-            max-width: 100%;
+            border: 2px solid var(--grid-line);
+            background-color: var(--grid-line); /* Gap color */
+            gap: 1px; /* Thin gap */
             user-select: none;
-            touch-action: none; 
+            touch-action: none;
+            box-sizing: border-box;
         }
 
         .grid-cell {
@@ -179,23 +183,23 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.1rem;
+            font-size: 1.2rem; /* Larger Font */
             font-weight: 700;
-            background: white;
+            background: #FFF; /* White cells on cream bg */
             cursor: pointer;
             color: var(--text-dark);
             transition: background-color 0.1s;
         }
 
         .grid-cell.selected {
-            background-color: #ffd700; 
-            color: #333;
-            transform: scale(0.95);
-            border-radius: 4px;
+            background-color: #FFECB3; /* Light Orange/Gold */
+            color: #000;
+            transform: scale(1);
         }
 
         .grid-cell.found {
             color: white;
+            font-weight: 900;
         }
 
         .grid-cell.wrong-flash {
@@ -207,53 +211,56 @@
 
         /* --- CLUE LIST --- */
         #clue-panel {
-            background: white;
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: var(--shadow-sm);
+            background: rgba(255,255,255,0.5);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            flex: 1; /* Allow it to take space */
         }
-        #clue-panel h3 { margin: 0 0 10px 0; color: #667eea; }
+        #clue-panel h3 { margin: 0 0 8px 0; font-size: 1.1rem; color: #5D4037; }
         
         #clue-list {
             list-style: none;
             padding: 0;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 8px;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 6px;
         }
 
         .clue-item {
-            background: #f8f9fa;
-            padding: 8px;
-            border-radius: 8px;
-            font-size: 0.9rem;
+            background: #fff;
+            padding: 6px;
+            border-radius: 6px;
+            font-size: 0.85rem;
             text-align: center;
-            border: 1px solid #eee;
+            border: 1px solid #D7CCC8;
             transition: all 0.3s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
         .clue-item.found {
-            background: #d4edda;
-            border-color: #c3e6cb;
-            color: #155724;
-            opacity: 0.6;
+            background: #A1887F; /* Brownish found state */
+            color: white;
+            border-color: #8D6E63;
+            opacity: 0.8;
         }
         .clue-item.hint-used {
-            border: 1px dashed var(--danger-color);
+            border: 2px dashed var(--danger-color);
         }
 
-        /* --- SUMMARY SCREEN --- */
+        /* --- SUMMARY --- */
         .summary-content {
-            background: white;
+            background: #fff;
             border-radius: 12px;
             padding: 20px;
-            box-shadow: var(--shadow-sm);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             text-align: left;
+            margin-bottom: 20px;
         }
         .summary-list {
             list-style: none;
             padding: 0;
-            margin-top: 15px;
-            max-height: 300px;
+            margin-top: 10px;
+            max-height: 50vh;
             overflow-y: auto;
         }
         .summary-item {
@@ -263,8 +270,7 @@
             border-bottom: 1px solid #eee;
             font-size: 1rem;
         }
-        .summary-item span:first-child { font-weight: bold; color: #667eea; }
-        .summary-item span:last-child { color: #555; }
+        .summary-item span:first-child { font-weight: bold; color: #5D4037; }
 
         .pulsing-title { animation: slowPulse 2s infinite; color: #FFD54F; }
         @keyframes slowPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
@@ -282,8 +288,8 @@
 
         <div id="start-screen" class="screen active-screen">
             <div style="text-align: center; margin-bottom: 1rem;">
-                <h2 style="margin:0; color: #667eea;">เลือกหมวดหมู่คำศัพท์</h2>
-                <p style="color: #888; font-size: 0.9rem;">แตะ 2 ครั้งที่หัวข้อด้านบน เพื่อเปิดโหมดอัตโนมัติ</p>
+                <h2 style="margin:0; color: #5D4037;">เลือกหมวดหมู่</h2>
+                <p style="color: #795548; font-size: 0.9rem;">แตะ 2 ครั้งที่หัวข้อด้านบน เพื่อเปิดโหมดอัตโนมัติ</p>
             </div>
             
             <div class="grid-buttons">
@@ -303,10 +309,15 @@
         </div>
 
         <div id="difficulty-screen" class="screen">
-            <h2 id="difficulty-category-title" style="text-align: center; color: #555;">หมวดหมู่: ...</h2>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 id="difficulty-category-title" style="color: #5D4037;">หมวดหมู่: ...</h2>
+                <p style="color: #888;">เลือกระดับความยาก</p>
+            </div>
+            
             <button class="main-btn difficulty-btn" data-difficulty="easy" id="diff-easy">ระดับง่าย</button>
-            <button class="main-btn difficulty-btn" data-difficulty="hard" id="diff-hard" style="background-image: linear-gradient(to right, #fa709a 0%, #fee140 100%);">ระดับยาก</button>
-            <button class="main-btn category-btn" onclick="showScreen('start-screen')" style="margin-top:20px;">⬅ ย้อนกลับ</button>
+            <button class="main-btn difficulty-btn" data-difficulty="hard" id="diff-hard" style="background-color: #6D4C41;">ระดับยาก</button>
+            
+            <button class="main-btn category-btn" onclick="showScreen('start-screen')" style="margin-top:auto;">⬅ ย้อนกลับ</button>
         </div>
 
         <div id="game-screen" class="screen">
@@ -335,7 +346,7 @@
             </div>
             
             <div class="summary-content">
-                <h3 style="margin:0; border-bottom: 2px solid #eee; padding-bottom: 10px;">สรุปคำศัพท์ที่เรียนรู้</h3>
+                <h3 style="margin:0; border-bottom: 2px solid #eee; padding-bottom: 10px; color: #5D4037;">คำศัพท์ที่เรียนรู้</h3>
                 <ul id="summary-list" class="summary-list"></ul>
             </div>
 
@@ -344,7 +355,8 @@
     </div>
 
     <script>
-        // --- DATA: WORD CATEGORIES ---
+        // --- CONFIG & DATA ---
+        const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         const WORD_CATEGORIES = {
             'animals': { name: 'สัตว์ป่า', pool: [{ w: "CAT", t: "แมว" }, { w: "DOG", t: "สุนัข" }, { w: "LION", t: "สิงโต" }, { w: "TIGER", t: "เสือ" }, { w: "BEAR", t: "หมี" }, { w: "ZEBRA", t: "ม้าลาย" }, { w: "PIG", t: "หมู" }, { w: "COW", t: "วัว" }, { w: "DUCK", t: "เป็ด" }, { w: "FISH", t: "ปลา" }, { w: "BIRD", t: "นก" }, { w: "FROG", t: "กบ" }, { w: "MONKEY", t: "ลิง" }, { w: "SNAKE", t: "งู" }, { w: "RABBIT", t: "กระต่าย" }, { w: "SHEEP", t: "แกะ" }, { w: "HORSE", t: "ม้า" }, { w: "ELEPHANT", t: "ช้าง" }, { w: "GIRAFFE", t: "ยีราฟ" }, { w: "PANDA", t: "แพนด้า" }] },
             'fruits': { name: 'ผลไม้', pool: [{ w: "APPLE", t: "แอปเปิ้ล" }, { w: "BANANA", t: "กล้วย" }, { w: "ORANGE", t: "ส้ม" }, { w: "GRAPE", t: "องุ่น" }, { w: "MANGO", t: "มะม่วง" }, { w: "PAPAYA", t: "มะละกอ" }, { w: "COCONUT", t: "มะพร้าว" }, { w: "BERRY", t: "เบอร์รี่" }, { w: "MELON", t: "เมล่อน" }, { w: "LEMON", t: "เลมอน" }, { w: "PEACH", t: "ลูกพีช" }, { w: "CHERRY", t: "เชอร์รี่" }, { w: "KIWI", t: "กีวี่" }, { w: "PEAR", t: "ลูกแพร์" }, { w: "LIME", t: "มะนาว" }, { w: "PLUM", t: "ลูกพลัม" }, { w: "DURIAN", t: "ทุเรียน" }, { w: "GUAVA", t: "ฝรั่ง" }, { w: "LYCHEE", t: "ลิ้นจี่" }, { w: "DATE", t: "อินทผลัม" }] },
@@ -360,15 +372,14 @@
             'music': { name: 'ดนตรี', pool: [{ w: "SONG", t: "เพลง" }, { w: "BAND", t: "วงดนตรี" }, { w: "ROCK", t: "ร็อค" }, { w: "POP", t: "ป๊อป" }, { w: "JAZZ", t: "แจ๊ส" }, { w: "DRUM", t: "กลอง" }, { w: "BASS", t: "เบส" }, { w: "PIANO", t: "เปียโน" }, { w: "NOTE", t: "โน้ต" }, { w: "SING", t: "ร้องเพลง" }, { w: "PLAY", t: "เล่น" }, { w: "LOUD", t: "ดัง" }, { w: "SOFT", t: "เบา" }, { w: "TUNE", t: "ท่วงทำนอง" }, { w: "BEAT", t: "จังหวะ" }, { w: "RAP", t: "แร็ป" }, { w: "SHOW", t: "การแสดง" }, { w: "DANCE", t: "เต้น" }, { w: "DJ", t: "ดีเจ" }, { w: "CD", t: "ซีดี" }] }
         };
 
+        // Darker Earth/Pastel Tones for selection
         const PASTEL_COLORS = [
-            '#FFC0CB', '#87CEFA', '#90EE90', '#F08080', '#DDA0DD', 
-            '#B0E0E6', '#F0E68C', '#AFEEEE', '#E6E6FA', '#FFDAB9'
+            '#8D6E63', '#5D4037', '#795548', '#A1887F', '#6D4C41',
+            '#4E342E', '#3E2723', '#8C7B75', '#BCAAA4', '#D7CCC8' 
         ];
 
-        const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
         // --- GAME STATE ---
-        let GRID_SIZE = 8;
+        let GRID_SIZE = 8; // Default, changed dynamically
         let targetWords = [];
         let grid = [];
         let placedWordsMeta = [];
@@ -445,27 +456,29 @@
             document.getElementById('difficulty-category-title').textContent = `หมวดหมู่: ${cat.name}`;
             
             const btnEasy = document.getElementById('diff-easy');
-            btnEasy.textContent = `ง่าย (6x6, 6 คำ)`;
-            btnEasy.onclick = () => startGame(catKey, 6, 6);
+            btnEasy.textContent = `ง่าย (8x8, 6 คำ)`;
+            btnEasy.onclick = () => startGame(catKey, 8, 6);
 
             const btnHard = document.getElementById('diff-hard');
-            btnHard.textContent = `ยาก (10x10, 10 คำ)`;
-            btnHard.onclick = () => startGame(catKey, 10, 10);
+            btnHard.textContent = `ยาก (12x12, 10 คำ)`;
+            btnHard.onclick = () => startGame(catKey, 12, 10);
 
             showScreen('difficulty-screen');
         }
 
         async function startGame(catKey, size, count) {
             isGameRunning = true;
-            
+            GRID_SIZE = size; // Default size preference
             const cat = WORD_CATEGORIES[catKey];
-            const shuffled = [...cat.pool].sort(() => 0.5 - Math.random());
-            let selected = shuffled.slice(0, count);
             
-            // Check word length vs grid size
+            const shuffled = [...cat.pool].sort(() => 0.5 - Math.random());
+            const selected = shuffled.slice(0, count);
+            
+            // Auto resize if words are too long for chosen grid
             const maxLen = Math.max(...selected.map(x => x.w.length));
-            // Auto resize if words are too long
-            GRID_SIZE = Math.max(size, maxLen);
+            if (maxLen > GRID_SIZE) {
+                GRID_SIZE = maxLen; // Force expand
+            }
 
             targetWords = selected.map(obj => ({
                 word: obj.w,
@@ -485,7 +498,7 @@
             startTimer();
             showScreen('game-screen');
 
-            // Autoplay Logic
+            // Autoplay Start Logic
             if (isAutoplayMode) {
                 gridEl.style.pointerEvents = 'none'; 
                 await new Promise(r => setTimeout(r, 1500)); // Initial Delay
@@ -497,7 +510,7 @@
 
         function generatePuzzleGuaranteed() {
             let attempts = 0;
-            const maxAttempts = 500;
+            const maxAttempts = 200;
             
             while(attempts < maxAttempts) {
                 grid = Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill(''));
@@ -597,7 +610,7 @@
             document.getElementById('score').textContent = `คำศัพท์: ${found}/${targetWords.length}`;
         }
 
-        // --- INTERACTION HANDLERS ---
+        // --- INTERACTION ---
         let isSelecting = false;
 
         function getCell(r, c) { return document.querySelector(`.grid-cell[data-r='${r}'][data-c='${c}']`); }
@@ -747,6 +760,7 @@
                 await speakText(wordObj.clue, 'th-TH');
                 if (!isGameRunning || !isAutoplayMode) break;
 
+                // Wait 1.5s AFTER reading is finished
                 await new Promise(r => setTimeout(r, 1500));
             }
 
