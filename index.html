@@ -3,309 +3,267 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Word Search</title>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700;900&display=swap" rel="stylesheet">
+    <title>Word Search Learning</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700;800&display=swap" rel="stylesheet">
     <style>
-        /* --- THEME & GLOBAL STYLES --- */
+        /* --- MODERN THEME & VARIABLES --- */
         :root {
-            --color-primary: #29B6F6;
-            --color-secondary-select: #42A5F5;
-            --color-wrong: #EF5350;
-            --color-bg: #80DEEA;
-            --color-card: #FFFFFF;
-            --color-text-dark: #2C3E50;
-            --color-text-light: #FFFFFF;
-            --color-header: var(--color-primary); 
-            --color-grid-line: #BBDEFB;
-            --color-category-btn: #FFD54F;
-            --color-difficulty-btn: #66BB6A;
-        }
-
-        .screen {
-            padding: 0 1rem 1rem;
-            display: none;
-            flex-direction: column;
-            gap: 1rem;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        .active-screen {
-            display: flex;
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --accent-color: #FFD54F;
+            --success-color: #48c6ef;
+            --danger-color: #ff6b6b;
+            --bg-color: #f0f4f8;
+            --card-bg: #ffffff;
+            --text-dark: #2d3436;
+            --text-light: #ffffff;
+            --shadow-sm: 0 4px 6px rgba(0,0,0,0.05);
+            --shadow-md: 0 10px 15px rgba(0,0,0,0.1);
+            --grid-line: #e2e8f0;
+            --border-radius: 16px;
         }
 
         body {
             font-family: 'Sarabun', sans-serif;
-            background-color: var(--color-bg);
-            color: var(--color-text-dark);
+            background: var(--bg-color);
+            color: var(--text-dark);
             margin: 0;
             padding: 0;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
             min-height: 100vh;
-            text-align: center;
         }
 
         .container {
             width: 100%;
-            max-width: 500px; 
-            box-sizing: border-box;
-            background-color: var(--color-card);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            max-width: 600px; /* Wider for better tablet view */
+            background-color: var(--card-bg);
+            box-shadow: var(--shadow-md);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
-            padding: 0;
             position: relative;
+            overflow-x: hidden;
         }
 
+        /* --- HEADER & TITLE --- */
         header {
-            background-color: var(--color-header); 
-            color: var(--color-text-light);
+            background: var(--primary-gradient);
+            color: var(--text-light);
             padding: 1.5rem 1rem;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            box-shadow: var(--shadow-sm);
             margin-bottom: 1rem;
-        }
-        header h1 {
-            font-size: 1.8rem;
-            margin: 0;
-            cursor: pointer; 
+            position: relative;
+            z-index: 10;
         }
 
-        /* Animation for Autoplay Mode */
-        @keyframes slowPulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.03); opacity: 0.85; }
-            100% { transform: scale(1); opacity: 1; }
+        header h1 {
+            font-size: 2rem;
+            margin: 0;
+            font-weight: 800;
+            letter-spacing: 1px;
+            cursor: pointer;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        .pulsing-title {
-            animation: slowPulse 2s ease-in-out infinite;
-        }
-        
-        /* Notification Bar */
+
+        /* --- NOTIFICATION TOAST --- */
         #autoplay-notification {
-            position: absolute;
-            top: 0;
-            width: 100%;
-            background-color: #FFEB3B;
-            color: var(--color-text-dark);
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background-color: #333;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 30px;
             font-weight: bold;
-            padding: 8px 10px;
-            box-sizing: border-box;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s, transform 0.3s;
-            transform: translateY(-100%);
-            z-index: 100;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 1000;
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            width: 90%;
+            max-width: 400px;
             text-align: center;
         }
         #autoplay-notification.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
+            transform: translateX(-50%) translateY(0);
         }
 
-        #status-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-            padding: 0 1rem;
-            color: var(--color-text-dark);
-        }
-        #timer-display {
-            background-color: #E0E0E0;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 1.1rem;
-        }
-
-        #word-search-grid {
-            display: grid;
-            width: 100%;
-            max-width: 480px; 
-            margin: 0 auto;
-            border: 2px solid var(--color-grid-line);
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            overflow: hidden;
-            user-select: none; 
-            touch-action: manipulation; 
-        }
-
-        .grid-cell {
-            aspect-ratio: 1 / 1; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            user-select: none;
-            color: var(--color-text-dark);
-            border: 1px solid var(--color-grid-line);
-            box-sizing: border-box;
-            transition: transform 0.1s;
-            background-color: transparent; 
-        }
-
-        .grid-cell.selected {
-            background-color: var(--color-secondary-select);
-            color: var(--color-text-light);
-            transform: scale(1.05); 
-            z-index: 10;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-        }
-        
-        .grid-cell.found {
-            color: var(--color-text-dark); 
-            font-weight: 900;
-        }
-        
-        .grid-cell.wrong-flash {
-            background-color: var(--color-wrong) !important; 
-            color: var(--color-text-light) !important;
-            animation: wrongFlash 1s ease-out; 
-        }
-        
-        @keyframes wrongFlash {
-            0% { background-color: var(--color-wrong); }
-            50% { background-color: var(--color-wrong); }
-            100% { background-color: inherit; color: inherit; } 
-        }
-
-        #clue-panel {
-            text-align: left;
-            background-color: #F0F4C3; 
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
-        }
-        #clue-panel h3 {
-            margin-top: 0;
-            color: var(--color-text-dark);
-            font-size: 1.3rem;
-            border-bottom: 2px solid #C5E1A5;
-            padding-bottom: 5px;
-            margin-bottom: 10px;
-        }
-        #clue-list {
-            list-style: none;
-            padding: 0;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); 
-            gap: 10px;
-        }
-        .clue-item {
-            background-color: #E0E0E0; 
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: var(--color-text-dark);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s;
-            cursor: pointer; 
-        }
-        
-        .clue-item.found {
-            opacity: 1;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-            font-size: 1.1rem; 
-            cursor: default;
-        }
-
-        .clue-item.hint-used {
-            background-color: #FFCDD2FF !important; 
-            border: 2px dashed #EF5350;
-            color: var(--color-text-dark); 
-        }
-        
-        .clue-hint {
-            display: block;
-            font-size: 0.8rem;
-            font-weight: 400;
-            color: #757575; 
-            margin-top: 5px;
-        }
-        
-        .clue-word-text {
-            display: none; 
-            font-weight: 900;
-            font-size: 1.2rem;
-            text-transform: uppercase;
-        }
-        
-        .clue-item.found .clue-hint {
+        /* --- SCREENS --- */
+        .screen {
+            padding: 1rem;
             display: none;
+            flex-direction: column;
+            gap: 1rem;
+            animation: fadeIn 0.3s ease-out;
         }
-        .clue-item.found .clue-word-text {
-            display: block;
-            color: var(--color-text-dark); 
-        }
+        .active-screen { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        #summary-screen h2 {
-            font-size: 2rem;
-            color: var(--color-primary);
-            margin-bottom: 1.5rem;
-        }
-        .summary-stat {
-            background-color: #F3E5F5;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 8px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        /* --- BUTTONS & CATEGORIES --- */
+        .grid-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
         }
 
         .main-btn {
-            color: var(--color-text-light);
             border: none;
             padding: 1rem;
             border-radius: 12px;
             font-size: 1.1rem;
-            font-weight: bold;
+            font-weight: 700;
             cursor: pointer;
-            transition: transform 0.1s, box-shadow 0.1s;
-            width: 100%;
-            margin-top: 0;
-            white-space: nowrap;
+            transition: all 0.2s;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
         }
-        .main-btn:active {
-            transform: translateY(2px);
-        }
-        .main-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            box-shadow: none;
-            transform: none;
-        }
+        
+        .main-btn:active { transform: scale(0.98); }
+
         .category-btn {
-            background-color: var(--color-category-btn);
-            box-shadow: 0 4px 0 #FFC107; 
+            background: white;
+            color: #555;
+            border: 2px solid #eee;
         }
+        .category-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+            background: #f8f9fa;
+        }
+
         .difficulty-btn {
-            background-color: var(--color-difficulty-btn);
-            box-shadow: 0 4px 0 #388E3C;
+            background: var(--success-color);
+            background-image: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        #restart-btn, #summary-btn {
+            background: var(--text-dark);
             margin-top: 1rem;
         }
-        .difficulty-btn:active {
-            box-shadow: 0 2px 0 #388E3C;
+
+        /* --- GAME BOARD --- */
+        #status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            font-weight: bold;
+            color: #555;
         }
-        .category-btn:active {
-            box-shadow: 0 2px 0 #FFC107;
+
+        #word-search-grid {
+            display: grid;
+            gap: 2px;
+            background: var(--grid-line);
+            padding: 2px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+            margin: 0 auto;
+            max-width: 100%;
+            user-select: none;
+            touch-action: none; /* Important for drag on mobile */
         }
-        #summary-btn, #restart-btn {
-             background-color: var(--color-secondary-select);
-             box-shadow: 0 4px 0 #3188d6;
+
+        .grid-cell {
+            aspect-ratio: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.1rem; /* Bigger font */
+            font-weight: 700;
+            background: white;
+            cursor: pointer;
+            color: var(--text-dark);
+            transition: background-color 0.1s;
         }
-        #summary-btn:active, #restart-btn:active {
-            box-shadow: 0 2px 0 #3188d6;
+
+        .grid-cell.selected {
+            background-color: #ffd700; /* Gold for selection */
+            color: #333;
+            transform: scale(0.95);
+            border-radius: 4px;
         }
+
+        .grid-cell.found {
+            color: white;
+            /* Background set dynamically via JS */
+        }
+
+        /* --- CLUE LIST --- */
+        #clue-panel {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+        }
+        #clue-panel h3 { margin: 0 0 10px 0; color: #667eea; }
+        
+        #clue-list {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 8px;
+        }
+
+        .clue-item {
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            text-align: center;
+            border: 1px solid #eee;
+            transition: all 0.3s;
+        }
+        .clue-item.found {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+            opacity: 0.6;
+        }
+        .clue-item.hint-used {
+            border: 1px dashed var(--danger-color);
+        }
+
+        /* --- SUMMARY SCREEN --- */
+        .summary-content {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            text-align: left;
+        }
+        .summary-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 1rem;
+        }
+        .summary-item span:first-child { font-weight: bold; color: #667eea; }
+        .summary-item span:last-child { color: #555; }
+
+        /* Autoplay Pulse Animation */
+        .pulsing-title { animation: slowPulse 2s infinite; color: #FFD54F; }
+        @keyframes slowPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
     </style>
 </head>
 <body>
@@ -314,235 +272,250 @@
         <div id="autoplay-notification"></div>
 
         <header>
-            <h1 id="game-title">Word Search</h1>
+            <h1 id="game-title">Word Search 🔍</h1>
         </header>
 
         <div id="start-screen" class="screen active-screen">
-            <h2 style="color: var(--color-primary); margin-bottom: 0;">ยินดีต้อนรับสู่เกม Word Search! 🔍</h2>
-            <p style="font-size: 1.1rem; margin-top: 0.5rem; margin-bottom: 1.5rem;">โปรดเลือกหมวดหมู่และระดับความยากเพื่อเริ่มเกม</p>
+            <div style="text-align: center; margin-bottom: 1rem;">
+                <h2 style="margin:0; color: #667eea;">เลือกหมวดหมู่คำศัพท์</h2>
+                <p style="color: #888; font-size: 0.9rem;">แตะ 2 ครั้งที่หัวข้อด้านบน เพื่อเปิดโหมดอัตโนมัติ</p>
+            </div>
             
-            <h3>เลือกหมวดหมู่ (8 หมวด)</h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <button class="main-btn category-btn" data-category="animals">สัตว์ป่า (Animals)</button>
-                <button class="main-btn category-btn" data-category="fruits">ผลไม้ (Fruits)</button>
-                <button class="main-btn category-btn" data-category="countries">ประเทศ (Countries)</button>
-                <button class="main-btn category-btn" data-category="jobs">อาชีพ (Jobs)</button>
-                <button class="main-btn category-btn" data-category="colors">สี (Colors)</button>
-                <button class="main-btn category-btn" data-category="sports">กีฬา (Sports)</button>
-                <button class="main-btn category-btn" data-category="foods">อาหาร (Foods)</button>
-                <button class="main-btn category-btn" data-category="vehicles">ยานพาหนะ (Vehicles)</button>
+            <div class="grid-buttons">
+                <button class="main-btn category-btn" data-category="animals">🦁 สัตว์ (Animals)</button>
+                <button class="main-btn category-btn" data-category="fruits">🍎 ผลไม้ (Fruits)</button>
+                <button class="main-btn category-btn" data-category="foods">🍕 อาหาร (Foods)</button>
+                <button class="main-btn category-btn" data-category="sports">⚽ กีฬา (Sports)</button>
+                <button class="main-btn category-btn" data-category="colors">🎨 สี (Colors)</button>
+                <button class="main-btn category-btn" data-category="jobs">👮 อาชีพ (Jobs)</button>
+                <button class="main-btn category-btn" data-category="vehicles">🚗 ยานพาหนะ</button>
+                <button class="main-btn category-btn" data-category="countries">🌏 ประเทศ</button>
+                <button class="main-btn category-btn" data-category="technology">💻 เทคโนโลยี</button>
+                <button class="main-btn category-btn" data-category="clothes">👕 เสื้อผ้า</button>
+                <button class="main-btn category-btn" data-category="weather">⛅ อากาศ</button>
+                <button class="main-btn category-btn" data-category="music">🎵 ดนตรี</button>
             </div>
         </div>
 
         <div id="difficulty-screen" class="screen">
-            <h2 id="difficulty-category-title">หมวดหมู่: สัตว์ป่า</h2>
-            <h3>เลือกระดับความยาก</h3>
-            <button class="main-btn difficulty-btn" data-difficulty="easy" id="diff-easy"></button>
-            <button class="main-btn difficulty-btn" data-difficulty="hard" id="diff-hard"></button>
+            <h2 id="difficulty-category-title" style="text-align: center; color: #555;">หมวดหมู่: ...</h2>
+            <button class="main-btn difficulty-btn" data-difficulty="easy" id="diff-easy">ระดับง่าย</button>
+            <button class="main-btn difficulty-btn" data-difficulty="hard" id="diff-hard" style="background-image: linear-gradient(to right, #fa709a 0%, #fee140 100%);">ระดับยาก</button>
+            <button class="main-btn category-btn" onclick="showScreen('start-screen')" style="margin-top:20px;">⬅ ย้อนกลับ</button>
         </div>
 
         <div id="game-screen" class="screen">
             <div id="status-bar">
-                <span id="category-title"></span>
-                <span id="score">คำศัพท์ที่พบ: 0/10</span>
-                <span id="timer-display">เวลา: 00:00</span>
+                <span id="score">0/10</span>
+                <span id="timer-display">00:00</span>
             </div>
 
             <div id="word-search-grid"></div>
 
             <div id="clue-panel">
-                <h3>คำใบ้ (Clues)</h3>
-                <p style="font-size: 0.9rem; color: #5D4037;">*คลิกที่คำใบ้เพื่อเฉลย (- คะแนน)*</p>
+                <h3>คำใบ้</h3>
                 <ul id="clue-list"></ul>
             </div>
             
-            <button id="restart-btn" class="main-btn">กลับหน้าหลัก</button>
+            <button id="restart-btn" class="main-btn">🏠 กลับหน้าหลัก</button>
         </div>
         
         <div id="summary-screen" class="screen">
-            <h2>สรุปผลการค้นหา</h2>
-            <div class="summary-stat">
-                <p id="summary-score"></p>
+            <div style="text-align: center;">
+                <h2 style="color: var(--success-color);">ยอดเยี่ยม! 🎉</h2>
+                <div class="summary-stat">
+                    <p id="summary-score" style="font-size: 1.2rem; font-weight: bold;"></p>
+                    <p id="summary-time" style="color: #777;"></p>
+                </div>
             </div>
-            <div class="summary-stat">
-                <p id="summary-time"></p>
+            
+            <div class="summary-content">
+                <h3 style="margin:0; border-bottom: 2px solid #eee; padding-bottom: 10px;">สรุปคำศัพท์ที่เรียนรู้</h3>
+                <ul id="summary-list" class="summary-list">
+                    </ul>
             </div>
-            <button id="summary-btn" class="main-btn">กลับหน้าหลัก</button>
+
+            <button id="summary-btn" class="main-btn">เล่นใหม่อีกครั้ง</button>
         </div>
     </div>
 
     <script>
-        // --- AUDIO/SPEECH LOGIC (PROMISE BASED) ---
-        let audioContext;
-        let voices = [];
-        
-        function initAudioContext() {
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            }
-        }
-        
-        function setupSpeech() {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.onvoiceschanged = () => {
-                    voices = window.speechSynthesis.getVoices();
-                };
-            }
-        }
-        
-        function getVoice(lang) {
-             return voices.find(v => v.lang.startsWith(lang)) || voices.find(v => v.lang.startsWith(lang.substring(0, 2))) || null;
-        }
-
-        // Modified: Returns a Promise that resolves when speech ends
-        function speakText(text, lang) {
-            return new Promise((resolve) => {
-                if (!('speechSynthesis' in window)) {
-                    resolve(); // Not supported, resolve immediately
-                    return;
-                }
-                
-                window.speechSynthesis.cancel(); // Cancel any current speech
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = lang;
-                utterance.rate = (lang === 'en-US') ? 0.75 : 0.9; 
-                utterance.volume = 1;
-                
-                const targetVoice = getVoice(lang); 
-                if (targetVoice) utterance.voice = targetVoice;
-
-                // Resolve promise when reading ends
-                utterance.onend = () => {
-                    resolve();
-                };
-                
-                // Resolve on error to prevent hanging
-                utterance.onerror = () => {
-                    resolve(); 
-                };
-
-                window.speechSynthesis.speak(utterance);
-            });
-        }
-
-        function createTone(frequency, duration, type, volume = 0.5) {
-            initAudioContext();
-            if (!audioContext || audioContext.state === 'suspended') return;
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
-            oscillator.type = type; 
-            gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + duration);
-            oscillator.start();
-            oscillator.stop(audioContext.currentTime + duration);
-        }
-        function playSuccessTone() { createTone(660, 0.15, 'sine', 0.8); }
-        function playFailTone() { createTone(150, 0.4, 'triangle', 0.7); }
-    </script>
-
-    <script>
-        // --- CONFIGURATION & DATA ---
-        const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        // --- DATA: WORD CATEGORIES (12 Total) ---
         const WORD_CATEGORIES = {
             'animals': {
-                name: 'สัตว์ป่า (Animals)',
-                easyWordsPool: [{ word: "CAT", clue: "แมว" }, { word: "DOG", clue: "สุนัข" }, { word: "FOX", clue: "สุนัขจิ้งจอก" }, { word: "LION", clue: "ราชาแห่งป่า" }, { word: "CUB", clue: "ลูกสิงโต/หมี" }, { word: "DEER", clue: "กวาง" }, { word: "WOLF", clue: "หมาป่า" }, { word: "EEL", clue: "ปลาไหล" }, { word: "BAT", clue: "ค้างคาว" }, { word: "PIG", clue: "หมู" }, { word: "RAT", clue: "หนู" }, { word: "COW", clue: "วัว" }, { word: "BULL", clue: "วัวตัวผู้" }, { word: "GOAT", clue: "แพะ" }, { word: "SHEEP", clue: "แกะ" }, { word: "CRAB", clue: "ปู" }, { word: "FISH", clue: "ปลา" }, { word: "FROG", clue: "กบ" }, { word: "DUCK", clue: "เป็ด" }, { word: "OWL", clue: "นกฮูก" }],
-                hardWordsPool: [{ word: "TIGER", clue: "สัตว์ตระกูลแมวที่มีลายทางสีดำบนขนสีส้ม" }, { word: "ZEBRA", clue: "ม้าลายที่มีลายทางสีดำและขาว" }, { word: "BEAR", clue: "หมี สัตว์ตัวใหญ่ที่ชอบกินน้ำผึ้ง" }, { word: "EAGLE", clue: "นกอินทรี นกล่าเหยื่อขนาดใหญ่" }, { word: "SNAKE", clue: "สัตว์เลื้อยคลานที่ไม่มีขา" }, { word: "DOLPHIN", clue: "โลมา สัตว์เลี้ยงลูกด้วยนมในทะเล" }, { word: "ELEPHANT", clue: "ช้าง สัตว์บกที่ใหญ่ที่สุด" }, { word: "GIRAFFE", clue: "ยีราฟ คอยาว" }, { word: "MONKEY", clue: "ลิง สัตว์เลี้ยงลูกด้วยนมที่ชอบปีนป่าย" }, { word: "RABBIT", clue: "กระต่าย หูยาว ชอบกินแครอท" }, { word: "PENGUIN", clue: "นกเพนกวิน บินไม่ได้ อาศัยในขั้วโลก" }, { word: "PARROT", clue: "นกแก้ว นกพูดได้" }, { word: "CHIMPANZEE", clue: "ลิงชิมแปนซี" }, { word: "RHINOS", clue: "แรด" }, { word: "CAMEL", clue: "อูฐ" }, { word: "TURTLE", clue: "เต่า" }, { word: "CROCODILE", clue: "จระเข้" }, { word: "KANGAROO", clue: "จิงโจ้" }, { word: "OSTRICH", clue: "นกกระจอกเทศ" }, { word: "HIPPO", clue: "ฮิปโป" }],
-                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' }, hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
+                name: 'สัตว์ป่า',
+                pool: [
+                    { w: "CAT", t: "แมว" }, { w: "DOG", t: "สุนัข" }, { w: "LION", t: "สิงโต" }, { w: "TIGER", t: "เสือ" }, { w: "BEAR", t: "หมี" }, 
+                    { w: "ZEBRA", t: "ม้าลาย" }, { w: "PIG", t: "หมู" }, { w: "COW", t: "วัว" }, { w: "DUCK", t: "เป็ด" }, { w: "FISH", t: "ปลา" },
+                    { w: "BIRD", t: "นก" }, { w: "FROG", t: "กบ" }, { w: "MONKEY", t: "ลิง" }, { w: "SNAKE", t: "งู" }, { w: "RABBIT", t: "กระต่าย" },
+                    { w: "SHEEP", t: "แกะ" }, { w: "HORSE", t: "ม้า" }, { w: "ELEPHANT", t: "ช้าง" }, { w: "GIRAFFE", t: "ยีราฟ" }, { w: "PANDA", t: "แพนด้า" }
+                ]
             },
-            'fruits': { 
-                name: 'ผลไม้ (Fruits)',
-                easyWordsPool: [{ word: "APPLE", clue: "แอปเปิ้ล" }, { word: "BANANA", clue: "กล้วย" }, { word: "GRAPE", clue: "องุ่น" }, { word: "PEAR", clue: "ลูกแพร์" }, { word: "KIWI", clue: "กีวี่" }, { word: "LIME", clue: "มะนาว" }, { word: "FIG", clue: "มะเดื่อ" }, { word: "BERRY", clue: "ผลเบอร์รี่" }, { word: "MELON", clue: "แตงโม" }, { word: "DATE", clue: "อินทผลัม" }, { word: "PLUM", clue: "ลูกพลัม" }, { word: "MANGO", clue: "มะม่วง" }, { word: "PEACH", clue: "ลูกพีช" }, { word: "CHERRY", clue: "เชอร์รี่" }, { word: "GUAVA", clue: "ฝรั่ง" }, { word: "SAGO", clue: "สาคู" }, { word: "COCOA", clue: "เมล็ดโกโก้" }, { word: "LEMON", clue: "มะนาวเหลือง" }, { word: "MINT", clue: "สะระแหน่" }, { word: "ORANGE", clue: "ส้ม" }],
-                hardWordsPool: [{ word: "PINEAPPLE", clue: "สับปะรด" }, { word: "STRAWBERRY", clue: "สตรอว์เบอร์รี" }, { word: "WATERMELON", clue: "แตงโมลูกใหญ่" }, { word: "AVOCADO", clue: "อะโวคาโด" }, { word: "BLUEBERRY", clue: "บลูเบอร์รี" }, { word: "RASPBERRY", clue: "ราสเบอร์รี" }, { word: "GRAPEFRUIT", clue: "ส้มโอฝรั่ง" }, { word: "POMEGRANATE", clue: "ทับทิม" }, { word: "TANGERINE", clue: "ส้มเขียวหวาน" }, { word: "APRICOT", clue: "แอปริคอท" }, { word: "COCONUT", clue: "มะพร้าว" }, { word: "PAPAYA", clue: "มะละกอ" }, { word: "DURIAN", clue: "ทุเรียน" }, { word: "LYCHEE", clue: "ลิ้นจี่" }, { word: "RAMBUTAN", clue: "เงาะ" }, { word: "PASSIONFRUIT", clue: "เสาวรส" }, { word: "CANTALOUPE", clue: "แคนตาลูป" }, { word: "DRAGONFRUIT", clue: "แก้วมังกร" }, { word: "STARFRUIT", clue: "มะเฟือง" }, { word: "POMELO", clue: "ส้มโอ" }],
-                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' }, hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
-            },
-            'countries': { 
-                name: 'ประเทศ (Countries)',
-                easyWordsPool: [{ word: "USA", clue: "สหรัฐอเมริกา" }, { word: "UK", clue: "สหราชอาณาจักร" }, { word: "JAPAN", clue: "ญี่ปุ่น" }, { word: "CHINA", clue: "จีน" }, { word: "INDIA", clue: "อินเดีย" }, { word: "THAI", clue: "ไทย" }, { word: "KOREA", clue: "เกาหลี" }, { word: "ITALY", clue: "อิตาลี" }, { word: "SPAIN", clue: "สเปน" }, { word: "PERU", clue: "เปรู" }, { word: "EGYPT", clue: "อียิปต์" }, { word: "CUBA", clue: "คิวบา" }, { word: "BRAZIL", clue: "บราซิล" }, { word: "RUSSIA", clue: "รัสเซีย" }, { word: "CANADA", clue: "แคนาดา" }, { word: "MEXICO", clue: "เม็กซิโก" }, { word: "GREECE", clue: "กรีซ" }, { word: "CHILE", clue: "ชิลี" }, { word: "GERMANY", clue: "เยอรมนี" }, { word: "FRANCE", clue: "ฝรั่งเศส" }],
-                hardWordsPool: [{ word: "INDONESIA", clue: "อินโดนีเซีย" }, { word: "ARGENTINA", clue: "อาร์เจนตินา" }, { word: "AUSTRALIA", clue: "ออสเตรเลีย" }, { word: "NEWZEALAND", clue: "นิวซีแลนด์" }, { word: "SWITZERLAND", clue: "สวิตเซอร์แลนด์" }, { word: "PORTUGAL", clue: "โปรตุเกส" }, { word: "PHILIPPINES", clue: "ฟิลิปปินส์" }, { word: "VIETNAM", clue: "เวียดนาม" }, { word: "MALAYSIA", clue: "มาเลเซีย" }, { word: "SINGAPORE", clue: "สิงคโปร์" }, { word: "FINLAND", clue: "ฟินแลนด์" }, { word: "NETHERLANDS", clue: "เนเธอร์แลนด์" }, { word: "COLOMBIA", clue: "โคลอมเบีย" }, { word: "SOUTHAFRICA", clue: "แอฟริกาใต้" }, { word: "SAUDIARABIA", clue: "ซาอุดีอาระเบีย" }, { word: "BANGLADESH", clue: "บังกลาเทศ" }, { word: "MYANMAR", clue: "เมียนมา" }, { word: "BELGIUM", clue: "เบลเยียม" }, { word: "PAKISTAN", clue: "ปากีสถาน" }, { word: "KENYA", clue: "เคนยา" }],
-                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' }, hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
-            },
-            'jobs': {
-                name: 'อาชีพ (Jobs)',
-                easyWordsPool: [{ word: "CHEF", clue: "พ่อครัว" }, { word: "DOCTOR", clue: "แพทย์" }, { word: "NURSE", clue: "พยาบาล" }, { word: "JUDGE", clue: "ผู้พิพากษา" }, { word: "LAWYER", clue: "ทนาย" }, { word: "PILOT", clue: "นักบิน" }, { word: "GUARD", clue: "ยาม" }, { word: "SINGER", clue: "นักร้อง" }, { word: "CLERK", clue: "เสมียน" }, { word: "FARMER", clue: "ชาวนา" }, { word: "POLICE", clue: "ตำรวจ" }, { word: "SOLDIER", clue: "ทหาร" }, { word: "ARTIST", clue: "ศิลปิน" }, { word: "WRITER", clue: "นักเขียน" }, { word: "POSTMAN", clue: "บุรุษไปรษณีย์" }, { word: "MONK", clue: "พระสงฆ์" }, { word: "PRIEST", clue: "บาทหลวง" }, { word: "DANCER", clue: "นักเต้น" }, { word: "OWNER", clue: "เจ้าของ" }, { word: "AGENT", clue: "ตัวแทน" }],
-                hardWordsPool: [{ word: "ENGINEER", clue: "วิศวกร" }, { word: "TEACHER", clue: "ครู/อาจารย์" }, { word: "PROGRAMMER", clue: "โปรแกรมเมอร์" }, { word: "SCIENTIST", clue: "นักวิทยาศาสตร์" }, { word: "ASTRONAUT", clue: "นักบินอวกาศ" }, { word: "ARCHITECT", clue: "สถาปนิก" }, { word: "FIREFIGHTER", clue: "นักดับเพลิง" }, { word: "JOURNALIST", clue: "นักข่าว" }, { word: "ELECTRICIAN", clue: "ช่างไฟฟ้า" }, { word: "PLUMBER", clue: "ช่างประปา" }, { word: "LIBRARIAN", clue: "บรรณารักษ์" }, { word: "THERAPIST", clue: "นักบำบัด" }, { word: "CONSULTANT", clue: "ที่ปรึกษา" }, { word: "ACCOUNTANT", clue: "นักบัญชี" }, { word: "PHOTOGRAPHER", clue: "ช่างภาพ" }, { word: "RECEPTIONIST", clue: "พนักงานต้อนรับ" }, { word: "VETERINARIAN", clue: "สัตวแพทย์" }, { word: "BUSINESSMAN", clue: "นักธุรกิจ" }, { word: "FLIGHTATTENDANT", clue: "พนักงานต้อนรับบนเครื่องบิน" }, { word: "HAIRDRESSER", clue: "ช่างทำผม" }],
-                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' }, hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
-            },
-            'colors': {
-                name: 'สี (Colors)',
-                easyWordsPool: [{ word: "RED", clue: "สีแดง" }, { word: "BLUE", clue: "สีน้ำเงิน" }, { word: "GREEN", clue: "สีเขียว" }, { word: "YELLOW", clue: "สีเหลือง" }, { word: "BLACK", clue: "สีดำ" }, { word: "WHITE", clue: "สีขาว" }, { word: "GRAY", clue: "สีเทา" }, { word: "PINK", clue: "สีชมพู" }, { word: "BROWN", clue: "สีน้ำตาล" }, { word: "GOLD", clue: "สีทอง" }, { word: "SILVER", clue: "สีเงิน" }, { word: "LIME", clue: "สีเขียวมะนาว" }, { word: "TEAL", clue: "สีเขียวน้ำทะเล" }, { word: "AZURE", clue: "สีฟ้าคราม" }, { word: "CYAN", clue: "สีฟ้าอ่อน" }, { word: "BEIGE", clue: "สีเบจ" }, { word: "IVORY", clue: "สีงาช้าง" }, { word: "RUST", clue: "สีสนิม" }, { word: "NAVY", clue: "สีกรมท่า" }, { word: "MAROON", clue: "สีน้ำตาลแดง" }],
-                hardWordsPool: [{ word: "PURPLE", clue: "สีม่วง" }, { word: "ORANGE", clue: "สีส้ม" }, { word: "MAGENTA", clue: "สีม่วงแดง" }, { word: "VIOLET", clue: "สีม่วงอ่อน" }, { word: "TURQUOISE", clue: "สีเขียวขุ่น" }, { word: "CHARTREUSE", clue: "สีเขียวอ่อน" }, { word: "CRIMSON", clue: "สีแดงเข้ม" }, { word: "INDIGO", clue: "สีคราม" }, { word: "AQUAMARINE", clue: "สีฟ้าอมเขียว" }, { word: "BRONZE", clue: "สีบรอนซ์" }, { word: "OLIVE", clue: "สีเขียวมะกอก" }, { word: "LAVENDER", clue: "สีม่วงลาเวนเดอร์" }, { word: "FUCHSIA", clue: "สีบานเย็น" }, { word: "SALMON", clue: "สีส้มปลาแซลมอน" }, { word: "PERIWINKLE", clue: "สีม่วงอ่อนอมฟ้า" }, { word: "SAPPHIRE", clue: "สีน้ำเงินแซฟไฟร์" }, { word: "CHOCOLATE", clue: "สีช็อกโกแลต" }, { word: "CORNFLOWER", clue: "สีฟ้าอ่อน" }, { word: "MUSTARD", clue: "สีเหลืองมัสตาร์ด" }, { word: "MAHOGANY", clue: "สีมะฮอกกานี" }],
-                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' }, hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
-            },
-            'sports': {
-                name: 'กีฬา (Sports)',
-                easyWordsPool: [{ word: "RUN", clue: "วิ่ง" }, { word: "SWIM", clue: "ว่ายน้ำ" }, { word: "GOLF", clue: "กอล์ฟ" }, { word: "HOCKEY", clue: "ฮอกกี้" }, { word: "BOXING", clue: "มวย" }, { word: "TENNIS", clue: "เทนนิส" }, { word: "SKI", clue: "สกี" }, { word: "YOGA", clue: "โยคะ" }, { word: "RACE", clue: "การแข่งขัน" }, { word: "BALL", clue: "ลูกบอล" }, { word: "GYM", clue: "โรงยิม" }, { word: "JUMP", clue: "กระโดด" }, { word: "WRESTLE", clue: "มวยปล้ำ" }, { word: "FENCE", clue: "ฟันดาบ" }, { word: "SURF", clue: "โต้คลื่น" }, { word: "PITCH", clue: "สนาม" }, { word: "COURT", clue: "สนาม" }, { word: "GOAL", clue: "ประตู" }, { word: "CATCH", clue: "จับ" }, { word: "KICK", clue: "เตะ" }],
-                hardWordsPool: [{ word: "FOOTBALL", clue: "ฟุตบอล" }, { word: "BASKETBALL", clue: "บาสเกตบอล" }, { word: "BADMINTON", clue: "แบดมินตัน" }, { word: "VOLLEYBALL", clue: "วอลเลย์บอล" }, { word: "BASEBALL", clue: "เบสบอล" }, { word: "ATHLETICS", clue: "กรีฑา" }, { word: "CYCLING", clue: "ปั่นจักรยาน" }, { word: "MARATHON", clue: "วิ่งมาราธอน" }, { word: "TRIATHLON", clue: "ไตรกีฬา" }, { word: "SKATEBOARD", clue: "สเกตบอร์ด" }, { word: "SNOWBOARD", clue: "สโนว์บอร์ด" }, { word: "GYMNASTICS", clue: "ยิมนาสติก" }, { word: "FISHING", clue: "ตกปลา" }, { word: "SAILING", clue: "แล่นเรือ" }, { word: "ARCHERY", clue: "ยิงธนู" }, { word: "KARATE", clue: "คาราเต้" }, { word: "TAEKWONDO", clue: "เทควันโด" }, { word: "HUNTING", clue: "ล่าสัตว์" }, { word: "BOULDERING", clue: "ปีนผา" }, { word: "PADDLEBOARD", clue: "ยืนพาย" }],
-                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' }, hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
+            'fruits': {
+                name: 'ผลไม้',
+                pool: [
+                    { w: "APPLE", t: "แอปเปิ้ล" }, { w: "BANANA", t: "กล้วย" }, { w: "ORANGE", t: "ส้ม" }, { w: "GRAPE", t: "องุ่น" }, { w: "MANGO", t: "มะม่วง" },
+                    { w: "PAPAYA", t: "มะละกอ" }, { w: "COCONUT", t: "มะพร้าว" }, { w: "BERRY", t: "เบอร์รี่" }, { w: "MELON", t: "เมล่อน" }, { w: "LEMON", t: "เลมอน" },
+                    { w: "PEACH", t: "ลูกพีช" }, { w: "CHERRY", t: "เชอร์รี่" }, { w: "KIWI", t: "กีวี่" }, { w: "PEAR", t: "ลูกแพร์" }, { w: "LIME", t: "มะนาว" },
+                    { w: "PLUM", t: "ลูกพลัม" }, { w: "DURIAN", t: "ทุเรียน" }, { w: "GUAVA", t: "ฝรั่ง" }, { w: "LYCHEE", t: "ลิ้นจี่" }, { w: "DATE", t: "อินทผลัม" }
+                ]
             },
             'foods': {
-                name: 'อาหาร (Foods)',
-                easyWordsPool: [{ word: "BREAD", clue: "ขนมปัง" }, { word: "RICE", clue: "ข้าว" }, { word: "FISH", clue: "ปลา" }, { word: "MEAT", clue: "เนื้อ" }, { word: "EGG", clue: "ไข่" }, { word: "CAKE", clue: "เค้ก" }, { word: "SOUP", clue: "ซุป" }, { word: "SALT", clue: "เกลือ" }, { word: "SUGAR", clue: "น้ำตาล" }, { word: "CHEESE", clue: "เนยแข็ง" }, { word: "PASTA", clue: "พาสต้า" }, { word: "NOODLE", clue: "ก๋วยเตี๋ยว" }, { word: "WATER", clue: "น้ำ" }, { word: "MILK", clue: "นม" }, { word: "COFFEE", clue: "กาแฟ" }, { word: "TEA", clue: "ชา" }, { word: "PIZZA", clue: "พิซซ่า" }, { word: "BURGER", clue: "เบอร์เกอร์" }, { word: "FRIES", clue: "เฟรนช์ฟรายส์" }, { word: "CANDY", clue: "ลูกอม" }],
-                hardWordsPool: [{ word: "VEGETABLES", clue: "ผัก" }, { word: "CHOCOLATE", clue: "ช็อกโกแลต" }, { word: "SANDWICH", clue: "แซนด์วิช" }, { word: "PANCAKE", clue: "แพนเค้ก" }, { word: "CORNFLAKES", clue: "คอร์นเฟลก" }, { word: "CROISSANT", clue: "ครัวซองต์" }, { word: "ICE CREAM", clue: "ไอศกรีม" }, { word: "SPAGHETTI", clue: "สปาเก็ตตี้" }, { word: "LASAGNA", clue: "ลาซานญ่า" }, { word: "MAYONNAISE", clue: "มายองเนส" }, { word: "KETCHUP", clue: "ซอสมะเขือเทศ" }, { word: "MUSTARD", clue: "มัสตาร์ด" }, { word: "PEANUT", clue: "ถั่วลิสง" }, { word: "ALMOND", clue: "อัลมอนด์" }, { word: "OATMEAL", clue: "ข้าวโอ๊ต" }, { word: "POPCORN", clue: "ข้าวโพดคั่ว" }, { word: "COCKTAIL", clue: "ค็อกเทล" }, { word: "SMOOTHIE", clue: "สมูทตี้" }, { word: "SAUSAGE", clue: "ไส้กรอก" }, { word: "GRILLED", clue: "ย่าง" }],
-                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' }, hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
+                name: 'อาหาร',
+                pool: [
+                    { w: "RICE", t: "ข้าว" }, { w: "SOUP", t: "ซุป" }, { w: "EGG", t: "ไข่" }, { w: "MEAT", t: "เนื้อ" }, { w: "FISH", t: "ปลา" },
+                    { w: "BREAD", t: "ขนมปัง" }, { w: "CAKE", t: "เค้ก" }, { w: "PIZZA", t: "พิซซ่า" }, { w: "BURGER", t: "เบอร์เกอร์" }, { w: "SALAD", t: "สลัด" },
+                    { w: "NOODLE", t: "ก๋วยเตี๋ยว" }, { w: "PASTA", t: "พาสต้า" }, { w: "STEAK", t: "สเต็ก" }, { w: "SUSHI", t: "ซูชิ" }, { w: "DONUT", t: "โดนัท" },
+                    { w: "MILK", t: "นม" }, { w: "TEA", t: "ชา" }, { w: "COFFEE", t: "กาแฟ" }, { w: "JUICE", t: "น้ำผลไม้" }, { w: "WATER", t: "น้ำ" }
+                ]
+            },
+            'sports': {
+                name: 'กีฬา',
+                pool: [
+                    { w: "RUN", t: "วิ่ง" }, { w: "JUMP", t: "กระโดด" }, { w: "SWIM", t: "ว่ายน้ำ" }, { w: "GOLF", t: "กอล์ฟ" }, { w: "BOXING", t: "มวย" },
+                    { w: "TENNIS", t: "เทนนิส" }, { w: "JUDO", t: "ยูโด" }, { w: "RUGBY", t: "รักบี้" }, { w: "YOGA", t: "โยคะ" }, { w: "HOCKEY", t: "ฮอกกี้" },
+                    { w: "SOCCER", t: "ฟุตบอล" }, { w: "KARATE", t: "คาราเต้" }, { w: "SURF", t: "โต้คลื่น" }, { w: "SKI", t: "สกี" }, { w: "SKATE", t: "สเก็ต" },
+                    { w: "CYCLING", t: "ปั่นจักรยาน" }, { w: "RACING", t: "แข่งรถ" }, { w: "DIVING", t: "ดำน้ำ" }, { w: "ARCHERY", t: "ยิงธนู" }, { w: "SUMO", t: "ซูโม่" }
+                ]
+            },
+            'colors': {
+                name: 'สี',
+                pool: [
+                    { w: "RED", t: "สีแดง" }, { w: "BLUE", t: "สีน้ำเงิน" }, { w: "GREEN", t: "สีเขียว" }, { w: "PINK", t: "สีชมพู" }, { w: "BLACK", t: "สีดำ" },
+                    { w: "WHITE", t: "สีขาว" }, { w: "GREY", t: "สีเทา" }, { w: "GOLD", t: "สีทอง" }, { w: "SILVER", t: "สีเงิน" }, { w: "BROWN", t: "สีน้ำตาล" },
+                    { w: "YELLOW", t: "สีเหลือง" }, { w: "PURPLE", t: "สีม่วง" }, { w: "ORANGE", t: "สีส้ม" }, { w: "VIOLET", t: "สีม่วงคราม" }, { w: "INDIGO", t: "สีคราม" },
+                    { w: "CREAM", t: "สีครีม" }, { w: "NAVY", t: "สีกรมท่า" }, { w: "CYAN", t: "สีฟ้า" }, { w: "LIME", t: "สีเขียวมะนาว" }, { w: "TEAL", t: "สีน้ำเงินอมเขียว" }
+                ]
+            },
+            'jobs': {
+                name: 'อาชีพ',
+                pool: [
+                    { w: "DOCTOR", t: "หมอ" }, { w: "NURSE", t: "พยาบาล" }, { w: "TEACHER", t: "ครู" }, { w: "POLICE", t: "ตำรวจ" }, { w: "SOLDIER", t: "ทหาร" },
+                    { w: "CHEF", t: "พ่อครัว" }, { w: "PILOT", t: "นักบิน" }, { w: "JUDGE", t: "ผู้พิพากษา" }, { w: "ARTIST", t: "ศิลปิน" }, { w: "SINGER", t: "นักร้อง" },
+                    { w: "ACTOR", t: "นักแสดง" }, { w: "DRIVER", t: "คนขับรถ" }, { w: "FARMER", t: "ชาวนา" }, { w: "VET", t: "สัตวแพทย์" }, { w: "BAKER", t: "คนอบขนม" },
+                    { w: "MONK", t: "พระสงฆ์" }, { w: "GUIDE", t: "ไกด์" }, { w: "MAID", t: "แม่บ้าน" }, { w: "GUARD", t: "ยาม" }, { w: "CLERK", t: "เสมียน" }
+                ]
             },
             'vehicles': {
-                name: 'ยานพาหนะ (Vehicles)',
-                easyWordsPool: [{ word: "CAR", clue: "รถยนต์" }, { word: "BUS", clue: "รถบัส" }, { word: "TAXI", clue: "รถแท็กซี่" }, { word: "TRAIN", clue: "รถไฟ" }, { word: "BIKE", clue: "จักรยาน" }, { word: "BOAT", clue: "เรือ" }, { word: "TRUCK", clue: "รถบรรทุก" }, { word: "VAN", clue: "รถตู้" }, { word: "JEEP", clue: "รถจี๊ป" }, { word: "MOTO", clue: "มอเตอร์ไซค์" }, { word: "SCOOTER", clue: "สกู๊ตเตอร์" }, { word: "SHIP", clue: "เรือใหญ่" }, { word: "YACHT", clue: "เรือยอชท์" }, { word: "PLANE", clue: "เครื่องบิน" }, { word: "JET", clue: "เครื่องบินเจ็ต" }, { word: "WAGON", clue: "รถเกวียน" }, { word: "SLIDE", clue: "เลื่อน" }, { word: "TROLLEY", clue: "รถเข็น" }, { word: "KAYAK", clue: "เรือคายัค" }, { word: "RAFT", clue: "แพ" }],
-                hardWordsPool: [{ word: "HELICOPTER", clue: "เฮลิคอปเตอร์" }, { word: "SUBMARINE", clue: "เรือดำน้ำ" }, { word: "AEROPLANE", clue: "เครื่องบิน" }, { word: "AMBULANCE", clue: "รถพยาบาล" }, { word: "CRUISE", clue: "เรือสำราญ" }, { word: "SPACESHIP", clue: "ยานอวกาศ" }, { word: "LIMOUSINE", clue: "รถลิมูซีน" }, { word: "TRACTOR", clue: "รถแทรกเตอร์" }, { word: "FORKLIFT", clue: "รถยก" }, { word: "BICYCLE", clue: "จักรยาน" }, { word: "SKATEBOARD", clue: "สเกตบอร์ด" }, { word: "SNOWMOBILE", clue: "รถสโนว์โมบิล" }, { word: "FIRETRUCK", clue: "รถดับเพลิง" }, { word: "CONVERTIBLE", clue: "รถเปิดประทุน" }, { word: "HOTAIRBALLOON", clue: "บอลลูนลมร้อน" }, { word: "DIRIGIBLE", clue: "เรือเหาะ" }, { word: "MONORAIL", clue: "รถไฟรางเดียว" }, { word: "CABLECAR", clue: "กระเช้าไฟฟ้า" }, { word: "MOTORHOME", clue: "รถบ้าน" }, { word: "CRUISESHIP", clue: "เรือเดินสมุทร" }],
-                easy: { size: 6, targetWordCount: 8, poolKey: 'easyWordsPool' }, hard: { size: 10, targetWordCount: 10, poolKey: 'hardWordsPool' }
+                name: 'ยานพาหนะ',
+                pool: [
+                    { w: "CAR", t: "รถยนต์" }, { w: "BUS", t: "รถบัส" }, { w: "VAN", t: "รถตู้" }, { w: "TAXI", t: "แท็กซี่" }, { w: "BIKE", t: "จักรยาน" },
+                    { w: "TRAIN", t: "รถไฟ" }, { w: "BOAT", t: "เรือ" }, { w: "SHIP", t: "เรือใหญ่" }, { w: "PLANE", t: "เครื่องบิน" }, { w: "JET", t: "เครื่องบินเจ็ท" },
+                    { w: "TRUCK", t: "รถบรรทุก" }, { w: "JEEP", t: "รถจี๊ป" }, { w: "MOTO", t: "มอเตอร์ไซค์" }, { w: "YACHT", t: "เรือยอชท์" }, { w: "FERRY", t: "เรือข้ามฟาก" },
+                    { w: "SUBWAY", t: "รถไฟใต้ดิน" }, { w: "TUKTUK", t: "ตุ๊กตุ๊ก" }, { w: "CANOE", t: "เรือแคนู" }, { w: "ROCKET", t: "จรวด" }, { w: "TANK", t: "รถถัง" }
+                ]
+            },
+            'countries': {
+                name: 'ประเทศ',
+                pool: [
+                    { w: "THAI", t: "ไทย" }, { w: "CHINA", t: "จีน" }, { w: "JAPAN", t: "ญี่ปุ่น" }, { w: "KOREA", t: "เกาหลี" }, { w: "INDIA", t: "อินเดีย" },
+                    { w: "USA", t: "อเมริกา" }, { w: "UK", t: "อังกฤษ" }, { w: "FRANCE", t: "ฝรั่งเศส" }, { w: "ITALY", t: "อิตาลี" }, { w: "SPAIN", t: "สเปน" },
+                    { w: "BRAZIL", t: "บราซิล" }, { w: "CHILE", t: "ชิลี" }, { w: "PERU", t: "เปรู" }, { w: "EGYPT", t: "อียิปต์" }, { w: "IRAN", t: "อิหร่าน" },
+                    { w: "IRAQ", t: "อิรัก" }, { w: "LAOS", t: "ลาว" }, { w: "BURMA", t: "พม่า" }, { w: "RUSSIA", t: "รัสเซีย" }, { w: "CANADA", t: "แคนาดา" }
+                ]
+            },
+            // --- 4 NEW CATEGORIES ---
+            'technology': {
+                name: 'เทคโนโลยี',
+                pool: [
+                    { w: "MOUSE", t: "เมาส์" }, { w: "CODE", t: "รหัส" }, { w: "DATA", t: "ข้อมูล" }, { w: "WIFI", t: "ไวไฟ" }, { w: "APP", t: "แอปพลิเคชัน" },
+                    { w: "WEB", t: "เว็บ" }, { w: "LINK", t: "ลิงก์" }, { w: "FILE", t: "ไฟล์" }, { w: "JAVA", t: "จาวา" }, { w: "ROBOT", t: "หุ่นยนต์" },
+                    { w: "PHONE", t: "โทรศัพท์" }, { w: "EMAIL", t: "อีเมล" }, { w: "CLICK", t: "คลิก" }, { w: "TYPE", t: "พิมพ์" }, { w: "SAVE", t: "บันทึก" },
+                    { w: "COPY", t: "คัดลอก" }, { w: "PASTE", t: "วาง" }, { w: "LOGIN", t: "เข้าสู่ระบบ" }, { w: "CHAT", t: "แชท" }, { w: "ZOOM", t: "ซูม" }
+                ]
+            },
+            'clothes': {
+                name: 'เสื้อผ้า',
+                pool: [
+                    { w: "SHIRT", t: "เสื้อเชิ้ต" }, { w: "DRESS", t: "ชุดเดรส" }, { w: "SKIRT", t: "กระโปรง" }, { w: "JEANS", t: "ยีนส์" }, { w: "COAT", t: "เสื้อโค้ท" },
+                    { w: "HAT", t: "หมวก" }, { w: "CAP", t: "หมวกแก๊ป" }, { w: "SHOE", t: "รองเท้า" }, { w: "SOCK", t: "ถุงเท้า" }, { w: "BELT", t: "เข็มขัด" },
+                    { w: "BOOT", t: "รองเท้าบูท" }, { w: "RING", t: "แหวน" }, { w: "WATCH", t: "นาฬิกา" }, { w: "VEST", t: "เสื้อกั๊ก" }, { w: "TIE", t: "เนคไท" },
+                    { w: "SUIT", t: "ชุดสูท" }, { w: "BAG", t: "กระเป๋า" }, { w: "PANTS", t: "กางเกง" }, { w: "SCARF", t: "ผ้าพันคอ" }, { w: "MASK", t: "หน้ากาก" }
+                ]
+            },
+            'weather': {
+                name: 'สภาพอากาศ',
+                pool: [
+                    { w: "SUN", t: "ดวงอาทิตย์" }, { w: "RAIN", t: "ฝน" }, { w: "SNOW", t: "หิมะ" }, { w: "WIND", t: "ลม" }, { w: "HOT", t: "ร้อน" },
+                    { w: "COLD", t: "หนาว" }, { w: "STORM", t: "พายุ" }, { w: "CLOUD", t: "เมฆ" }, { w: "FOG", t: "หมอก" }, { w: "DRY", t: "แห้ง" },
+                    { w: "WET", t: "เปียก" }, { w: "ICE", t: "น้ำแข็ง" }, { w: "HEAT", t: "ความร้อน" }, { w: "HAIL", t: "ลูกเห็บ" }, { w: "WARM", t: "อบอุ่น" },
+                    { w: "COOL", t: "เย็นสบาย" }, { w: "DARK", t: "มืด" }, { w: "CLEAR", t: "แจ่มใส" }, { w: "MIST", t: "หมอกบาง" }, { w: "DEW", t: "น้ำค้าง" }
+                ]
+            },
+            'music': {
+                name: 'ดนตรี',
+                pool: [
+                    { w: "SONG", t: "เพลง" }, { w: "BAND", t: "วงดนตรี" }, { w: "ROCK", t: "ร็อค" }, { w: "POP", t: "ป๊อป" }, { w: "JAZZ", t: "แจ๊ส" },
+                    { w: "DRUM", t: "กลอง" }, { w: "BASS", t: "เบส" }, { w: "PIANO", t: "เปียโน" }, { w: "NOTE", t: "โน้ต" }, { w: "SING", t: "ร้องเพลง" },
+                    { w: "PLAY", t: "เล่น" }, { w: "LOUD", t: "ดัง" }, { w: "SOFT", t: "เบา" }, { w: "TUNE", t: "ท่วงทำนอง" }, { w: "BEAT", t: "จังหวะ" },
+                    { w: "RAP", t: "แร็ป" }, { w: "SHOW", t: "การแสดง" }, { w: "DANCE", t: "เต้น" }, { w: "DJ", t: "ดีเจ" }, { w: "CD", t: "ซีดี" }
+                ]
             }
         };
 
         const PASTEL_COLORS = [
-            '#FFC0CB80', '#ADD8E680', '#90EE9080', '#F0808080', '#DDA0DD80', 
-            '#B0E0E680', '#F5DEB380', '#AFEEEE80', '#E6E6FA80', '#FFE4B580'
+            '#FFC0CB', '#87CEFA', '#90EE90', '#F08080', '#DDA0DD', 
+            '#B0E0E6', '#F0E68C', '#AFEEEE', '#E6E6FA', '#FFDAB9'
         ];
 
         // --- GAME STATE ---
-        let GRID_SIZE = 10;
+        let GRID_SIZE = 8;
         let targetWords = [];
         let grid = [];
         let placedWordsMeta = [];
-        let startCell = null; 
-        let selectedCells = []; 
-        let currentConfig = null;
-        
+        let selectedCells = [];
+        let startCell = null;
         let timerInterval;
-        let autoplayTimeout; 
         let startTime;
         let totalTimeSeconds = 0;
-        let isAutoplayMode = false; 
+        let isAutoplayMode = false;
+        let isGameRunning = false;
+        
+        // Double tap detection
         let lastTap = 0;
-        const DBL_TAP_THRESHOLD = 300; 
+        const DBL_TAP_THRESHOLD = 300;
 
-        // --- ELEMENTS ---
-        const screens = {
-            'start-screen': document.getElementById('start-screen'),
-            'difficulty-screen': document.getElementById('difficulty-screen'),
-            'game-screen': document.getElementById('game-screen'),
-            'summary-screen': document.getElementById('summary-screen')
-        };
+        // Elements
         const gridEl = document.getElementById('word-search-grid');
         const clueListEl = document.getElementById('clue-list');
-        const scoreEl = document.getElementById('score');
-        const categoryTitleEl = document.getElementById('category-title');
-        const timerDisplayEl = document.getElementById('timer-display');
-        const gameTitleEl = document.getElementById('game-title');
-        const diffEasyBtn = document.getElementById('diff-easy');
-        const diffHardBtn = document.getElementById('diff-hard');
         const notifEl = document.getElementById('autoplay-notification');
+        const summaryListEl = document.getElementById('summary-list');
 
-        // --- UTILITY FUNCTIONS ---
+        // --- SPEECH FUNCTION ---
+        function speakText(text, lang) {
+            return new Promise((resolve) => {
+                if (!('speechSynthesis' in window)) {
+                    resolve();
+                    return;
+                }
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = lang;
+                utterance.rate = (lang === 'en-US') ? 0.8 : 1.0; 
+                utterance.onend = () => resolve();
+                utterance.onerror = () => resolve();
+                window.speechSynthesis.speak(utterance);
+            });
+        }
+
+        // --- CORE FUNCTIONS ---
         function showNotification(message) {
             notifEl.textContent = message;
             notifEl.classList.add('show');
-            setTimeout(() => {
-                notifEl.classList.remove('show');
-            }, 3000); 
+            setTimeout(() => notifEl.classList.remove('show'), 3000);
+        }
+
+        function toggleAutoplayMode() {
+            isAutoplayMode = !isAutoplayMode;
+            const title = document.getElementById('game-title');
+            if (isAutoplayMode) {
+                title.classList.add('pulsing-title');
+                showNotification("เปิดโหมดอัตโนมัติ 🤖");
+            } else {
+                title.classList.remove('pulsing-title');
+                showNotification("ปิดโหมดอัตโนมัติ");
+                // Reset state handled in game loop check
+            }
         }
 
         function handleTitleTap() {
@@ -555,615 +528,415 @@
             }
         }
 
-        function updateDifficultyButtons(categoryId) {
-            const category = WORD_CATEGORIES[categoryId];
-            
-            const easyConfig = category.easy;
-            diffEasyBtn.textContent = `ง่าย (${easyConfig.size}x${easyConfig.size}, ${easyConfig.targetWordCount} คำ, สุ่มจาก ${category[easyConfig.poolKey].length} คำ)`;
-            diffEasyBtn.dataset.categoryId = categoryId;
-
-            const hardConfig = category.hard;
-            diffHardBtn.textContent = `ยาก (${hardConfig.size}x${hardConfig.size}, ${hardConfig.targetWordCount} คำ, สุ่มจาก ${category[hardConfig.poolKey].length} คำ)`;
-            diffHardBtn.dataset.categoryId = categoryId;
-        }
-
-        function toggleAutoplayMode() {
-            isAutoplayMode = !isAutoplayMode;
-            if (isAutoplayMode) {
-                gameTitleEl.classList.add('pulsing-title');
-                showNotification("โหมดเล่นอัตโนมัติ (Autoplay Mode) เปิดใช้งานแล้ว! (ดับเบิลแท็บชื่อเกมเพื่อปิด)");
-            } else {
-                gameTitleEl.classList.remove('pulsing-title');
-                showNotification("โหมดเล่นอัตโนมัติ (Autoplay Mode) ปิดใช้งานแล้ว");
-                clearTimeout(autoplayTimeout); 
-                window.speechSynthesis.cancel(); // Cancel speech if toggled off
-            }
-        }
-        
         function showScreen(id) {
-            Object.values(screens).forEach(screen => {
-                screen.classList.remove('active-screen');
-                screen.classList.add('hidden-screen');
-            });
-            screens[id].classList.add('active-screen');
-            screens[id].classList.remove('hidden-screen');
-            
-            if (id !== 'game-screen') {
-                stopTimer();
-            }
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+            document.getElementById(id).classList.add('active-screen');
+            if (id !== 'game-screen') stopTimer();
         }
-        
-        function selectCategory(categoryId) {
-            const category = WORD_CATEGORIES[categoryId];
-            document.getElementById('difficulty-category-title').textContent = `หมวดหมู่: ${category.name}`;
-            updateDifficultyButtons(categoryId); 
+
+        function selectCategory(catKey) {
+            const cat = WORD_CATEGORIES[catKey];
+            document.getElementById('difficulty-category-title').textContent = `หมวดหมู่: ${cat.name}`;
+            
+            // Set data for difficulty buttons
+            const btnEasy = document.getElementById('diff-easy');
+            btnEasy.textContent = `ง่าย (6x6, 6 คำ)`;
+            btnEasy.onclick = () => startGame(catKey, 6, 6);
+
+            const btnHard = document.getElementById('diff-hard');
+            btnHard.textContent = `ยาก (10x10, 10 คำ)`;
+            btnHard.onclick = () => startGame(catKey, 10, 10);
+
             showScreen('difficulty-screen');
         }
 
-        function startGame(categoryId, difficulty) {
-            const category = WORD_CATEGORIES[categoryId];
-            currentConfig = category[difficulty];
-            currentConfig.categoryId = categoryId; 
+        async function startGame(catKey, size, count) {
+            isGameRunning = true;
+            GRID_SIZE = size;
+            const cat = WORD_CATEGORIES[catKey];
             
-            const pool = category[currentConfig.poolKey];
-            const filteredPool = pool.filter(w => w.word.length <= currentConfig.size);
-            const shuffledPool = [...filteredPool].sort(() => 0.5 - Math.random());
+            // Randomly select words
+            const shuffled = [...cat.pool].sort(() => 0.5 - Math.random());
+            const selected = shuffled.slice(0, count);
             
-            targetWords = shuffledPool.slice(0, currentConfig.targetWordCount).map(w => ({ 
-                ...w, 
-                word: w.word.toUpperCase(), 
-                found: false, 
-                colorIndex: -1, 
-                hintUsed: false 
+            // Prepare Target Words
+            targetWords = selected.map(obj => ({
+                word: obj.w,
+                clue: obj.t,
+                found: false,
+                color: null
             }));
 
-            GRID_SIZE = currentConfig.size;
-            clearSelection(false);
-            
-            generatePuzzle(); 
+            // Guaranteed Generation
+            if (!generatePuzzleGuaranteed()) {
+                alert("เกิดข้อผิดพลาดในการสร้างตาราง กรุณาลองใหม่");
+                return;
+            }
+
             renderGrid();
             renderClues();
-
-            categoryTitleEl.textContent = `หมวดหมู่: ${category.name} (${difficulty === 'easy' ? 'ง่าย 6x6' : 'ยาก 10x10'})`;
-            
-            if (isAutoplayMode) {
-                gridEl.style.pointerEvents = 'none'; 
-                // Wait 1 second before starting the sequence
-                setTimeout(() => {
-                    if (isAutoplayMode) runAutoplaySequence();
-                }, 1000);
-            } else {
-                gridEl.style.pointerEvents = 'auto'; 
-                clearTimeout(autoplayTimeout); 
-            }
-            
             startTimer();
             showScreen('game-screen');
-        }
 
-        function startTimer() {
-            startTime = Date.now();
-            updateTimerDisplay();
-            timerInterval = setInterval(updateTimerDisplay, 1000);
-        }
-
-        function stopTimer() {
-            clearInterval(timerInterval);
-            if (startTime) {
-                totalTimeSeconds = Math.floor((Date.now() - startTime) / 1000);
-                startTime = null; 
+            // Autoplay Start Logic
+            if (isAutoplayMode) {
+                gridEl.style.pointerEvents = 'none'; // Lock grid
+                await new Promise(r => setTimeout(r, 1500)); // Wait 1.5s start
+                if(isGameRunning) runAutoplayLoop();
+            } else {
+                gridEl.style.pointerEvents = 'auto';
             }
         }
 
-        function formatTime(seconds) {
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
-        }
+        function generatePuzzleGuaranteed() {
+            let attempts = 0;
+            const maxAttempts = 100;
+            
+            while(attempts < maxAttempts) {
+                // Init Grid
+                grid = Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill(''));
+                placedWordsMeta = [];
+                let placedCount = 0;
 
-        function updateTimerDisplay() {
-            if (!startTime) return;
-            const elapsed = Math.floor((Date.now() - startTime) / 1000);
-            timerDisplayEl.textContent = `เวลา: ${formatTime(elapsed)}`;
-        }
-        
-        function createEmptyGrid() { grid = Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill('')); }
-        function getRandomLetter() { return ALPHABET[Math.floor(Math.random() * ALPHABET.length)]; }
-        function isSafe(r, c, len, direction) {
-            const [dr, dc] = direction;
-            if (r < 0 || r >= GRID_SIZE || c < 0 || c >= GRID_SIZE) return false;
-            const newR = r + (len - 1) * dr;
-            const newC = c + (len - 1) * dc;
-            return newR >= 0 && newR < GRID_SIZE && newC >= 0 && newC < GRID_SIZE;
-        }
-        function checkWordFit(r, c, word, direction) {
-            const [dr, dc] = direction;
-            const len = word.length;
-            if (!isSafe(r, c, len, direction)) return false;
+                // Sort Longest First
+                const wordsToPlace = [...targetWords].sort((a,b) => b.word.length - a.word.length);
 
-            for (let i = 0; i < len; i++) {
-                const char = grid[r + i * dr][c + i * dc];
-                if (char !== '' && char !== word[i]) {
-                    return false;
+                for (let wObj of wordsToPlace) {
+                    if (placeSingleWord(wObj.word)) placedCount++;
                 }
+
+                if (placedCount === targetWords.length) {
+                    fillEmptyCells();
+                    return true;
+                }
+                attempts++;
+            }
+            return false;
+        }
+
+        function placeSingleWord(word) {
+            const directions = [[0,1], [1,0], [1,1], [0,-1], [-1,0], [-1,-1], [1,-1], [-1,1]];
+            let tries = 0;
+            while(tries < 200) {
+                const r = Math.floor(Math.random() * GRID_SIZE);
+                const c = Math.floor(Math.random() * GRID_SIZE);
+                const dir = directions[Math.floor(Math.random() * directions.length)];
+                
+                if (canPlace(r, c, word, dir)) {
+                    for(let i=0; i<word.length; i++) {
+                        grid[r + i*dir[0]][c + i*dir[1]] = word[i];
+                    }
+                    placedWordsMeta.push({
+                        word: word,
+                        start: {r, c},
+                        end: {r: r + (word.length-1)*dir[0], c: c + (word.length-1)*dir[1]}
+                    });
+                    return true;
+                }
+                tries++;
+            }
+            return false;
+        }
+
+        function canPlace(r, c, word, dir) {
+            const lastR = r + (word.length - 1) * dir[0];
+            const lastC = c + (word.length - 1) * dir[1];
+            if (lastR < 0 || lastR >= GRID_SIZE || lastC < 0 || lastC >= GRID_SIZE) return false;
+
+            for(let i=0; i<word.length; i++) {
+                const cell = grid[r + i*dir[0]][c + i*dir[1]];
+                if (cell !== '' && cell !== word[i]) return false;
             }
             return true;
         }
-        function placeWord(r, c, word, direction) {
-            const [dr, dc] = direction;
-            for (let i = 0; i < word.length; i++) {
-                grid[r + i * dr][c + i * dc] = word[i];
-            }
-        }
-        
-        function generatePuzzle() {
-            const MAX_PUZZLE_ATTEMPTS = 500; 
-            const placementWords = [...targetWords].sort((a, b) => b.word.length - a.word.length); 
-            const directions = [ [0, 1], [1, 0], [1, 1], [-1, 0], [0, -1], [-1, -1], [1, -1], [-1, 1] ];
-            
-            let puzzleGenerated = false;
-            let attempts = 0;
 
-            while (!puzzleGenerated && attempts < MAX_PUZZLE_ATTEMPTS) {
-                attempts++;
-                createEmptyGrid();
-                placedWordsMeta = []; 
-                let allWordsPlaced = true;
-
-                for (const wordObj of placementWords) {
-                    const word = wordObj.word;
-                    let placed = false;
-                    let wordAttempts = 0;
-                    const MAX_WORD_ATTEMPTS = 5000; 
-
-                    while (!placed && wordAttempts < MAX_WORD_ATTEMPTS) {
-                        const r = Math.floor(Math.random() * GRID_SIZE);
-                        const c = Math.floor(Math.random() * GRID_SIZE);
-                        const direction = directions[Math.floor(Math.random() * directions.length)];
-
-                        if (checkWordFit(r, c, word, direction)) {
-                            placeWord(r, c, word, direction);
-                            placedWordsMeta.push({ 
-                                word: word, 
-                                start: { r: r, c: c }, 
-                                end: { r: r + (word.length - 1) * direction[0], c: c + (word.length - 1) * direction[1] } 
-                            });
-                            placed = true;
-                        }
-                        wordAttempts++;
-                    }
-                    
-                    if (!placed) {
-                        allWordsPlaced = false;
-                        break; 
-                    }
-                }
-
-                if (allWordsPlaced) {
-                    puzzleGenerated = true;
-                }
-            }
-
-            if (!puzzleGenerated) {
-                 console.error("Critical Error: Failed to generate a puzzle with all words after maximum attempts.");
-            }
-            
-            for (let r = 0; r < GRID_SIZE; r++) {
-                for (let c = 0; c < GRID_SIZE; c++) {
-                    if (grid[r][c] === '') {
-                        grid[r][c] = getRandomLetter();
-                    }
+        function fillEmptyCells() {
+            for(let r=0; r<GRID_SIZE; r++) {
+                for(let c=0; c<GRID_SIZE; c++) {
+                    if(grid[r][c] === '') grid[r][c] = ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
                 }
             }
         }
 
-        function getCellsInLine(r1, c1, r2, c2) {
-            const cells = [];
-            const dr = Math.sign(r2 - r1);
-            const dc = Math.sign(c2 - c1);
-            
-            const isHorizontal = r1 === r2 && c1 !== c2;
-            const isVertical = c1 === c2 && r1 !== r2;
-            const isDiagonal = Math.abs(r1 - r2) === Math.abs(c1 - c2) && r1 !== r2;
-            
-            if (r1 === r2 && c1 === c2) { 
-                 const cellEl = gridEl.querySelector(`[data-row="${r1}"][data-col="${c1}"]`);
-                 if (cellEl) cells.push(cellEl);
-                 return cells;
-            }
-            
-            if (!isHorizontal && !isVertical && !isDiagonal) return [];
-
-            let r = r1;
-            let c = c1;
-
-            while (true) {
-                const cellEl = gridEl.querySelector(`[data-row="${r}"][data-col="${c}"]`);
-                if (cellEl) cells.push(cellEl);
-
-                if (r === r2 && c === c2) break;
-                
-                r += dr;
-                c += dc;
-
-                if (r < 0 || r >= GRID_SIZE || c < 0 || c >= GRID_SIZE) break;
-            }
-            return cells;
-        }
-
-        function getWordCellsAndPlacement(index) {
-            const wordDetails = targetWords[index];
-            const wordToSolve = wordDetails.word;
-            const placement = placedWordsMeta.find(meta => meta.word === wordToSolve);
-
-            if (!placement) return null;
-            
-            const r1 = placement.start.r;
-            const c1 = placement.start.c;
-            const r2 = placement.end.r;
-            const c2 = placement.end.c;
-            const cellsToHighlight = getCellsInLine(r1, c1, r2, c2);
-            
-            return {
-                wordDetails,
-                cells: cellsToHighlight
-            };
-        }
-
-        function clearSelection(flash = false) {
-            selectedCells.forEach(cell => {
-                cell.classList.remove('selected'); 
-                if (!cell.classList.contains('found')) { 
-                    cell.style.transform = 'scale(1)'; 
-                }
-                if (flash) {
-                    cell.classList.add('wrong-flash');
-                    setTimeout(() => { cell.classList.remove('wrong-flash'); }, 1000);
-                } 
-            });
-            selectedCells = [];
-            startCell = null;
-        }
-        
-        function handleWordCheck() {
-            if (selectedCells.length < 2) {
-                clearSelection(false);
-                return;
-            }
-            
-            const selectedWord = selectedCells.map(cell => cell.textContent).join('');
-            let foundIndex = -1;
-
-            targetWords.forEach((wordObj, index) => {
-                if (wordObj.found) return;
-                const target = wordObj.word;
-                const reversedTarget = target.split('').reverse().join('');
-                if (selectedWord === target || selectedWord === reversedTarget) {
-                    foundIndex = index;
-                }
-            });
-
-            if (foundIndex !== -1) {
-                // Manual mark: speak = true
-                markAsFound(foundIndex, selectedCells, targetWords[foundIndex], true);
-            } else {
-                playFailTone();
-                clearSelection(true); 
-            }
-        }
-
-        // Modified to accept a 'speak' flag to control audio manually in Autoplay
-        function markAsFound(index, cells, wordDetails, shouldSpeak = true) {
-            const foundWordsCountBefore = targetWords.filter(w => w.found).length;
-            
-            if (wordDetails.colorIndex === -1) {
-                const colorIndex = foundWordsCountBefore % PASTEL_COLORS.length;
-                wordDetails.colorIndex = colorIndex; 
-            }
-            
-            const uniqueColor = PASTEL_COLORS[wordDetails.colorIndex];
-            wordDetails.found = true;
-
-            cells.forEach(cell => {
-                cell.classList.remove('selected', 'wrong-flash');
-                cell.classList.add('found');
-                cell.style.transform = 'scale(1)'; 
-                cell.style.backgroundColor = uniqueColor;
-            });
-
-            const clueEl = clueListEl.querySelector(`[data-index="${index}"]`);
-            if (clueEl) {
-                clueEl.classList.add('found');
-                clueEl.style.backgroundColor = uniqueColor.substring(0, 7) + 'FF';
-                if (wordDetails.hintUsed) {
-                    clueEl.classList.add('hint-used');
-                }
-            }
-            
-            playSuccessTone();
-            
-            if (shouldSpeak) {
-                speakText(wordDetails.word.toLowerCase(), 'en-US'); 
-                checkWinCondition();
-            }
-            
-            selectedCells = [];
-            startCell = null;
-            renderClues();
-        }
-
-        // --- MAIN AUTOPLAY LOOP (ASYNC) ---
-        async function runAutoplaySequence() {
-            const nextIndex = targetWords.findIndex(w => !w.found);
-            
-            if (nextIndex === -1) {
-                // No more words (Win condition check)
-                return; 
-            }
-
-            if (!isAutoplayMode) return;
-
-            const data = getWordCellsAndPlacement(nextIndex);
-            if (!data) { 
-                // Skip broken word (shouldn't happen with guaranteed placement)
-                setTimeout(runAutoplaySequence, 100);
-                return;
-            }
-
-            const { wordDetails, cells } = data;
-
-            // 1. ONE-SHOT HIGHLIGHT: Immediately highlight the word cells
-            // (No more partial highlighting steps)
-            cells.forEach(cell => cell.classList.add('selected'));
-            
-            // Mark logic (Updates visual Found state + Tone) but NO SPEAKING YET
-            wordDetails.hintUsed = true;
-            markAsFound(nextIndex, cells, wordDetails, false); // false = don't speak yet
-
-            // 2. Speak English -> WAIT for completion
-            await speakText(wordDetails.word.toLowerCase(), 'en-US');
-            
-            // Check cancel
-            if (!isAutoplayMode) return;
-
-            // 3. Small Gap
-            await new Promise(r => setTimeout(r, 500)); 
-            if (!isAutoplayMode) return;
-
-            // 4. Speak Thai -> WAIT for completion
-            await speakText(wordDetails.clue, 'th-TH');
-            
-            if (!isAutoplayMode) return;
-
-            // 5. Clear temporary 'selected' styling (leave 'found' style)
-            cells.forEach(cell => cell.classList.remove('selected'));
-
-            // 6. Check if this was the last word
-            const foundCount = targetWords.filter(w => w.found).length;
-            if (foundCount === targetWords.length) {
-                // Last word finished reading.
-                // Wait 1s then show summary
-                stopTimer();
-                await new Promise(r => setTimeout(r, 1000));
-                showSummaryScreen();
-            } else {
-                // Not last word, wait 1s then next
-                await new Promise(r => setTimeout(r, 1000));
-                if (isAutoplayMode) runAutoplaySequence();
-            }
-        }
-
-        // --- HINT/SOLVE SYSTEM (MANUAL) ---
-        function solveWord(index) {
-            const wordDetails = targetWords[index];
-            if (wordDetails.found) return;
-            
-            if (isAutoplayMode) {
-                showNotification("โหมดอัตโนมัติทำงานอยู่! กรุณาปิดก่อนใช้ตัวช่วย");
-                return;
-            }
-
-            wordDetails.hintUsed = true;
-            const data = getWordCellsAndPlacement(index);
-            if (!data) {
-                showNotification(`ขออภัย! คำว่า "${wordDetails.word}" ไม่อยู่ในตาราง`);
-                return;
-            }
-            
-            data.cells.forEach(cell => cell.classList.add('selected'));
-            markAsFound(index, data.cells, wordDetails, true); // Manual hint speaks
-            data.cells.forEach(cell => cell.classList.remove('selected'));
-        }
-
-        // --- CLICK SELECTION HANDLER ---
-        function onCellClick(e) {
-            if (isAutoplayMode) return; 
-
-            const cell = e.target;
-            if (!cell.classList.contains('grid-cell')) return; 
-
-            if (startCell === null) {
-                clearSelection(false); 
-                startCell = cell;
-                startCell.classList.add('selected');
-                selectedCells = [startCell];
-            } else {
-                const endCell = cell; 
-                if (startCell === endCell) {
-                    clearSelection(false);
-                    return;
-                }
-
-                const r1 = parseInt(startCell.dataset.row);
-                const c1 = parseInt(startCell.dataset.col);
-                const r2 = parseInt(endCell.dataset.row);
-                const c2 = parseInt(endCell.dataset.col);
-                
-                const isHorizontal = r1 === r2;
-                const isVertical = c1 === c2;
-                const isDiagonal = Math.abs(r1 - r2) === Math.abs(c1 - c2);
-
-                if (isHorizontal || isVertical || isDiagonal) {
-                    selectedCells.forEach(c => c.classList.remove('selected'));
-                    selectedCells = getCellsInLine(r1, c1, r2, c2);
-                    selectedCells.forEach(c => c.classList.add('selected'));
-                    handleWordCheck();
-                } else {
-                    selectedCells.forEach(c => c.classList.remove('selected'));
-                    startCell.classList.add('selected');
-                    endCell.classList.add('selected');
-                    selectedCells = [startCell, endCell]; 
-                    playFailTone();
-                    clearSelection(true); 
-                }
-            }
-        }
-        
-        function attachGridListeners() {
-            if (!gridEl.dataset.listenersAttached) {
-                gridEl.addEventListener('click', onCellClick);
-                gridEl.dataset.listenersAttached = 'true';
-            }
-        }
-        
         function renderGrid() {
             gridEl.innerHTML = '';
             gridEl.style.gridTemplateColumns = `repeat(${GRID_SIZE}, 1fr)`;
             
-            for (let r = 0; r < GRID_SIZE; r++) {
-                for (let c = 0; c < GRID_SIZE; c++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'grid-cell';
-                    cell.textContent = grid[r][c];
-                    cell.dataset.row = r;
-                    cell.dataset.col = c;
-                    gridEl.appendChild(cell);
+            for(let r=0; r<GRID_SIZE; r++) {
+                for(let c=0; c<GRID_SIZE; c++) {
+                    const div = document.createElement('div');
+                    div.className = 'grid-cell';
+                    div.textContent = grid[r][c];
+                    div.dataset.r = r;
+                    div.dataset.c = c;
+                    gridEl.appendChild(div);
                 }
             }
-            
-            targetWords.filter(w => w.found).forEach(wordObj => {
-                const wordMeta = placedWordsMeta.find(meta => meta.word === wordObj.word);
-                if (wordMeta) {
-                     const cells = getCellsInLine(wordMeta.start.r, wordMeta.start.c, wordMeta.end.r, wordMeta.end.c);
-                     const uniqueColor = PASTEL_COLORS[wordObj.colorIndex];
-                     cells.forEach(cell => {
-                        cell.classList.add('found');
-                        cell.style.backgroundColor = uniqueColor;
-                     });
-                }
-            });
         }
 
         function renderClues() {
             clueListEl.innerHTML = '';
-            targetWords.forEach((wordObj, index) => {
+            targetWords.forEach((item, idx) => {
                 const li = document.createElement('li');
-                li.className = 'clue-item' + (wordObj.found ? ' found' : '');
-                li.dataset.index = index;
-                
-                const hintSpan = document.createElement('span');
-                hintSpan.className = 'clue-hint';
-                hintSpan.textContent = wordObj.clue;
-                
-                const wordSpan = document.createElement('span');
-                wordSpan.className = 'clue-word-text';
-                wordSpan.textContent = wordObj.word;
-                
-                li.appendChild(wordSpan);
-                li.appendChild(hintSpan);
+                li.className = 'clue-item';
+                li.innerHTML = `<span>${item.clue}</span><span class="clue-word-text" style="display:none; font-weight:bold; display:block; color:#333;">${item.word}</span>`;
+                li.id = `clue-${idx}`;
+                // Manual hint
+                li.onclick = () => { if(!isAutoplayMode) giveHint(idx); };
                 clueListEl.appendChild(li);
+            });
+            updateStatus();
+        }
 
-                if (wordObj.found) {
-                     const uniqueColor = PASTEL_COLORS[wordObj.colorIndex];
-                     li.style.backgroundColor = uniqueColor.substring(0, 7) + 'FF';
-                     if (wordObj.hintUsed) {
-                         li.classList.add('hint-used');
-                     }
+        function updateStatus() {
+            const found = targetWords.filter(t => t.found).length;
+            document.getElementById('score').textContent = `คำศัพท์: ${found}/${targetWords.length}`;
+        }
+
+        // --- INTERACTION ---
+        let isSelecting = false;
+
+        function getCell(r, c) { return document.querySelector(`.grid-cell[data-r='${r}'][data-c='${c}']`); }
+
+        function handleStart(e) {
+            if(isAutoplayMode) return;
+            const cell = e.target.closest('.grid-cell');
+            if(!cell) return;
+            isSelecting = true;
+            startCell = cell;
+            clearSelection();
+            selectCell(cell);
+        }
+
+        function handleMove(e) {
+            if(!isSelecting || !startCell) return;
+            e.preventDefault(); // Prevent scroll
+            
+            // Get element at touch position
+            const touch = e.touches ? e.touches[0] : e;
+            const target = document.elementFromPoint(touch.clientX, touch.clientY);
+            const cell = target?.closest('.grid-cell');
+            
+            if(cell) checkLine(startCell, cell);
+        }
+
+        function handleEnd() {
+            if(!isSelecting) return;
+            isSelecting = false;
+            checkWordMatch();
+        }
+
+        function selectCell(cell) {
+            if(!cell.classList.contains('found')) {
+                cell.classList.add('selected');
+                selectedCells.push(cell);
+            }
+        }
+
+        function clearSelection() {
+            selectedCells.forEach(c => c.classList.remove('selected'));
+            selectedCells = [];
+        }
+
+        function checkLine(start, end) {
+            clearSelection();
+            const r1 = parseInt(start.dataset.r);
+            const c1 = parseInt(start.dataset.c);
+            const r2 = parseInt(end.dataset.r);
+            const c2 = parseInt(end.dataset.c);
+
+            const dr = Math.sign(r2 - r1);
+            const dc = Math.sign(c2 - c1);
+
+            // Check if valid diagonal/straight line
+            if((r1===r2 && c1===c2) || (r1===r2) || (c1===c2) || (Math.abs(r1-r2) === Math.abs(c1-c2))) {
+                let r = r1, c = c1;
+                // Only loop if movement
+                if (r1===r2 && c1===c2) {
+                    selectCell(start);
                 } else {
-                    li.addEventListener('click', () => solveWord(index));
+                    while(true) {
+                        const cell = getCell(r, c);
+                        if(cell) selectCell(cell);
+                        if(r === r2 && c === c2) break;
+                        r += dr;
+                        c += dc;
+                    }
                 }
+            }
+        }
+
+        function checkWordMatch() {
+            const wordStr = selectedCells.map(c => c.textContent).join('');
+            const wordStrRev = wordStr.split('').reverse().join('');
+            
+            const matchIdx = targetWords.findIndex(t => !t.found && (t.word === wordStr || t.word === wordStrRev));
+            
+            if (matchIdx !== -1) {
+                foundWord(matchIdx, selectedCells);
+            } else {
+                // Wrong
+                selectedCells.forEach(c => c.classList.add('wrong-flash'));
+                setTimeout(clearSelection, 500);
+            }
+        }
+
+        function foundWord(idx, cells, isAuto = false) {
+            const wordObj = targetWords[idx];
+            wordObj.found = true;
+            
+            // Assign Color
+            const color = PASTEL_COLORS[idx % PASTEL_COLORS.length];
+            wordObj.color = color;
+
+            cells.forEach(c => {
+                c.classList.remove('selected');
+                c.classList.add('found');
+                c.style.backgroundColor = color;
             });
 
-            const foundCount = targetWords.filter(w => w.found).length;
-            scoreEl.textContent = `คำศัพท์ที่พบ: ${foundCount}/${targetWords.length}`;
-        }
-        
-        function checkWinCondition() {
-            const foundCount = targetWords.filter(w => w.found).length;
-            if (foundCount === targetWords.length) {
-                // For Manual play, end here. 
-                // For Autoplay, logic is handled in runAutoplaySequence to wait for audio.
-                if (!isAutoplayMode) {
-                    stopTimer();
-                    gridEl.style.pointerEvents = 'none'; 
-                    setTimeout(showSummaryScreen, 1000); 
-                }
+            // Update Clue List
+            const li = document.getElementById(`clue-${idx}`);
+            li.classList.add('found');
+            li.style.backgroundColor = color;
+
+            // Sound
+            if(!isAuto) {
+                // Manual play: speak only English
+                speakText(wordObj.word, 'en-US');
             }
-        }
-        
-        function showSummaryScreen() {
-            showScreen('summary-screen');
-            const timeString = formatTime(totalTimeSeconds);
-            const totalFound = targetWords.length;
-            const hintsUsed = targetWords.filter(w => w.hintUsed).length;
-            const finalScore = Math.max(0, totalFound - hintsUsed); 
+
+            updateStatus();
             
-            document.getElementById('summary-score').innerHTML = `
-                คำศัพท์ทั้งหมด: ${totalFound} คำ<br>
-                ค้นหาเอง: ${totalFound - hintsUsed} คำ<br>
-                ใช้ตัวช่วย (เฉลย): ${hintsUsed} คำ<br>
-                <hr style="margin: 8px 0; border-color: #DDD;">
-                <p style="font-size: 1.5rem; color: ${finalScore > 0 ? 'var(--color-primary)' : 'var(--color-wrong)'}; margin: 0;">
-                    คะแนนสุดท้าย: **${finalScore}/${totalFound}** คำ
-                </p>
-            `;
-            document.getElementById('summary-time').textContent = `เวลาที่ใช้: ${timeString}`;
+            // Check Win (Only for manual, Auto handles its own finish)
+            if(!isAuto && targetWords.every(t => t.found)) {
+                setTimeout(finishGame, 1500);
+            }
         }
 
-        // --- INITIALIZATION ---
-        function init() {
-            attachGridListeners(); 
-            gameTitleEl.addEventListener('click', handleTitleTap);
-            showScreen('start-screen');
+        function giveHint(idx) {
+            const w = targetWords[idx];
+            if(w.found) return;
+            
+            // Mark hint used style
+            document.getElementById(`clue-${idx}`).classList.add('hint-used');
+            
+            // Find coords
+            const meta = placedWordsMeta.find(m => m.word === w.word);
+            // Simulate selection
+            const cells = getCellsFromMeta(meta);
+            foundWord(idx, cells); // Treat as found
         }
+
+        function getCellsFromMeta(meta) {
+            const cells = [];
+            const r1 = meta.start.r, c1 = meta.start.c;
+            const r2 = meta.end.r, c2 = meta.end.c;
+            const dr = Math.sign(r2-r1);
+            const dc = Math.sign(c2-c1);
+            let r=r1, c=c1;
+            while(true) {
+                cells.push(getCell(r,c));
+                if(r===r2 && c===c2) break;
+                r+=dr; c+=dc;
+            }
+            return cells;
+        }
+
+        // --- AUTOPLAY LOGIC (The Core Fixes) ---
+        async function runAutoplayLoop() {
+            for (let i = 0; i < targetWords.length; i++) {
+                if (!isGameRunning || !isAutoplayMode) break;
+                const wordObj = targetWords[i];
+                if (wordObj.found) continue;
+
+                const meta = placedWordsMeta.find(m => m.word === wordObj.word);
+                const cells = getCellsFromMeta(meta);
+
+                // 1. One-Shot Highlight (Immediately mark as found)
+                foundWord(i, cells, true); // true = suppress default audio logic
+
+                // 2. Speak English -> Wait
+                await speakText(wordObj.word, 'en-US');
+                if (!isGameRunning || !isAutoplayMode) break;
+
+                // 3. Speak Thai -> Wait
+                await speakText(wordObj.clue, 'th-TH');
+                if (!isGameRunning || !isAutoplayMode) break;
+
+                // 4. Delay 1.5s BEFORE next word
+                await new Promise(r => setTimeout(r, 1500));
+            }
+
+            if (isGameRunning && isAutoplayMode) {
+                finishGame();
+            }
+        }
+
+        // --- TIMER ---
+        function startTimer() {
+            startTime = Date.now();
+            timerInterval = setInterval(() => {
+                const delta = Math.floor((Date.now() - startTime)/1000);
+                totalTimeSeconds = delta;
+                const m = Math.floor(delta / 60).toString().padStart(2,'0');
+                const s = (delta % 60).toString().padStart(2,'0');
+                document.getElementById('timer-display').textContent = `${m}:${s}`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        // --- FINISH ---
+        function finishGame() {
+            isGameRunning = false;
+            stopTimer();
+            
+            // Populate Summary List (Visual Only)
+            summaryListEl.innerHTML = '';
+            targetWords.forEach(w => {
+                const li = document.createElement('li');
+                li.className = 'summary-item';
+                li.innerHTML = `<span>${w.word}</span> <span>${w.clue}</span>`;
+                summaryListEl.appendChild(li);
+            });
+
+            document.getElementById('summary-score').textContent = `ค้นหาเจอ: ${targetWords.length}/${targetWords.length}`;
+            document.getElementById('summary-time').textContent = `เวลาที่ใช้: ${document.getElementById('timer-display').textContent}`;
+            
+            showScreen('summary-screen');
+        }
+
+        // --- INIT EVENTS ---
+        gridEl.addEventListener('mousedown', handleStart);
+        document.addEventListener('mousemove', handleMove);
+        document.addEventListener('mouseup', handleEnd);
+        gridEl.addEventListener('touchstart', handleStart, {passive: false});
+        gridEl.addEventListener('touchmove', handleMove, {passive: false});
+        gridEl.addEventListener('touchend', handleEnd);
+
+        document.getElementById('game-title').addEventListener('click', handleTitleTap);
         
-        document.addEventListener('DOMContentLoaded', () => {
-            setupSpeech();
-            document.addEventListener('click', () => {
-                initAudioContext();
-                if (audioContext && audioContext.state === 'suspended') {
-                    audioContext.resume();
-                }
-            }, { once: true });
-            updateDifficultyButtons('animals'); 
-            init(); 
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.onclick = function() {
+                if(this.dataset.category) selectCategory(this.dataset.category);
+            }
         });
 
-        document.getElementById('start-screen').addEventListener('click', (e) => {
-            if (e.target.classList.contains('category-btn')) {
-                selectCategory(e.target.dataset.category);
-            }
-        });
-        
-        document.getElementById('difficulty-screen').addEventListener('click', (e) => {
-            if (e.target.classList.contains('difficulty-btn')) {
-                const categoryId = e.target.dataset.categoryId;
-                const difficulty = e.target.dataset.difficulty;
-                startGame(categoryId, difficulty);
-            }
-        });
-        
-        document.getElementById('summary-screen').addEventListener('click', (e) => {
-            if (e.target.id === 'summary-btn') {
+        document.getElementById('restart-btn').onclick = () => {
+            if(confirm('ต้องการกลับหน้าหลัก? เกมปัจจุบันจะถูกยกเลิก')) {
+                isGameRunning = false;
                 showScreen('start-screen');
             }
-        });
+        };
+        
+        document.getElementById('summary-btn').onclick = () => showScreen('start-screen');
 
-        document.getElementById('restart-btn').addEventListener('click', (e) => {
-             if (confirm("คุณแน่ใจที่จะเริ่มใหม่? ข้อมูลเกมปัจจุบันจะหายไป")) {
-                 showScreen('start-screen');
-             }
-        });
+        // Init Speech
+        if('speechSynthesis' in window) window.speechSynthesis.getVoices();
+
     </script>
 </body>
 </html>
