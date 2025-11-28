@@ -13,13 +13,13 @@
             --success-color: #66BB6A;
             --danger-color: #EF5350;
             
-            /* Theme Colors Updated */
-            --bg-color: #D7CCC8; /* Light Brown background for body */
-            --card-bg: #FFF8E1; /* Cream background for container */
+            /* Theme Colors */
+            --bg-color: #D7CCC8; /* Light Brown background */
+            --card-bg: #FFF8E1; /* Cream background */
             
             --text-dark: #3E2723; /* Dark Brown text */
             --text-light: #ffffff;
-            --grid-line: #BCAAA4; /* Grid border color */
+            --grid-line: #BCAAA4;
             --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
             --shadow-md: 0 8px 16px rgba(0,0,0,0.15);
         }
@@ -67,27 +67,30 @@
             cursor: pointer;
         }
 
-        /* --- NOTIFICATION --- */
+        /* --- FIXED: NOTIFICATION BAR --- */
         #autoplay-notification {
-            position: fixed;
-            top: 60px; /* Below header slightly */
+            position: fixed; /* Fixed relative to screen */
+            top: 20px; 
             left: 50%;
-            transform: translateX(-50%) translateY(-150%);
+            transform: translateX(-50%) translateY(-200%); /* Start hidden above screen */
             background-color: #3E2723;
             color: #FFD54F;
             padding: 10px 20px;
             border-radius: 30px;
             font-weight: bold;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            z-index: 1000;
-            transition: transform 0.4s ease;
-            width: 90%;
-            max-width: 400px;
+            z-index: 2000; /* Top most */
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+            width: auto;
+            max-width: 90%;
             text-align: center;
             font-size: 0.9rem;
+            opacity: 0;
+            pointer-events: none; /* Prevent clicks when hidden */
         }
         #autoplay-notification.show {
             transform: translateX(-50%) translateY(0);
+            opacity: 1;
         }
 
         /* --- SCREENS --- */
@@ -97,7 +100,7 @@
             flex-direction: column;
             gap: 1rem;
             animation: fadeIn 0.3s ease-out;
-            flex: 1; /* Fill remaining space */
+            flex: 1; 
         }
         .active-screen { display: flex; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -144,13 +147,13 @@
         #restart-btn, #summary-btn {
             background: #5D4037;
             color: white;
-            margin-top: auto; /* Push to bottom if flex */
+            margin-top: auto;
             margin-bottom: 20px;
         }
 
-        /* --- GAME BOARD (FULL WIDTH FIX) --- */
+        /* --- GAME BOARD --- */
         #game-screen {
-            padding: 0.5rem; /* Reduced padding for full width feel */
+            padding: 0.5rem; 
         }
 
         #status-bar {
@@ -167,12 +170,11 @@
 
         #word-search-grid {
             display: grid;
-            /* Grid will be set via JS */
             width: 100%;
             margin: 0 auto;
             border: 2px solid var(--grid-line);
-            background-color: var(--grid-line); /* Gap color */
-            gap: 1px; /* Thin gap */
+            background-color: var(--grid-line);
+            gap: 1px;
             user-select: none;
             touch-action: none;
             box-sizing: border-box;
@@ -183,16 +185,16 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.2rem; /* Larger Font */
+            font-size: 1.2rem;
             font-weight: 700;
-            background: #FFF; /* White cells on cream bg */
+            background: #FFF;
             cursor: pointer;
             color: var(--text-dark);
             transition: background-color 0.1s;
         }
 
         .grid-cell.selected {
-            background-color: #FFECB3; /* Light Orange/Gold */
+            background-color: #FFECB3; 
             color: #000;
             transform: scale(1);
         }
@@ -215,7 +217,7 @@
             padding: 10px;
             border-radius: 8px;
             margin-top: 10px;
-            flex: 1; /* Allow it to take space */
+            flex: 1;
         }
         #clue-panel h3 { margin: 0 0 8px 0; font-size: 1.1rem; color: #5D4037; }
         
@@ -238,7 +240,7 @@
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
         .clue-item.found {
-            background: #A1887F; /* Brownish found state */
+            background: #A1887F;
             color: white;
             border-color: #8D6E63;
             opacity: 0.8;
@@ -455,6 +457,7 @@
             const cat = WORD_CATEGORIES[catKey];
             document.getElementById('difficulty-category-title').textContent = `หมวดหมู่: ${cat.name}`;
             
+            // --- UPDATE: Adjusted for requested grid sizes (8x8 and 12x12) ---
             const btnEasy = document.getElementById('diff-easy');
             btnEasy.textContent = `ง่าย (8x8, 6 คำ)`;
             btnEasy.onclick = () => startGame(catKey, 8, 6);
