@@ -8,16 +8,13 @@
     <style>
         /* --- THEME & VARIABLES (CREAM/BROWN THEME) --- */
         :root {
-            --primary-color: #8D6E63; /* Brownish */
+            --primary-color: #8D6E63;
             --accent-color: #FFD54F;
             --success-color: #66BB6A;
             --danger-color: #EF5350;
-            
-            /* Theme Colors */
-            --bg-color: #D7CCC8; /* Light Brown background */
-            --card-bg: #FFF8E1; /* Cream background */
-            
-            --text-dark: #3E2723; /* Dark Brown text */
+            --bg-color: #D7CCC8;
+            --card-bg: #FFF8E1;
+            --text-dark: #3E2723;
             --text-light: #ffffff;
             --grid-line: #BCAAA4;
             --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
@@ -67,26 +64,26 @@
             cursor: pointer;
         }
 
-        /* --- FIXED: NOTIFICATION BAR --- */
+        /* --- NOTIFICATION BAR --- */
         #autoplay-notification {
-            position: fixed; /* Fixed relative to screen */
+            position: fixed;
             top: 20px; 
             left: 50%;
-            transform: translateX(-50%) translateY(-200%); /* Start hidden above screen */
+            transform: translateX(-50%) translateY(-200%);
             background-color: #3E2723;
             color: #FFD54F;
             padding: 10px 20px;
             border-radius: 30px;
             font-weight: bold;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            z-index: 2000; /* Top most */
+            z-index: 2000;
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
             width: auto;
             max-width: 90%;
             text-align: center;
             font-size: 0.9rem;
             opacity: 0;
-            pointer-events: none; /* Prevent clicks when hidden */
+            pointer-events: none;
         }
         #autoplay-notification.show {
             transform: translateX(-50%) translateY(0);
@@ -374,14 +371,13 @@
             'music': { name: 'ดนตรี', pool: [{ w: "SONG", t: "เพลง" }, { w: "BAND", t: "วงดนตรี" }, { w: "ROCK", t: "ร็อค" }, { w: "POP", t: "ป๊อป" }, { w: "JAZZ", t: "แจ๊ส" }, { w: "DRUM", t: "กลอง" }, { w: "BASS", t: "เบส" }, { w: "PIANO", t: "เปียโน" }, { w: "NOTE", t: "โน้ต" }, { w: "SING", t: "ร้องเพลง" }, { w: "PLAY", t: "เล่น" }, { w: "LOUD", t: "ดัง" }, { w: "SOFT", t: "เบา" }, { w: "TUNE", t: "ท่วงทำนอง" }, { w: "BEAT", t: "จังหวะ" }, { w: "RAP", t: "แร็ป" }, { w: "SHOW", t: "การแสดง" }, { w: "DANCE", t: "เต้น" }, { w: "DJ", t: "ดีเจ" }, { w: "CD", t: "ซีดี" }] }
         };
 
-        // Darker Earth/Pastel Tones for selection
         const PASTEL_COLORS = [
             '#8D6E63', '#5D4037', '#795548', '#A1887F', '#6D4C41',
             '#4E342E', '#3E2723', '#8C7B75', '#BCAAA4', '#D7CCC8' 
         ];
 
         // --- GAME STATE ---
-        let GRID_SIZE = 8; // Default, changed dynamically
+        let GRID_SIZE = 8;
         let targetWords = [];
         let grid = [];
         let placedWordsMeta = [];
@@ -409,7 +405,9 @@
                     return;
                 }
                 window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
+                // Fix: convert to lowercase for better English pronunciation
+                const textToSpeak = lang === 'en-US' ? text.toLowerCase() : text;
+                const utterance = new SpeechSynthesisUtterance(textToSpeak);
                 utterance.lang = lang;
                 utterance.rate = (lang === 'en-US') ? 0.8 : 1.0; 
                 utterance.onend = () => resolve();
@@ -457,30 +455,30 @@
             const cat = WORD_CATEGORIES[catKey];
             document.getElementById('difficulty-category-title').textContent = `หมวดหมู่: ${cat.name}`;
             
-            // --- UPDATE: Adjusted for requested grid sizes (8x8 and 12x12) ---
+            // Set word counts: Easy=8, Hard=12
             const btnEasy = document.getElementById('diff-easy');
-            btnEasy.textContent = `ง่าย (8x8, 6 คำ)`;
-            btnEasy.onclick = () => startGame(catKey, 8, 6);
+            btnEasy.textContent = `ง่าย (8x8, 8 คำ)`;
+            btnEasy.onclick = () => startGame(catKey, 8, 8);
 
             const btnHard = document.getElementById('diff-hard');
-            btnHard.textContent = `ยาก (12x12, 10 คำ)`;
-            btnHard.onclick = () => startGame(catKey, 12, 10);
+            btnHard.textContent = `ยาก (12x12, 12 คำ)`;
+            btnHard.onclick = () => startGame(catKey, 12, 12);
 
             showScreen('difficulty-screen');
         }
 
         async function startGame(catKey, size, count) {
             isGameRunning = true;
-            GRID_SIZE = size; // Default size preference
+            GRID_SIZE = size;
             const cat = WORD_CATEGORIES[catKey];
             
             const shuffled = [...cat.pool].sort(() => 0.5 - Math.random());
             const selected = shuffled.slice(0, count);
             
-            // Auto resize if words are too long for chosen grid
+            // Auto resize if words are too long
             const maxLen = Math.max(...selected.map(x => x.w.length));
             if (maxLen > GRID_SIZE) {
-                GRID_SIZE = maxLen; // Force expand
+                GRID_SIZE = maxLen;
             }
 
             targetWords = selected.map(obj => ({
@@ -490,7 +488,6 @@
                 color: null
             }));
 
-            // Guaranteed Generation
             if (!generatePuzzleGuaranteed()) {
                 alert("เกิดข้อผิดพลาดในการสร้างตาราง กรุณาลองใหม่");
                 return;
@@ -501,10 +498,9 @@
             startTimer();
             showScreen('game-screen');
 
-            // Autoplay Start Logic
             if (isAutoplayMode) {
                 gridEl.style.pointerEvents = 'none'; 
-                await new Promise(r => setTimeout(r, 1500)); // Initial Delay
+                await new Promise(r => setTimeout(r, 1500)); 
                 if(isGameRunning) runAutoplayLoop();
             } else {
                 gridEl.style.pointerEvents = 'auto';
@@ -763,7 +759,6 @@
                 await speakText(wordObj.clue, 'th-TH');
                 if (!isGameRunning || !isAutoplayMode) break;
 
-                // Wait 1.5s AFTER reading is finished
                 await new Promise(r => setTimeout(r, 1500));
             }
 
